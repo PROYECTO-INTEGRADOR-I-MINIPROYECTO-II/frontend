@@ -1,1 +1,48 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/inter';
+
+/* Guía visual de Synk (Figma, Sprint 0) */
+@theme {
+  --color-primario: #4338ca;
+  --color-primario-hover: #3730a3;
+  --color-primario-suave: #e0e7ff;
+  --color-acento: #0f766e;
+  --color-texto: #0f172a;
+  --color-texto-secundario: #475569;
+  --color-borde: #94a3b8;
+  --color-fondo: #f8fafc;
+  --color-superficie: #ffffff;
+  --color-exito: #15803d;
+  --color-exito-suave: #dcfce7;
+  --color-error: #b91c1c;
+  --color-error-suave: #fee2e2;
+  --color-foco: #f59e0b;
+  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-fondo font-sans text-base text-texto;
+  }
+  h1, h2, h3 {
+    @apply font-display;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-foco);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn-primario {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-primario bg-primario text-white hover:border-primario-hover hover:bg-primario-hover;
+  }
+  .btn-secundario {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-primario bg-superficie text-primario hover:bg-primario-suave;
+  }
+  .btn-peligro {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-error bg-error text-white hover:opacity-90;
+  }
+}
