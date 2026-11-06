@@ -89,3 +89,22 @@
     .lock-open { animation: none; opacity: 1; }
   }
 }
+
+/* Efecto CRT: líneas de barrido y parpadeo leve del fósforo. */
+@keyframes led-flicker {
+  0%, 100% { opacity: 1; }
+  47% { opacity: 1; }
+  50% { opacity: 0.82; }
+  53% { opacity: 1; }
+  80% { opacity: 0.92; }
+}
+@layer utilities {
+  .crt-scan {
+    background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.3) 2px 3px);
+    pointer-events: none;
+  }
+  .led-flicker { animation: led-flicker 2.4s linear infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .led-flicker { animation: none; }
+  }
+}

@@ -5,7 +5,7 @@ const items = Array.from({ length: 6 });
 function Item() {
   return (
     <span className="flex shrink-0 items-center gap-4 px-6">
-      <Lock aria-hidden="true" className="size-7" strokeWidth={2.5} />
+      <Lock aria-hidden="true" className="size-6" strokeWidth={2.5} />
       INICIA SESIÓN
       <span className="px-2 opacity-60">·</span>
     </span>
@@ -17,7 +17,7 @@ export default function LedMarquee() {
   return (
     <div
       aria-hidden="true"
-      className="led-mask pointer-events-none absolute inset-0 overflow-hidden rounded-2xl font-pixel text-2xl font-semibold tracking-widest text-led md:text-3xl"
+      className="led-mask pointer-events-none absolute inset-0 overflow-hidden rounded-2xl font-pixel text-xl font-semibold tracking-widest text-led md:text-2xl"
     >
       {/* Con movimiento reducido: un solo letrero quieto y centrado. */}
       <div className="hidden h-full items-center justify-center motion-reduce:flex">
