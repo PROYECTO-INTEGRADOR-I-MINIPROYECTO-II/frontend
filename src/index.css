@@ -67,3 +67,25 @@
     opacity: 0.55;
   }
 }
+
+/* Campo LED de inicio de sesión: el candado alterna cerrado/abierto mientras el puntero (o el foco) está encima. */
+@keyframes lock-closed {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes lock-open {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+@layer utilities {
+  .lock-closed { animation: lock-closed 1.2s steps(1) infinite; }
+  .lock-open { animation: lock-open 1.2s steps(1) infinite; }
+  .led-glow {
+    box-shadow: 0 0 0 1px var(--color-led), 0 0 18px 2px color-mix(in srgb, var(--color-led) 55%, transparent),
+      inset 0 0 14px color-mix(in srgb, var(--color-led) 25%, transparent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lock-closed { animation: none; opacity: 0; }
+    .lock-open { animation: none; opacity: 1; }
+  }
+}

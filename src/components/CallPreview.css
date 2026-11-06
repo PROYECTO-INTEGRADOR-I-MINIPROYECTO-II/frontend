@@ -54,9 +54,9 @@
   0%, 10% { transform: translateX(0); }
   14%     { transform: translateX(-17px); }
   16%     { transform: translateX(-4px); }
-  40%, 60%{ transform: translateX(112px); }
-  64%     { transform: translateX(129px); }
-  66%     { transform: translateX(116px); }
+  40%, 60%{ transform: translateX(162px); }
+  64%     { transform: translateX(179px); }
+  66%     { transform: translateX(166px); }
   90%, 100% { transform: translateX(0); }
 }
 @keyframes sc-by {
