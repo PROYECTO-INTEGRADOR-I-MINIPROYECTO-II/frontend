@@ -1,0 +1,118 @@
+.synk-call {
+  --accent: #f5a524; /* mismo ámbar del marquee */
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  margin: 0 auto 32px;
+  overflow: visible;
+}
+
+/* Reglas base que faltaban en el original: sin ellas los trazos y los ojos no se ven. */
+.synk-call .ln  { fill: none; stroke: var(--c, #f5f5f5); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.synk-call .dot { fill: var(--c, #f5f5f5); }
+
+.synk-call .ln.solid { fill: #0b0b0b; }   /* mismo color que .tile-bg */
+.synk-call .ln.thin  { stroke-width: 2; }
+.synk-call .ln.glint { stroke-width: 1.2; opacity: .55; }
+
+.synk-call .tile-bg     { fill: #0e0e0e; }
+.synk-call .tile-border { fill: none; stroke: #232323; stroke-width: 1; }
+.synk-call .body  { fill: #1f1f1f; }
+.synk-call .skin,
+.synk-call .hand  { fill: #3a3a3a; }
+.synk-call .hair  { fill: #161616; }
+.synk-call .eye   { fill: #0a0a0a; }
+.synk-call .limb  { fill: none; stroke: #2a2a2a; stroke-width: 9; stroke-linecap: round; }
+.synk-call .finger{ fill: none; stroke: #3a3a3a; stroke-width: 3.5; stroke-linecap: round; }
+.synk-call .ball  { fill: var(--accent); }
+.synk-call .pill  { fill: rgba(0, 0, 0, .6); }
+.synk-call .name  { fill: #cfcfcf; font: 400 11px 'Geist Variable', system-ui, sans-serif; }
+.synk-call .btn   { fill: #161616; stroke: #262626; }
+.synk-call .ico   { fill: none; stroke: #cfcfcf; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.synk-call .hangup{ fill: #e5484d; }
+.synk-call .plus  { fill: var(--accent); font: 600 13px ui-monospace, monospace; opacity: 0; }
+
+/* Animaciones: todo encaja en un ciclo de 8 s (pelota 4 s ×2, cabezas 2 s alternate) */
+.synk-call .head   { animation: sc-bob 2s ease-in-out infinite alternate; }
+.synk-call .ball-x { animation: sc-bx 4s linear infinite; }
+.synk-call .ball-y { animation: sc-by 4s linear infinite; }
+.synk-call .arm-a  { animation: sc-aa 4s ease-in-out infinite; }
+.synk-call .arm-b  { animation: sc-ab 4s ease-in-out infinite; }
+.synk-call .arm-rps{ animation: sc-rps 8s ease-in-out infinite; }
+.synk-call .r1     { opacity: 0; animation: sc-r1 8s linear infinite; }
+.synk-call .r2     { opacity: 0; animation: sc-r2 8s linear infinite; }
+.synk-call .win-c  { animation: sc-wc 8s linear infinite; }
+.synk-call .win-d  { animation: sc-wd 8s linear infinite; }
+.synk-call .plus-c { animation: sc-pc 8s ease-out infinite; }
+.synk-call .plus-d { animation: sc-pd 8s ease-out infinite; }
+.synk-call .notif  { opacity: 0; animation: sc-nt 8s linear infinite; }
+
+@keyframes sc-bob { to { transform: translateY(1.5px); } }
+
+@keyframes sc-bx {
+  0%, 10% { transform: translateX(0); }
+  14%     { transform: translateX(-17px); }
+  16%     { transform: translateX(-4px); }
+  40%, 60%{ transform: translateX(112px); }
+  64%     { transform: translateX(129px); }
+  66%     { transform: translateX(116px); }
+  90%, 100% { transform: translateX(0); }
+}
+@keyframes sc-by {
+  0%, 10% { transform: translateY(0); }
+  14% { transform: translateY(-10px); }
+  16% { transform: translateY(-3px);  animation-timing-function: cubic-bezier(.3,.6,.5,1); }
+  28% { transform: translateY(-48px); animation-timing-function: cubic-bezier(.5,0,.7,.4); }
+  40% { transform: translateY(0);     animation-timing-function: ease-out; }
+  44% { transform: translateY(5px);   animation-timing-function: ease-in-out; }
+  50%, 60% { transform: translateY(0); }
+  64% { transform: translateY(-10px); }
+  66% { transform: translateY(-3px);  animation-timing-function: cubic-bezier(.3,.6,.5,1); }
+  78% { transform: translateY(-48px); animation-timing-function: cubic-bezier(.5,0,.7,.4); }
+  90% { transform: translateY(0);     animation-timing-function: ease-out; }
+  94% { transform: translateY(5px);   animation-timing-function: ease-in-out; }
+  100%{ transform: translateY(0); }
+}
+@keyframes sc-aa {
+  0%, 10% { transform: rotate(0); }
+  14% { transform: rotate(-28deg); }
+  18% { transform: rotate(14deg); }
+  28%, 88% { transform: rotate(0); }
+  93% { transform: rotate(12deg); }
+  100%{ transform: rotate(0); }
+}
+@keyframes sc-ab {
+  0%, 38% { transform: rotate(0); }
+  43% { transform: rotate(12deg); }
+  50%, 60% { transform: rotate(0); }
+  64% { transform: rotate(-28deg); }
+  68% { transform: rotate(14deg); }
+  78%, 100% { transform: rotate(0); }
+}
+@keyframes sc-rps {
+  0%, 8%, 16%, 24%, 50%, 58%, 66%, 74%, 100% { transform: rotate(0); }
+  4%, 12%, 20%, 54%, 62%, 70% { transform: rotate(-18deg); }
+}
+@keyframes sc-r1 { 0%, 24% { opacity: 0; } 25.5%, 45% { opacity: 1; } 46.5%, 100% { opacity: 0; } }
+@keyframes sc-r2 { 0%, 74% { opacity: 0; } 75.5%, 95% { opacity: 1; } 96.5%, 100% { opacity: 0; } }
+@keyframes sc-wc { 0%, 25% { stroke: #232323; } 27%, 44% { stroke: var(--accent); } 47%, 100% { stroke: #232323; } }
+@keyframes sc-wd { 0%, 75% { stroke: #232323; } 77%, 94% { stroke: var(--accent); } 97%, 100% { stroke: #232323; } }
+@keyframes sc-pc {
+  0%, 26% { opacity: 0; transform: translateY(6px); }
+  30% { opacity: 1; transform: translateY(0); }
+  42% { opacity: 1; transform: translateY(-4px); }
+  46%, 100% { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes sc-pd {
+  0%, 76% { opacity: 0; transform: translateY(6px); }
+  80% { opacity: 1; transform: translateY(0); }
+  92% { opacity: 1; transform: translateY(-4px); }
+  96%, 100% { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes sc-nt { 0%, 30% { opacity: 0; } 32%, 88% { opacity: 1; } 90%, 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .synk-call * { animation: none !important; }
+}
+

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import UnivalleIcon from './UnivalleIcon';
 
 const tab = 'underline underline-offset-4 hover:text-texto-secundario';
 
@@ -8,10 +9,18 @@ export default function Footer() {
     <footer className="mx-auto w-full max-w-5xl px-5 pb-6">
       <div className="border-t border-texto/80 pt-3 font-pixel text-base">
         <nav aria-label="Pie de página">
-          <ul className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+          <ul className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
             <li><Link to="/estado" className={tab}>Estado del sistema</Link></li>
+            <li><Link to="/ayuda" className={tab}>Ayuda</Link></li>
             <li><Link to="/accesibilidad" className={tab}>Accesibilidad</Link></li>
-            <li className="text-texto-secundario">Proyecto Integrador I · Univalle 2026</li>
+            <li className="flex items-center gap-3 text-texto-secundario">
+              <UnivalleIcon />
+              <span>
+                Proyecto Integrador I
+                <br />
+                Univalle 2026
+              </span>
+            </li>
           </ul>
         </nav>
       </div>

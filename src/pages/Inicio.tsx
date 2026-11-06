@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import CallPreview from '../components/CallPreview';
 import LedMarquee from '../components/LedMarquee';
 import { useSession } from '../auth/useSession';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -67,6 +68,10 @@ export default function Inicio() {
           </div>
         )}
       </form>
+
+      <div className="mt-14 w-full">
+        <CallPreview />
+      </div>
     </div>
   );
 }

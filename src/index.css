@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/pixelify-sans';
+@import '@fontsource-variable/orbitron';
 
 /* Rework oscuro (experimento): negro puro, monocromático, estilo v0. Todo texto cumple contraste AA sobre #000. */
 @theme {
@@ -19,8 +20,9 @@
   --color-foco: #f59e0b;
   --font-sans: 'Geist Variable', system-ui, sans-serif;
   --font-display: 'Geist Variable', system-ui, sans-serif;
-  --color-led: #f59e0b;
+  --color-led: #fafafa;
   --animate-led: led-scroll 18s linear infinite;
+  --font-retro: 'Orbitron Variable', system-ui, sans-serif;
   --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
 }
 
