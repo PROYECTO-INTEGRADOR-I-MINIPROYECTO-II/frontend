@@ -19,7 +19,15 @@
   --color-foco: #f59e0b;
   --font-sans: 'Geist Variable', system-ui, sans-serif;
   --font-display: 'Geist Variable', system-ui, sans-serif;
+  --color-led: #f59e0b;
+  --animate-led: led-scroll 18s linear infinite;
   --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
+}
+
+@keyframes led-scroll {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @layer base {
@@ -44,5 +52,16 @@
   }
   .btn-peligro {
     @apply inline-flex items-center justify-center gap-2 rounded-xl border border-error bg-error px-5 py-2.5 font-medium text-black transition-colors hover:opacity-90;
+  }
+}
+
+@layer utilities {
+  .led-mask {
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--color-led) 70%, transparent);
+  }
+  .led-dots {
+    background: radial-gradient(circle at center, transparent 0 0.9px, #000 1.3px) 0 0 / 3px 3px;
+    opacity: 0.55;
   }
 }

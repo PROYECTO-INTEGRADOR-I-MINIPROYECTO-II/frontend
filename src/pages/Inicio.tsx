@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import LedMarquee from '../components/LedMarquee';
 import { useSession } from '../auth/useSession';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
@@ -26,7 +27,8 @@ export default function Inicio() {
 
       <form onSubmit={submit} className="w-full" noValidate>
         <label htmlFor="passphrase" className="sr-only">Passphrase de la Sala</label>
-        {/* Sin sesión el campo queda bloqueado, pero sigue en el orden de foco para que el lector de pantalla lo anuncie. */}
+        {/* Sin sesión el campo está deshabilitado y un letrero LED decorativo lo cubre. */}
+        <div className="relative">
         <input
           id="passphrase"
           type="text"
@@ -35,15 +37,16 @@ export default function Inicio() {
             setPhrase(e.target.value);
             setError('');
           }}
-          readOnly={!user}
-          aria-disabled={!user}
+          disabled={!user}
           aria-describedby={user ? (error ? 'phrase-error' : undefined) : 'phrase-ayuda'}
           autoComplete="off"
           autoCapitalize="none"
           spellCheck={false}
-          placeholder="luna-roble-café-río"
-          className="w-full rounded-2xl border border-borde bg-superficie px-6 py-5 text-center text-2xl text-texto placeholder:text-texto-secundario/70 aria-disabled:cursor-not-allowed aria-disabled:opacity-60 md:text-3xl"
+          placeholder={user ? 'luna-roble-café-río' : undefined}
+          className="w-full rounded-2xl border border-borde bg-superficie px-6 py-5 text-center text-2xl text-texto placeholder:text-texto-secundario/70 disabled:cursor-not-allowed disabled:select-none md:text-3xl"
         />
+        {!user && <LedMarquee />}
+        </div>
 
         {error && (
           <p id="phrase-error" role="alert" className="mt-3 text-center text-error">
