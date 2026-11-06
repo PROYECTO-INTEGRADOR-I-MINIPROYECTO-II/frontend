@@ -1,48 +1,48 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/space-grotesk';
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/pixelify-sans';
 
-/* Guía visual de Synk (Figma, Sprint 0) */
+/* Rework oscuro (experimento): negro puro, monocromático, estilo v0. Todo texto cumple contraste AA sobre #000. */
 @theme {
-  --color-primario: #4338ca;
-  --color-primario-hover: #3730a3;
-  --color-primario-suave: #e0e7ff;
-  --color-acento: #0f766e;
-  --color-texto: #0f172a;
-  --color-texto-secundario: #475569;
-  --color-borde: #94a3b8;
-  --color-fondo: #f8fafc;
-  --color-superficie: #ffffff;
-  --color-exito: #15803d;
-  --color-exito-suave: #dcfce7;
-  --color-error: #b91c1c;
-  --color-error-suave: #fee2e2;
+  --color-primario: #fafafa;
+  --color-primario-hover: #d4d4d8;
+  --color-primario-suave: #18181b;
+  --color-texto: #fafafa;
+  --color-texto-secundario: #a1a1aa;
+  --color-borde: #3f3f46;
+  --color-fondo: #000000;
+  --color-superficie: #0a0a0a;
+  --color-exito: #4ade80;
+  --color-exito-suave: #052e16;
+  --color-error: #f87171;
+  --color-error-suave: #2a0a0a;
   --color-foco: #f59e0b;
-  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
-  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-display: 'Geist Variable', system-ui, sans-serif;
+  --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
 }
 
 @layer base {
-  body {
-    @apply bg-fondo font-sans text-base text-texto;
+  html {
+    color-scheme: dark;
   }
-  h1, h2, h3 {
-    @apply font-display;
+  body {
+    @apply bg-fondo font-sans text-base text-texto antialiased;
   }
   :focus-visible {
-    outline: 3px solid var(--color-foco);
-    outline-offset: 2px;
+    outline: 2px solid var(--color-foco);
+    outline-offset: 3px;
   }
 }
 
 @layer components {
   .btn-primario {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-primario bg-primario text-white hover:border-primario-hover hover:bg-primario-hover;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-primario bg-primario px-5 py-2.5 font-medium text-black transition-colors hover:border-primario-hover hover:bg-primario-hover;
   }
   .btn-secundario {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-primario bg-superficie text-primario hover:bg-primario-suave;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-borde bg-transparent px-5 py-2.5 font-medium text-texto transition-colors hover:bg-primario-suave;
   }
   .btn-peligro {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-error bg-error text-white hover:opacity-90;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-error bg-error px-5 py-2.5 font-medium text-black transition-colors hover:opacity-90;
   }
 }

@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import Estado from './pages/Estado';
 import Inicio from './pages/Inicio';
+import Login from './pages/Login';
 import NoEncontrada from './pages/NoEncontrada';
 import Pendiente from './pages/Pendiente';
 
@@ -11,7 +12,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Inicio />} />
-        <Route path="login" element={<Pendiente titulo="Ingresar" descripcion="Entra a tu cuenta para ver tus Salas." sprint="Sprint 1" />} />
+        <Route path="login" element={<Login />} />
         <Route path="registro" element={<Pendiente titulo="Crear cuenta" descripcion="Regístrate con tu correo o con Google." sprint="Sprint 1" />} />
         <Route path="registro/username" element={<Pendiente titulo="Elige tu username" descripcion="Último paso para completar tu registro con Google." sprint="Sprint 1" />} />
         <Route path="dashboard" element={<Pendiente titulo="Mis Salas" descripcion="Aquí verás las Salas que has creado y podrás unirte a otra por ID." sprint="Sprint 2" />} />

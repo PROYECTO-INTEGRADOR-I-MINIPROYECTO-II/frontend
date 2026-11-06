@@ -56,7 +56,7 @@ export default function Estado() {
         de Firestore a través de la API.
       </p>
 
-      <section aria-labelledby="dato" className="mt-8 rounded-2xl border border-slate-200 bg-superficie p-6 md:p-8">
+      <section aria-labelledby="dato" className="mt-8 rounded-2xl border border-borde bg-superficie p-6 md:p-8">
         <h2 id="dato" className="text-2xl font-medium">Dato desde Firestore</h2>
 
         <div aria-live="polite" className="mt-5">

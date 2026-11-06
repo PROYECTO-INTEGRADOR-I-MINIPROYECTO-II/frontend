@@ -22,12 +22,12 @@ export default function Layout() {
     <div className="flex min-h-screen flex-col">
       <a
         href="#contenido"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-20 focus:rounded-lg focus:bg-primario focus:px-4 focus:py-2 focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-20 focus:rounded-lg focus:bg-primario focus:px-4 focus:py-2 focus:text-black"
       >
         Saltar al contenido
       </a>
       <Header />
-      <main id="contenido" ref={main} tabIndex={-1} className="flex-1 outline-none">
+      <main id="contenido" ref={main} tabIndex={-1} className="flex flex-1 flex-col outline-none">
         <Outlet />
       </main>
       <Footer />
