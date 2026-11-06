@@ -19,7 +19,7 @@ export default function Layout() {
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col pb-[var(--footer-h,0px)]">
       <a
         href="#contenido"
         className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-20 focus:rounded-lg focus:bg-primario focus:px-4 focus:py-2 focus:text-black"

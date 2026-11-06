@@ -10,6 +10,7 @@ export default function Header() {
       <p className="rounded-full border border-borde bg-primario-suave px-4 py-1.5 font-retro text-xs font-medium uppercase tracking-[0.2em] text-texto">
         Salas y chat en tiempo real
       </p>
+      <hr className="mt-2 w-full max-w-[calc(64rem-2.5rem)] border-t border-texto/80" />
     </header>
   );
 }
