@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { PixelIcon } from '../../../utils/retro/PixelIcon';
 import './CallPreview.css';
 
 export const PEOPLE = { SC: '#f5f5f5', JD: '#f5a524', JG: '#7dd3fc', SR: '#fb7185' };
@@ -164,31 +165,13 @@ export default function CallPreview() {
         </g>
       </g>
 
-      {/* Controles */}
-      <g transform="translate(162 304)">
-        <circle className="btn" r="14" />
-        <rect className="ico" x="-3" y="-8" width="6" height="10" rx="3" />
-        <path className="ico" d="M-6 0 A6 6 0 0 0 6 0 M0 6 V9" />
-      </g>
-      <g transform="translate(198 304)">
-        <circle className="btn" r="14" />
-        <rect className="ico" x="-8" y="-5" width="11" height="10" rx="2" />
-        <path className="ico" d="M3 -2 L8 -5 V5 L3 2 Z" />
-      </g>
-      <g transform="translate(234 304)">
-        <circle className="btn" r="14" />
-        <rect className="ico" x="-8" y="-6" width="16" height="11" rx="1.5" />
-        <path className="ico" d="M0 2 V-3 M-2.5 -0.5 L0 -3 L2.5 -0.5" />
-      </g>
-      <g transform="translate(270 304)">
-        <circle className="btn" r="14" />
-        <path className="ico" d="M-7 -6 H7 A2 2 0 0 1 9 -4 V3 A2 2 0 0 1 7 5 H-1 L-5 8 V5 H-7 A2 2 0 0 1 -9 3 V-4 A2 2 0 0 1 -7 -6 Z" />
-        <circle className="notif" cx="9" cy="-9" r="3.5" />
-      </g>
-      <g transform="translate(312 304)">
-        <rect className="hangup" x="-20" y="-14" width="40" height="28" rx="14" />
-        <path fill="#fff" d="M-8 2 C-4 -3 4 -3 8 2 L6.5 4.5 L3.5 3.5 V1.5 C1.5 0.8 -1.5 0.8 -3.5 1.5 V3.5 L-6.5 4.5 Z" />
-      </g>
+      {/* Controles: iconos pixel art sin fondo, blancos (colgar en rojo) */}
+      <PixelIcon className="px" nombre="microfono" x={162} y={304} escala={2} />
+      <PixelIcon className="px" nombre="camara" x={198} y={304} escala={2} />
+      <PixelIcon className="px" nombre="presentar" x={234} y={304} escala={2} />
+      <PixelIcon className="px" nombre="chat" x={270} y={304} escala={2} />
+      <rect className="notif" x="277" y="291" width="5" height="5" />
+      <PixelIcon className="px px-colgar" nombre="colgar" x={312} y={304} escala={2} />
     </svg>
   );
 }

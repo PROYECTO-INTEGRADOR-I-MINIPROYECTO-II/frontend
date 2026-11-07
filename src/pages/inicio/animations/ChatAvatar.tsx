@@ -15,7 +15,7 @@ export function PersonaAvatar({ who }: { who: Persona }) {
   const Face = FACES[who];
   return (
     <svg
-      className="synk-avatar size-10 shrink-0 rounded-full bg-[#0e0e0e] ring-1 ring-[#232323]"
+      className="synk-avatar size-10 shrink-0 rounded-full bg-fondo ring-2 ring-texto"
       viewBox="86 10 64 64"
       aria-hidden="true"
       style={{ '--c': PEOPLE[who] } as CSSProperties}
@@ -30,7 +30,7 @@ export function PersonaAvatar({ who }: { who: Persona }) {
 export function DoodleAvatar() {
   return (
     <svg
-      className="synk-avatar size-10 shrink-0 rounded-full bg-[#0e0e0e] ring-1 ring-[#232323]"
+      className="synk-avatar size-10 shrink-0 rounded-full bg-fondo ring-2 ring-texto"
       viewBox="86 10 64 64"
       aria-hidden="true"
       style={{ '--c': '#a1a1aa' } as CSSProperties}

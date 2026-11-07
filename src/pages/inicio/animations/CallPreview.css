@@ -12,12 +12,12 @@
 :is(.synk-call, .synk-avatar) .ln  { fill: none; stroke: var(--c, #f5f5f5); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 :is(.synk-call, .synk-avatar) .dot { fill: var(--c, #f5f5f5); }
 
-:is(.synk-call, .synk-avatar) .ln.solid { fill: #0b0b0b; }   /* mismo color que .tile-bg */
+:is(.synk-call, .synk-avatar) .ln.solid { fill: #000; }   /* mismo color que .tile-bg */
 :is(.synk-call, .synk-avatar) .ln.thin  { stroke-width: 2; }
 :is(.synk-call, .synk-avatar) .ln.glint { stroke-width: 1.2; opacity: .55; }
 
-.synk-call .tile-bg     { fill: #0e0e0e; }
-.synk-call .tile-border { fill: none; stroke: #232323; stroke-width: 1; }
+.synk-call .tile-bg     { fill: #000; }
+.synk-call .tile-border { fill: none; stroke: #fff; stroke-width: 1.5; }
 .synk-call .body  { fill: #1f1f1f; }
 .synk-call .skin,
 .synk-call .hand  { fill: #3a3a3a; }
@@ -28,9 +28,9 @@
 .synk-call .ball  { fill: var(--accent); }
 .synk-call .pill  { fill: rgba(0, 0, 0, .6); }
 .synk-call .name  { fill: #cfcfcf; font: 400 11px 'Geist Variable', system-ui, sans-serif; }
-.synk-call .btn   { fill: #161616; stroke: #262626; }
-.synk-call .ico   { fill: none; stroke: #cfcfcf; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.synk-call .hangup{ fill: #e5484d; }
+.synk-call .px { fill: #fff; }
+.synk-call .px-colgar { fill: #e5484d; }
+.synk-call .notif { fill: #e5484d; }
 .synk-call .plus  { fill: var(--accent); font: 600 13px ui-monospace, monospace; opacity: 0; }
 
 /* Animaciones: todo encaja en un ciclo de 8 s (pelota 4 s ×2, cabezas 2 s alternate) */
@@ -96,8 +96,8 @@
 }
 @keyframes sc-r1 { 0%, 24% { opacity: 0; } 25.5%, 45% { opacity: 1; } 46.5%, 100% { opacity: 0; } }
 @keyframes sc-r2 { 0%, 74% { opacity: 0; } 75.5%, 95% { opacity: 1; } 96.5%, 100% { opacity: 0; } }
-@keyframes sc-wc { 0%, 25% { stroke: #232323; } 27%, 44% { stroke: var(--accent); } 47%, 100% { stroke: #232323; } }
-@keyframes sc-wd { 0%, 75% { stroke: #232323; } 77%, 94% { stroke: var(--accent); } 97%, 100% { stroke: #232323; } }
+@keyframes sc-wc { 0%, 25% { stroke: #fff; } 27%, 44% { stroke: var(--accent); } 47%, 100% { stroke: #fff; } }
+@keyframes sc-wd { 0%, 75% { stroke: #fff; } 77%, 94% { stroke: var(--accent); } 97%, 100% { stroke: #fff; } }
 @keyframes sc-pc {
   0%, 26% { opacity: 0; transform: translateY(6px); }
   30% { opacity: 1; transform: translateY(0); }

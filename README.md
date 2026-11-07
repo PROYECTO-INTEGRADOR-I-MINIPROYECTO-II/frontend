@@ -29,6 +29,19 @@ VITE_DEMO_SESION=true npm run dev                        # desarrollo
 VITE_DEMO_SESION=true npm run build && npm run preview   # build local
 ```
 
+## Estructura de `src/`
+
+```
+pages/
+  main/        marco común de las páginas: Layout, header/, footer/, FondoSprites
+  inicio/      una carpeta por página; lo que solo ella usa va dentro (p. ej. animations/)
+  estado/  login/  ajustes/  no-encontrada/  pendiente/
+utils/         lo que usa más de una página: led/, retro/, sprites/
+hooks/  auth/  api/  assets/
+```
+
+Regla: un componente vive junto a la única página que lo usa; cuando una segunda página lo necesita, se sube a `utils/`. Si una vista (p. ej. la Sala) no usa encabezado ni pie, queda fuera del `Layout` de `pages/main/` en `App.tsx`.
+
 ## Variables de entorno
 
 | Variable | Descripción |

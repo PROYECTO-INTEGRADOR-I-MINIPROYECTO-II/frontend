@@ -37,7 +37,7 @@ const MAX_ITEMS = 12;
 const reducido = sinMovimiento;
 
 function ImagenPrueba() {
-  return <img src={imagenPrueba} alt="Imagen de prueba: una foca" className="mt-1 w-48 rounded-lg ring-1 ring-[#232323]" />;
+  return <img src={imagenPrueba} alt="Imagen de prueba: una foca" className="mt-1 w-48 ring-2 ring-texto" />;
 }
 
 function Reacciones({ lista }: { lista: Reaccion[] }) {
@@ -49,7 +49,7 @@ function Reacciones({ lista }: { lista: Reaccion[] }) {
           key={r.emoji}
           aria-label={`${r.emoji} de ${r.por}`}
           title={r.por}
-          className="chat-pop flex items-center gap-1 rounded-md border border-[#232323] bg-[#161616] px-1.5 py-0.5 text-xs"
+          className="chat-pop flex items-center gap-1 border border-texto bg-fondo px-1.5 py-0.5 text-xs"
         >
           <span aria-hidden="true">{r.emoji}</span>
           <span aria-hidden="true" style={{ color: PEOPLE[r.por] }}>{r.por}</span>
@@ -129,8 +129,9 @@ export default function ChatPreview() {
   return (
     <section
       aria-label="Vista previa del chat de una Sala"
-      className="flex h-[23.6rem] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-[#232323] bg-[#0e0e0e] text-left"
+      className="flex h-[23.6rem] w-full max-w-[560px] flex-col overflow-hidden border-2 border-texto bg-fondo text-left"
     >
+      <div aria-hidden="true" className="border-b-2 border-texto px-4 py-3 text-center font-monokuro text-xs leading-5">Chat de la Sala</div>
       <div ref={log} className="flex flex-1 flex-col gap-1 overflow-y-auto p-4 [scrollbar-color:#3f3f46_transparent] [scrollbar-width:thin]" role="log" aria-live="off">
         {items.map((it, idx) => {
           if (it.kind === 'sys') {
@@ -172,7 +173,7 @@ export default function ChatPreview() {
         })}
       </div>
 
-      <form onSubmit={enviar} className="border-t border-[#232323] p-3">
+      <form onSubmit={enviar} className="border-t-2 border-texto p-3">
         <label htmlFor="chat-demo" className="sr-only">Mensaje de prueba</label>
         <input
           id="chat-demo"
@@ -182,7 +183,7 @@ export default function ChatPreview() {
           maxLength={140}
           autoComplete="off"
           placeholder={listo ? `Escribe como ${nombre}…` : 'Mensaje…'}
-          className="w-full rounded-lg bg-[#161616] px-3 py-2 text-sm text-texto placeholder:text-texto-secundario disabled:cursor-not-allowed"
+          className="w-full border-2 border-texto bg-fondo px-3 py-2 text-sm text-texto placeholder:text-texto-secundario disabled:cursor-not-allowed"
         />
       </form>
     </section>

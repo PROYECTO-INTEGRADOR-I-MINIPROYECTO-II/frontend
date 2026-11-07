@@ -1,0 +1,85 @@
+// Iconos pixel art dibujados con rectángulos SVG a partir de un mapa de bits (# = píxel encendido).
+// Se usan dentro de un <svg>: devuelven un <g> centrado en (x, y), con cada píxel de `escala` unidades.
+const ICONOS = {
+  microfono: [
+    '....###....',
+    '...#####...',
+    '...#####...',
+    '...#####...',
+    '#..#####..#',
+    '#..#####..#',
+    '.#.#####.#.',
+    '..#######..',
+    '.....#.....',
+    '.....#.....',
+    '...#####...',
+  ],
+  camara: [
+    '...........',
+    '...........',
+    '#######....',
+    '#.....#..##',
+    '#.....#.#.#',
+    '#.....###.#',
+    '#.....#.#.#',
+    '#.....#..##',
+    '#######....',
+    '...........',
+    '...........',
+  ],
+  presentar: [
+    '...........',
+    '###########',
+    '#.........#',
+    '#....#....#',
+    '#...###...#',
+    '#..#.#.#..#',
+    '#....#....#',
+    '###########',
+    '.....#.....',
+    '..#######..',
+    '...........',
+  ],
+  chat: [
+    '...........',
+    '.#########.',
+    '#.........#',
+    '#.........#',
+    '#..#.#.#..#',
+    '#.........#',
+    '#.........#',
+    '.#########.',
+    '..##.......',
+    '..#........',
+    '...........',
+  ],
+  colgar: [
+    '...........',
+    '...........',
+    '..#######..',
+    '.#########.',
+    '###.....###',
+    '###.....###',
+    '###.....###',
+    '...........',
+    '...........',
+    '...........',
+    '...........',
+  ],
+} as const;
+
+export type NombreIcono = keyof typeof ICONOS;
+
+export function PixelIcon({ nombre, x, y, escala = 2, className }: { nombre: NombreIcono; x: number; y: number; escala?: number; className?: string }) {
+  const filas = ICONOS[nombre];
+  const lado = filas.length * escala;
+  return (
+    <g className={className} transform={`translate(${x - lado / 2} ${y - lado / 2})`} shapeRendering="crispEdges" aria-hidden="true">
+      {filas.flatMap((fila, r) =>
+        [...fila.matchAll(/#+/g)].map((m) => (
+          <rect key={`${r}-${m.index}`} x={m.index! * escala} y={r * escala} width={m[0].length * escala} height={escala} />
+        )),
+      )}
+    </g>
+  );
+}
