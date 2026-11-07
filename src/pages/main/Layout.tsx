@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Footer from './Footer';
-import Header from './Header';
+import Footer from './footer/Footer';
+import Header from './header/Header';
 
 export default function Layout() {
   const { pathname } = useLocation();

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 // Sprites pixel art (blanco y negro) de objetos de reuniones virtuales.
-const modulos = import.meta.glob('../assets/sprites/*.png', { eager: true, import: 'default' }) as Record<string, string>;
+const modulos = import.meta.glob('../../../assets/sprites/*.png', { eager: true, import: 'default' }) as Record<string, string>;
 // Proporción alto/ancho de cada sprite, para calcular el espacio que ocupa sin esperar a que cargue la imagen.
 const ASPECTO: Record<string, number> = {
   'sprite_01.png': 1.369,

@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { DoodleAvatar, PersonaAvatar, type Persona } from './ChatAvatar';
 import { PEOPLE } from './CallPreview';
-import { sinMovimiento } from '../hooks/useAnimaciones';
-import imagenPrueba from '../assets/imagen-prueba.png';
-import { useSession } from '../auth/useSession';
+import { sinMovimiento } from '../../../hooks/useAnimaciones';
+import imagenPrueba from '../../../assets/imagen-prueba.png';
+import { useSession } from '../../../auth/useSession';
 
 type Reaccion = { emoji: string; por: Persona };
 type Item =

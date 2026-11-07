@@ -1,4 +1,4 @@
-import synkIcon from '../assets/synk-icon.png';
+import synkIcon from '../../../assets/synk-icon.png';
 
 export default function Logo() {
   return (

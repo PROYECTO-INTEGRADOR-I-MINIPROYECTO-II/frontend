@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { sinMovimiento } from '../hooks/useAnimaciones';
+import { sinMovimiento } from '../../hooks/useAnimaciones';
 
 const reducido = sinMovimiento;
 

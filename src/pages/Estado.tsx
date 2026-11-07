@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError, BaseInfo, fetchBase } from '../api/base';
-import { BarraRetro, BotonRetro, PuntosAnimados, RetroWindow } from '../components/RetroWindow';
+import { BarraRetro, BotonRetro, PuntosAnimados, RetroWindow } from '../utils/retro/RetroWindow';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 type State =

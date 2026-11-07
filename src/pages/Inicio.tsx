@@ -1,10 +1,10 @@
 import { FormEvent, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import CallPreview from '../components/CallPreview';
-import ChatPreview from '../components/ChatPreview';
-import LedPassphraseField from '../components/LedPassphraseField';
-import LedLoginField from '../components/LedLoginField';
+import CallPreview from './main/animations/CallPreview';
+import ChatPreview from './main/animations/ChatPreview';
+import LedPassphraseField from '../utils/led/LedPassphraseField';
+import LedLoginField from '../utils/led/LedLoginField';
 import { useSession } from '../auth/useSession';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 

@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import CuentaEnlace from './CuentaEnlace';
-import univalleLogo from '../assets/univalle-logo.png';
+import univalleLogo from '../../../assets/univalle-logo.png';
 
 const tab = 'underline underline-offset-4 hover:text-texto-secundario';
 

@@ -1,6 +1,6 @@
 import { UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useSession } from '../auth/useSession';
+import { useSession } from '../../../auth/useSession';
 
 const ETIQUETA = 'Iniciar sesión';
 
