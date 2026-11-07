@@ -5,7 +5,7 @@ import { SPRITES } from '../../utils/sprites/sprites';
 // y otra más visible que solo se deja ver dentro de un radio alrededor del cursor (máscara radial por CSS).
 const CELDA = 96; // px
 const RADIO = 190; // px del halo
-const OP_BASE = 0.045;
+const OP_BASE = 0.0;
 const OP_LUZ = 0.25;
 const CAJA = 48; // cada sprite se ajusta a una caja cuadrada fija, centrada en su celda
 const CASILLAS = 900; // tabla aleatoria; cada celda (col, fila) toma la suya por índice
@@ -21,10 +21,10 @@ export default function FondoSprites() {
   const raiz = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const cb = base.current;
+    const cb = base.current; // null si la capa base está apagada (OP_BASE = 0)
     const cl = luz.current;
     const el = raiz.current;
-    if (!cb || !cl || !el) return;
+    if (!cl || !el) return;
 
     const casillas = sortear();
     const imgs = SPRITES.map(({ src }) => {
@@ -63,7 +63,7 @@ export default function FondoSprites() {
     }
     const todo = () => {
       if (!vivo) return;
-      dibujar(cb, OP_BASE);
+      if (cb) dibujar(cb, OP_BASE);
       dibujar(cl, OP_LUZ);
     };
 
@@ -97,7 +97,7 @@ export default function FondoSprites() {
 
   return (
     <div ref={raiz} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden [--luz:0]">
-      <canvas ref={base} className="absolute inset-0 size-full" />
+      {OP_BASE > 0 && <canvas ref={base} className="absolute inset-0 size-full" />}
       <canvas
         ref={luz}
         className="absolute inset-0 size-full transition-opacity duration-300"
