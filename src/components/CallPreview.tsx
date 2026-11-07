@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import './CallPreview.css';
 
-const PEOPLE = { SC: '#f5f5f5', JD: '#f5a524', JG: '#7dd3fc', SR: '#fb7185' };
+export const PEOPLE = { SC: '#f5f5f5', JD: '#f5a524', JG: '#7dd3fc', SR: '#fb7185' };
 
 const SCISSORS = 'M54 -17 L69 -25 M54 -11 L69 -3';
 const PAPER = 'M54 -19 L66 -26 M54 -15 L69 -17 M54 -11 L68 -8 M49 -20 L52 -27';
@@ -15,7 +15,7 @@ const Eyes = ({ x1 = 120, x2 = 132, y = 50 }: { x1?: number; x2?: number; y?: nu
   </>
 );
 
-const Glasses = () => (
+export const Glasses = () => (
   <>
     {/* patilla + puente recto */}
     <path className="ln thin" d="M111 45 L95 43 M124 45 H127.5" />
@@ -27,7 +27,7 @@ const Glasses = () => (
   </>
 );
 
-const Cap = () => (
+export const Cap = () => (
   <>
     <path className="ln solid" d="M94.3 44 A25 25 0 0 1 141.7 44 Z" />
     <path className="ln" d="M141.7 44 Q154 42.5 165 47" />
@@ -37,7 +37,7 @@ const Cap = () => (
   </>
 );
 
-const Hat = () => (
+export const Hat = () => (
   <>
     <ellipse className="ln solid" cx="118" cy="32" rx="34" ry="5" />
     <path className="ln solid" d="M101 32 L104 12 Q118 7 132 12 L135 32 Z" />
@@ -46,7 +46,7 @@ const Hat = () => (
   </>
 );
 
-const Headset = () => (
+export const Headset = () => (
   <>
     <path className="ln" d="M91 52 A27 27 0 0 1 145 52" />
     <path className="ln thin" d="M145 60 Q146 72 132 70" />

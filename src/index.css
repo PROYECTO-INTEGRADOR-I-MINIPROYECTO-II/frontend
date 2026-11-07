@@ -108,3 +108,19 @@
     .led-flicker { animation: none; }
   }
 }
+
+/* Chat de demostración */
+@keyframes chat-pop {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes chat-caret {
+  50% { opacity: 0; }
+}
+@layer utilities {
+  .chat-pop { animation: chat-pop 0.25s ease-out; }
+  .chat-caret { animation: chat-caret 1s steps(1) infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-pop, .chat-caret { animation: none; }
+  }
+}

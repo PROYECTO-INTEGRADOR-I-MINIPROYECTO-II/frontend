@@ -9,12 +9,12 @@
 }
 
 /* Reglas base que faltaban en el original: sin ellas los trazos y los ojos no se ven. */
-.synk-call .ln  { fill: none; stroke: var(--c, #f5f5f5); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.synk-call .dot { fill: var(--c, #f5f5f5); }
+:is(.synk-call, .synk-avatar) .ln  { fill: none; stroke: var(--c, #f5f5f5); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+:is(.synk-call, .synk-avatar) .dot { fill: var(--c, #f5f5f5); }
 
-.synk-call .ln.solid { fill: #0b0b0b; }   /* mismo color que .tile-bg */
-.synk-call .ln.thin  { stroke-width: 2; }
-.synk-call .ln.glint { stroke-width: 1.2; opacity: .55; }
+:is(.synk-call, .synk-avatar) .ln.solid { fill: #0b0b0b; }   /* mismo color que .tile-bg */
+:is(.synk-call, .synk-avatar) .ln.thin  { stroke-width: 2; }
+:is(.synk-call, .synk-avatar) .ln.glint { stroke-width: 1.2; opacity: .55; }
 
 .synk-call .tile-bg     { fill: #0e0e0e; }
 .synk-call .tile-border { fill: none; stroke: #232323; stroke-width: 1; }

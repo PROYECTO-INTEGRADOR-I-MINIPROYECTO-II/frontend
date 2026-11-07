@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CallPreview from '../components/CallPreview';
+import ChatPreview from '../components/ChatPreview';
 import LedLoginField from '../components/LedLoginField';
 import { useSession } from '../auth/useSession';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -23,9 +24,10 @@ export default function Inicio() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center px-5 py-16">
+    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-5 py-16">
       <h1 className="sr-only">Entrar a una Sala</h1>
 
+      <div className="w-full max-w-2xl">
       {user ? (
         <form onSubmit={submit} className="w-full" noValidate>
           <label htmlFor="passphrase" className="sr-only">Passphrase de la Sala</label>
@@ -61,9 +63,15 @@ export default function Inicio() {
           <LedLoginField />
         </div>
       )}
+      </div>
 
-      <div className="mt-14 w-full">
-        <CallPreview />
+      <div className="mt-14 flex w-full flex-wrap items-start justify-center gap-x-6 gap-y-2">
+        <div className="w-full max-w-[560px] flex-1 basis-[420px]">
+          <CallPreview />
+        </div>
+        <div className="flex w-full max-w-[560px] flex-1 basis-[360px] justify-center">
+          <ChatPreview />
+        </div>
       </div>
     </div>
   );
