@@ -184,3 +184,23 @@
     mask-image: linear-gradient(to bottom, #000 55%, transparent);
   }
 }
+
+/* «Pausar animaciones» (Ajustes): detiene todo movimiento y deja cada elemento en su estado final. */
+:root[data-animaciones='pausadas'] *,
+:root[data-animaciones='pausadas'] *::before,
+:root[data-animaciones='pausadas'] *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+:root[data-animaciones='pausadas'] .lock-closed { opacity: 0; }
+:root[data-animaciones='pausadas'] .lock-open { opacity: 1; }
+
+/* Ondulación de las letras de «Iniciar sesión» (cuenta): salto corto de 2 px por pasos, en cadena. */
+@keyframes letra {
+  0% { transform: translateY(0); }
+  8% { transform: translateY(-2px); }
+  16%, 100% { transform: translateY(0); }
+}
+@theme {
+  --animate-letra: letra 1.6s steps(1) infinite;
+}

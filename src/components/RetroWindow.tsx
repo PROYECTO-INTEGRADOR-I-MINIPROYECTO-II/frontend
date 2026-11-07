@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { sinMovimiento } from '../hooks/useAnimaciones';
 
-const reducido = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reducido = sinMovimiento;
 
 // Ventana sencilla al estilo Monokuro: marco blanco, barra de título con borde y cuerpo negro.
 export function RetroWindow({ heading, title, children }: { heading: string; title: ReactNode; children: ReactNode }) {

@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { DoodleAvatar, PersonaAvatar, type Persona } from './ChatAvatar';
 import { PEOPLE } from './CallPreview';
+import { sinMovimiento } from '../hooks/useAnimaciones';
 import imagenPrueba from '../assets/imagen-prueba.png';
 import { useSession } from '../auth/useSession';
 
@@ -33,7 +34,7 @@ const GUION: Paso[] = [
 ];
 
 const MAX_ITEMS = 12;
-const reducido = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reducido = sinMovimiento;
 
 function ImagenPrueba() {
   return <img src={imagenPrueba} alt="Imagen de prueba: una foca" className="mt-1 w-48 rounded-lg ring-1 ring-[#232323]" />;

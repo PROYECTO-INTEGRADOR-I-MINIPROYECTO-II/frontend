@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import CuentaEnlace from './CuentaEnlace';
 import univalleLogo from '../assets/univalle-logo.png';
 
 const tab = 'underline underline-offset-4 hover:text-texto-secundario';
@@ -9,6 +10,7 @@ const ENLACES = [
   { to: '/estado', texto: 'Estado del sistema' },
   { to: '/ayuda', texto: 'Ayuda' },
   { to: '/accesibilidad', texto: 'Accesibilidad' },
+  { to: '/ajustes', texto: 'Ajustes' },
 ];
 
 function Etiqueta() {
@@ -61,6 +63,7 @@ export default function Footer() {
               {ENLACES.map((e) => (
                 <li key={e.to}><Link to={e.to} className={tab}>{e.texto}</Link></li>
               ))}
+              <li><CuentaEnlace className={tab} /></li>
               <li><Etiqueta /></li>
             </ul>
           </nav>
@@ -86,6 +89,7 @@ export default function Footer() {
             className="absolute inset-x-0 bottom-full -mx-5 border-t border-texto/80 bg-fondo px-5 py-2 sm:-mx-8 sm:px-8 md:hidden"
           >
             <ul>
+              <li className="border-b border-borde"><CuentaEnlace className="block py-3" /></li>
               {ENLACES.map((e) => (
                 <li key={e.to} className="border-b border-borde last:border-0">
                   <Link to={e.to} className="block py-3">

@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
+import Ajustes from './pages/Ajustes';
 import Estado from './pages/Estado';
 import Inicio from './pages/Inicio';
 import Login from './pages/Login';
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="dashboard" element={<Pendiente titulo="Mis Salas" descripcion="Aquí verás las Salas que has creado y podrás unirte a otra por ID." sprint="Sprint 2" />} />
         <Route path="salas/:id" element={<Pendiente titulo="Sala" descripcion="Video, chat y pantalla compartida de tu Sala." sprint="Sprint 3" />} />
         <Route path="perfil" element={<Pendiente titulo="Mi perfil" descripcion="Edita tu nombre, avatar y username, o elimina tu cuenta." sprint="Sprint 2" />} />
+        <Route path="ajustes" element={<Ajustes />} />
         <Route path="estado" element={<Estado />} />
         <Route path="ayuda" element={<Pendiente titulo="Ayuda" descripcion="Cómo crear una Sala, unirte y usar los controles." sprint="Sprint 6" />} />
         <Route path="accesibilidad" element={<Pendiente titulo="Declaración de accesibilidad" descripcion="Nuestro compromiso con WCAG 2.2 nivel AA." sprint="Sprint 6" />} />
