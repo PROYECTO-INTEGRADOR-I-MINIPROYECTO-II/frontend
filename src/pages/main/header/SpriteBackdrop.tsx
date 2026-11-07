@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SPRITES } from '../../../utils/sprites/sprites';
 
 const ANCHO_PISTA = 3000; // px; debe superar el ancho de pantalla para que el bucle no deje huecos
@@ -52,6 +52,12 @@ function generar(): Colocado[] {
 // Fondo decorativo del panel superior: franja de sprites desenfocados que se desplaza en horizontal.
 export default function SpriteBackdrop() {
   const colocados = useMemo(generar, []);
+  // Decorativo: aparece con un fundido tras el primer pintado para no competir con el contenido (LCP).
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setVisible(true), 300);
+    return () => window.clearTimeout(t);
+  }, []);
   const grupo = (clave: string) => (
     <div key={clave} className="relative h-full shrink-0" style={{ width: ANCHO_PISTA }}>
       {colocados.map((s, i) => (
@@ -74,7 +80,7 @@ export default function SpriteBackdrop() {
   );
 
   return (
-    <div aria-hidden="true" className="sprite-fade pointer-events-none absolute inset-0 overflow-hidden">
+    <div aria-hidden="true" className={`sprite-fade pointer-events-none absolute inset-0 overflow-hidden transition-opacity duration-700 ${visible ? 'opacity-100' : 'opacity-0'}`}>
       <div className="motion-safe:animate-sprites flex h-full w-max">
         {grupo('a')}
         {grupo('b')}
