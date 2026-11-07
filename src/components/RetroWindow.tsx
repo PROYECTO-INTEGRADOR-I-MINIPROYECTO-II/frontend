@@ -3,15 +3,12 @@ import { useEffect, useState, type ReactNode } from 'react';
 const reducido = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Ventana sencilla al estilo Monokuro: marco blanco, barra de título con borde y cuerpo negro.
-export function RetroWindow({ title, children }: { title: string; children: ReactNode }) {
+export function RetroWindow({ heading, title, children }: { heading: string; title: ReactNode; children: ReactNode }) {
   return (
     <section aria-labelledby="ventana-titulo" className="w-full max-w-2xl border-2 border-texto bg-fondo">
-      <h1
-        id="ventana-titulo"
-        className="border-b-2 border-texto px-4 py-3 text-center font-monokuro text-xs leading-5 lowercase"
-      >
-        {title}
-      </h1>
+      {/* El encabezado accesible es el h1; la barra visible puede llevar un título más rico (p. ej. la ruta). */}
+      <h1 id="ventana-titulo" className="sr-only">{heading}</h1>
+      <div className="border-b-2 border-texto px-4 py-3 text-center font-monokuro text-xs leading-5">{title}</div>
       <div className="px-6 py-8 sm:px-10">{children}</div>
     </section>
   );

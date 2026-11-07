@@ -60,11 +60,15 @@ export default function Estado() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-6 px-5 py-10">
-      <nav aria-label="Ruta de navegación" className="self-start text-sm text-texto-secundario">
-        <Link to="/" className="hover:underline">Inicio</Link> / Estado del sistema
-      </nav>
-
-      <RetroWindow title="estado del sistema">
+      <RetroWindow
+        heading="Estado del sistema"
+        title={
+          <nav aria-label="Ruta de navegación">
+            <Link to="/" className="underline underline-offset-4 hover:text-texto-secundario">Inicio</Link> /{' '}
+            <span aria-current="page">Estado del sistema</span>
+          </nav>
+        }
+      >
         <div aria-live="polite" className="text-center font-pixel text-lg">
           {state.status === 'loading' && (
             <p>
