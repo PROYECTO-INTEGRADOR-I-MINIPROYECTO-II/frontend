@@ -26,15 +26,15 @@ function generar(): Colocado[] {
   const barajados = [...SPRITES].sort(() => Math.random() - 0.5);
   const puestos: Colocado[] = [];
   for (let i = 0; i < CANTIDAD; i++) {
-    for (let intento = 0; intento < 60; intento++) {
+    for (let intento = 0; intento < 150; intento++) {
       const size = rnd(50, 130);
       const left = rnd(0, ANCHO_PISTA - size);
       const top = rnd(-size * 0.3, ALTO - size * 0.7);
-      const r = size * 0.6;
+      const r = size * 0.72;
       const cx = left + size / 2;
       const cy = top + size / 2;
       const libre = puestos.every((o) => {
-        const ro = o.size * 0.6;
+        const ro = o.size * 0.72;
         const dx = Math.min(Math.abs(cx - (o.left + o.size / 2)), ANCHO_PISTA - Math.abs(cx - (o.left + o.size / 2)));
         const dy = cy - (o.top + o.size / 2);
         return Math.hypot(dx, dy) > r + ro;
