@@ -2,6 +2,7 @@
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/pixelify-sans';
 @import '@fontsource-variable/orbitron';
+@import '@fontsource/press-start-2p';
 
 /* Rework oscuro (experimento): negro puro, monocromático, estilo v0. Todo texto cumple contraste AA sobre #000. */
 @theme {
@@ -23,6 +24,7 @@
   --color-led: #fafafa;
   --animate-led: led-scroll 18s linear infinite;
   --font-retro: 'Orbitron Variable', system-ui, sans-serif;
+  --font-monokuro: 'Press Start 2P', ui-monospace, monospace;
   --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
 }
 
@@ -80,10 +82,6 @@
 @layer utilities {
   .lock-closed { animation: lock-closed 1.2s steps(1) infinite; }
   .lock-open { animation: lock-open 1.2s steps(1) infinite; }
-  .led-glow {
-    box-shadow: 0 0 0 1px var(--color-led), 0 0 18px 2px color-mix(in srgb, var(--color-led) 55%, transparent),
-      inset 0 0 14px color-mix(in srgb, var(--color-led) 25%, transparent);
-  }
   @media (prefers-reduced-motion: reduce) {
     .lock-closed { animation: none; opacity: 0; }
     .lock-open { animation: none; opacity: 1; }
@@ -123,4 +121,14 @@
   @media (prefers-reduced-motion: reduce) {
     .chat-pop, .chat-caret { animation: none; }
   }
+}
+
+@layer utilities {
+  .led-text { text-shadow: 0 0 8px color-mix(in srgb, var(--color-led) 70%, transparent); }
+}
+
+/* @utility (y no @layer) para que acepte variantes como hover: y focus:. */
+@utility led-glow {
+  box-shadow: 0 0 0 1px var(--color-led), 0 0 18px 2px color-mix(in srgb, var(--color-led) 55%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--color-led) 25%, transparent);
 }

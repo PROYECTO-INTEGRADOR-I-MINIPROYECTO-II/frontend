@@ -31,21 +31,26 @@ export default function Inicio() {
       {user ? (
         <form onSubmit={submit} className="w-full" noValidate>
           <label htmlFor="passphrase" className="sr-only">Passphrase de la Sala</label>
-          <input
-            id="passphrase"
-            type="text"
-            value={phrase}
-            onChange={(e) => {
-              setPhrase(e.target.value);
-              setError('');
-            }}
-            aria-describedby={error ? 'phrase-error' : undefined}
-            autoComplete="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            placeholder="luna-roble-café-río"
-            className="w-full rounded-2xl border border-borde bg-superficie px-6 py-5 text-center text-2xl text-texto placeholder:text-texto-secundario/70 md:text-3xl"
-          />
+          {/* Mismo estilo LED que el campo bloqueado: tipografía pixel con brillo, rejilla de puntos y líneas CRT. */}
+          <div className="relative">
+            <input
+              id="passphrase"
+              type="text"
+              value={phrase}
+              onChange={(e) => {
+                setPhrase(e.target.value);
+                setError('');
+              }}
+              aria-describedby={error ? 'phrase-error' : undefined}
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              placeholder="luna-roble-café-río"
+              className="led-text h-14 w-full rounded-2xl border border-borde bg-superficie px-6 text-center font-pixel text-xl font-semibold uppercase tracking-widest text-led caret-led transition-shadow duration-300 placeholder:text-led/45 focus:led-glow focus:border-led focus:outline-none md:h-16 md:text-2xl"
+            />
+            <div aria-hidden="true" className="led-dots pointer-events-none absolute inset-0 rounded-2xl" />
+            <div aria-hidden="true" className="crt-scan absolute inset-0 rounded-2xl" />
+          </div>
           {error && (
             <p id="phrase-error" role="alert" className="mt-3 text-center text-error">
               {error}
