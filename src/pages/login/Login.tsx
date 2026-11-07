@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 // Marcador del Sprint 1. La creación de cuenta vive aquí y no en la portada.
 export default function Login() {

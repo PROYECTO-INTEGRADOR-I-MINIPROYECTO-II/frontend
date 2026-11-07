@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { RetroWindow } from '../utils/retro/RetroWindow';
-import { fijarPausadas, sistemaReduce, usePausadas } from '../hooks/useAnimaciones';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { RetroWindow } from '../../utils/retro/RetroWindow';
+import { fijarPausadas, sistemaReduce, usePausadas } from '../../hooks/useAnimaciones';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 export default function Ajustes() {
   useDocumentTitle('Ajustes');

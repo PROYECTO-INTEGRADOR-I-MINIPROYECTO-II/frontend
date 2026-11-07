@@ -1,11 +1,11 @@
 import { Route, Routes } from 'react-router-dom';
 import Layout from './pages/main/Layout';
-import Ajustes from './pages/Ajustes';
-import Estado from './pages/Estado';
-import Inicio from './pages/Inicio';
-import Login from './pages/Login';
-import NoEncontrada from './pages/NoEncontrada';
-import Pendiente from './pages/Pendiente';
+import Ajustes from './pages/ajustes/Ajustes';
+import Estado from './pages/estado/Estado';
+import Inicio from './pages/inicio/Inicio';
+import Login from './pages/login/Login';
+import NoEncontrada from './pages/no-encontrada/NoEncontrada';
+import Pendiente from './pages/pendiente/Pendiente';
 
 // Mapa del sitio (Figma, Sprint 0). Las pantallas sin lógica todavía son marcadores del sprint que las implementa.
 export default function App() {

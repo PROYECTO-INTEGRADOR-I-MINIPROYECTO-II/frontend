@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 export default function NoEncontrada() {
   useDocumentTitle('Página no encontrada');
