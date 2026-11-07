@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { DoodleAvatar, PersonaAvatar, type Persona } from './ChatAvatar';
 import { PEOPLE } from './CallPreview';
+import imagenPrueba from '../assets/imagen-prueba.png';
 import { useSession } from '../auth/useSession';
 
 type Reaccion = { emoji: string; por: Persona };
@@ -35,17 +36,7 @@ const MAX_ITEMS = 12;
 const reducido = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function ImagenPrueba() {
-  const barras = ['#f5f5f5', '#f5a524', '#7dd3fc', '#fb7185'];
-  return (
-    <svg viewBox="0 0 160 90" role="img" aria-label="Imagen de prueba" className="mt-1 w-44 rounded-lg ring-1 ring-[#232323]">
-      <rect width="160" height="90" fill="#0b0b0b" />
-      {barras.map((c, i) => (
-        <rect key={c} x={10 + i * 35} y="10" width="30" height="46" fill={c} />
-      ))}
-      <rect x="10" y="62" width="140" height="18" fill="#161616" />
-      <text x="80" y="75" textAnchor="middle" fill="#cfcfcf" fontSize="10" fontFamily="monospace">PRUEBA</text>
-    </svg>
-  );
+  return <img src={imagenPrueba} alt="Imagen de prueba: una foca" className="mt-1 w-48 rounded-lg ring-1 ring-[#232323]" />;
 }
 
 function Reacciones({ lista }: { lista: Reaccion[] }) {
@@ -67,6 +58,7 @@ function Reacciones({ lista }: { lista: Reaccion[] }) {
   );
 }
 
+// Demo visual: NO está basada en la vista real del chat de una Sala; solo ilustra la idea (ver README).
 // Chat de demostración: guion con efecto de escritura y, al terminar, un campo para escribir como en un chat real.
 export default function ChatPreview() {
   const { user } = useSession();

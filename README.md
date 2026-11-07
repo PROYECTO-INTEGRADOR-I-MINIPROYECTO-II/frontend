@@ -16,11 +16,25 @@ npm run dev            # http://localhost:5173
 VITE_API_URL=https://<api-en-render> docker compose up --build   # http://localhost:5173
 ```
 
+## Prototipo visual (rama de rework)
+
+Las animaciones de la vista inicial (`CallPreview` y `ChatPreview`) son una ilustración: **aún no están basadas en la vista real de una Sala ni de su chat**. Hay que rehacerlas o retirarlas cuando existan esas pantallas.
+
+## Probar la vista con sesión
+
+Mientras no exista Firebase Auth (Sprint 1), `src/auth/useSession.ts` es un marcador. Con `VITE_DEMO_SESION=true` el inicio muestra el campo de passphrase activo, y el chat de demostración usa el usuario `demo`. Es una variable de build:
+
+```bash
+VITE_DEMO_SESION=true npm run dev                        # desarrollo
+VITE_DEMO_SESION=true npm run build && npm run preview   # build local
+```
+
 ## Variables de entorno
 
 | Variable | Descripción |
 |---|---|
 | `VITE_API_URL` | URL base de la API (sin `/api`). Se incrusta en el build. |
+| `VITE_DEMO_SESION` | `true` simula una sesión iniciada (solo pruebas visuales). |
 
 ## Despliegue
 

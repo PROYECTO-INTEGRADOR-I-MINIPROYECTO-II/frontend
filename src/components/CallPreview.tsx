@@ -104,6 +104,7 @@ const Label = ({ x, y, name }: { x: number; y: number; name: keyof typeof PEOPLE
   </g>
 );
 
+// Demo visual: NO está basada en la vista real de una Sala; solo ilustra la idea (ver README).
 export default function CallPreview() {
   return (
     <svg
