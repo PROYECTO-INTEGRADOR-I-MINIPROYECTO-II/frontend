@@ -69,6 +69,7 @@ export default function Estado() {
           </nav>
         }
       >
+        <h2 className="sr-only">Dato desde Firestore</h2>
         <div aria-live="polite" className="text-center font-pixel text-lg">
           {state.status === 'loading' && (
             <p>
@@ -90,10 +91,10 @@ export default function Estado() {
             </>
           )}
           {state.status === 'error' && (
-            <>
+            <div role="alert">
               <p className="text-error">No pudimos conectar con la base de datos</p>
               <p className="mt-2 text-sm text-texto-secundario">{state.message} Si el problema sigue, revisa tu conexión.</p>
-            </>
+            </div>
           )}
         </div>
 
@@ -112,7 +113,7 @@ export default function Estado() {
 
         {!cargando && (
           <div className="mt-8 flex justify-center">
-            <BotonRetro onClick={retry}>{state.status === 'error' ? 'reintentar' : 'recargar dato'}</BotonRetro>
+            <BotonRetro onClick={retry}>{state.status === 'error' ? 'Reintentar' : 'Recargar dato'}</BotonRetro>
           </div>
         )}
       </RetroWindow>

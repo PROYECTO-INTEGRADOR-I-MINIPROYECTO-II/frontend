@@ -44,6 +44,8 @@
 @layer base {
   html {
     color-scheme: dark;
+    /* WCAG 2.4.11: el panel inferior es fijo; el elemento enfocado no debe quedar detrás de él. */
+    scroll-padding-bottom: calc(var(--footer-h, 0px) + 1rem);
   }
   body {
     @apply bg-fondo font-sans text-base text-texto antialiased;
