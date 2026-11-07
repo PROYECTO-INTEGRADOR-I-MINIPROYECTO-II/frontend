@@ -4,7 +4,7 @@ import SpriteBackdrop from './SpriteBackdrop';
 
 export default function Header() {
   return (
-    <header className="relative flex flex-col items-center gap-4 px-5 pb-2 pt-8 sm:px-8">
+    <header className="relative bg-fondo flex flex-col items-center gap-4 px-5 pb-2 pt-8 sm:px-8">
       <SpriteBackdrop />
       <Link to="/" aria-label="Synk, ir al inicio" className="group relative rounded-xl">
         <Logo />

@@ -5,26 +5,14 @@ import { SPRITES } from '../../utils/sprites/sprites';
 // y otra más visible que solo se deja ver dentro de un radio alrededor del cursor (máscara radial por CSS).
 const CELDA = 96; // px
 const RADIO = 190; // px del halo
-const OP_BASE = 0.07;
-const OP_LUZ = 0.4;
+const OP_BASE = 0.045;
+const OP_LUZ = 0.25;
+const CAJA = 48; // cada sprite se ajusta a una caja cuadrada fija, centrada en su celda
 const CASILLAS = 900; // tabla aleatoria; cada celda (col, fila) toma la suya por índice
 
-interface Casilla {
-  img: number; // índice en SPRITES, o -1 si la celda queda vacía
-  tam: number;
-  rot: number;
-  dx: number;
-  dy: number;
-}
-
-function sortear(): Casilla[] {
-  return Array.from({ length: CASILLAS }, () => ({
-    img: Math.random() < 0.3 ? -1 : Math.floor(Math.random() * SPRITES.length),
-    tam: 38 + Math.random() * 22,
-    rot: ((Math.random() * 2 - 1) * 20 * Math.PI) / 180,
-    dx: (Math.random() * 2 - 1) * 8,
-    dy: (Math.random() * 2 - 1) * 8,
-  }));
+// Cada celda toma un sprite al azar (o queda vacía); posición y tamaño de la caja son fijos, sin giros.
+function sortear(): number[] {
+  return Array.from({ length: CASILLAS }, () => (Math.random() < 0.3 ? -1 : Math.floor(Math.random() * SPRITES.length)));
 }
 
 export default function FondoSprites() {
@@ -62,18 +50,14 @@ export default function FondoSprites() {
       const filas = Math.ceil(h / CELDA);
       for (let f = 0; f < filas; f++) {
         for (let k = 0; k < cols; k++) {
-          const cas = casillas[(f * 53 + k) % CASILLAS];
-          if (cas.img < 0) continue;
-          const im = imgs[cas.img];
+          const idx = casillas[(f * 53 + k) % CASILLAS];
+          if (idx < 0) continue;
+          const im = imgs[idx];
           if (!im.complete || !im.naturalWidth) continue;
-          const asp = im.naturalHeight / im.naturalWidth;
-          const ancho = asp > 1 ? cas.tam / asp : cas.tam;
-          const alto = ancho * asp;
-          ctx.save();
-          ctx.translate(k * CELDA + CELDA / 2 + cas.dx, f * CELDA + CELDA / 2 + cas.dy);
-          ctx.rotate(cas.rot);
-          ctx.drawImage(im, -ancho / 2, -alto / 2, ancho, alto);
-          ctx.restore();
+          const esc = CAJA / Math.max(im.naturalWidth, im.naturalHeight);
+          const ancho = im.naturalWidth * esc;
+          const alto = im.naturalHeight * esc;
+          ctx.drawImage(im, k * CELDA + (CELDA - ancho) / 2, f * CELDA + (CELDA - alto) / 2, ancho, alto);
         }
       }
     }
