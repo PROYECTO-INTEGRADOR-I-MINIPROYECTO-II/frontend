@@ -19,9 +19,9 @@ export default function CuentaEnlace({ className = '' }: { className?: string })
   }
 
   return (
-    <Link to="/login" className={className}>
+    <Link to="/login" className={`group ${className}`}>
       <span className="sr-only">{ETIQUETA}</span>
-      <span aria-hidden="true" className="inline-flex text-[color-mix(in_srgb,var(--color-acento)_60%,white)]">
+      <span aria-hidden="true" className="relative inline-flex pb-[3px] text-[color-mix(in_srgb,var(--color-acento)_60%,white)] transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-current group-hover:text-texto-secundario group-focus-visible:text-texto-secundario">
         {[...ETIQUETA].map((c, i) => (
           <span
             key={i}

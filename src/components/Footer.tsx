@@ -60,10 +60,12 @@ export default function Footer() {
           {/* Ancho: enlaces repartidos en toda la fila. */}
           <nav aria-label="Pie de página" className="hidden md:block">
             <ul className="flex items-center justify-between gap-6">
+              <li><CuentaEnlace className={tab} /></li>
+
               {ENLACES.map((e) => (
                 <li key={e.to}><Link to={e.to} className={tab}>{e.texto}</Link></li>
               ))}
-              <li><CuentaEnlace className={tab} /></li>
+              
               <li><Etiqueta /></li>
             </ul>
           </nav>
