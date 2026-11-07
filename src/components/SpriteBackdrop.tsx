@@ -5,7 +5,7 @@ const modulos = import.meta.glob('../assets/sprites/*.png', { eager: true, impor
 const SPRITES = Object.values(modulos);
 
 const ANCHO_PISTA = 3000; // px; debe superar el ancho de pantalla para que el bucle no deje huecos
-const CANTIDAD = 16;
+const CANTIDAD = 32;
 
 interface Colocado {
   src: string;
@@ -25,10 +25,10 @@ function generar(): Colocado[] {
   const paso = ANCHO_PISTA / CANTIDAD;
   return Array.from({ length: CANTIDAD }, (_, i) => ({
     src: barajados[i % barajados.length],
-    left: i * paso + rnd(-paso * 0.25, paso * 0.25),
-    top: rnd(-15, 75),
-    size: rnd(44, 120),
-    rot: rnd(-28, 28),
+    left: i * paso + rnd(-paso * 0.4, paso * 0.4),
+    top: rnd(-30, 80),
+    size: rnd(50, 190),
+    rot: rnd(-180, 180),
     blur: rnd(1, 3),
     op: rnd(0.22, 0.45),
   }));
