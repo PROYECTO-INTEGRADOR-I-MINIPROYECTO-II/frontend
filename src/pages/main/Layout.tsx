@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Footer from './Footer';
-import Header from './Header';
+import FondoSprites from './FondoSprites';
+import Footer from './footer/Footer';
+import Header from './header/Header';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -19,15 +20,16 @@ export default function Layout() {
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col pb-[var(--footer-h,0px)]">
       <a
         href="#contenido"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-20 focus:rounded-lg focus:bg-primario focus:px-4 focus:py-2 focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-20 focus:rounded-lg focus:bg-primario focus:px-4 focus:py-2 focus:text-black"
       >
         Saltar al contenido
       </a>
+      <FondoSprites />
       <Header />
-      <main id="contenido" ref={main} tabIndex={-1} className="flex-1 outline-none">
+      <main id="contenido" ref={main} tabIndex={-1} className="relative flex flex-1 flex-col outline-none">
         <Outlet />
       </main>
       <Footer />

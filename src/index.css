@@ -1,48 +1,206 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/space-grotesk';
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/pixelify-sans';
+@import '@fontsource-variable/orbitron';
+@import '@fontsource/press-start-2p';
 
-/* Guía visual de Synk (Figma, Sprint 0) */
+/* Rework oscuro (experimento): negro puro, monocromático, estilo v0. Todo texto cumple contraste AA sobre #000. */
 @theme {
-  --color-primario: #4338ca;
-  --color-primario-hover: #3730a3;
-  --color-primario-suave: #e0e7ff;
-  --color-acento: #0f766e;
-  --color-texto: #0f172a;
-  --color-texto-secundario: #475569;
-  --color-borde: #94a3b8;
-  --color-fondo: #f8fafc;
-  --color-superficie: #ffffff;
-  --color-exito: #15803d;
-  --color-exito-suave: #dcfce7;
-  --color-error: #b91c1c;
-  --color-error-suave: #fee2e2;
+  --color-primario: #fafafa;
+  --color-primario-hover: #d4d4d8;
+  --color-primario-suave: #18181b;
+  --color-texto: #fafafa;
+  --color-texto-secundario: #a1a1aa;
+  --color-borde: #3f3f46;
+  --color-fondo: #000000;
+  --color-superficie: #0a0a0a;
+  --color-exito: #4ade80;
+  --color-exito-suave: #052e16;
+  --color-error: #f87171;
+  --color-error-suave: #2a0a0a;
   --color-foco: #f59e0b;
-  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
-  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-display: 'Geist Variable', system-ui, sans-serif;
+  --color-led: #fafafa;
+  /* Color de acento (morado de la guía original, aclarado para tener contraste ≥3:1 sobre negro).
+     Para otra paleta basta redefinir esta variable, p. ej. :root[data-paleta='verde'] { --color-acento: #4ade80; }
+     o animarla (modo rainbow). Todo lo que use text-acento / bg-acento / border-acento la sigue. */
+  --color-acento: #5b4fe0;
+  --animate-led: led-scroll 18s linear infinite;
+  --animate-sprites: sprites-scroll 140s linear infinite;
+  --animate-flotar: flotar 2.4s steps(1) infinite;
+  --animate-flecha: flecha 0.9s steps(1) infinite;
+  --font-retro: 'Orbitron Variable', system-ui, sans-serif;
+  --font-monokuro: 'Press Start 2P', ui-monospace, monospace;
+  --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
+}
+
+@keyframes led-scroll {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @layer base {
-  body {
-    @apply bg-fondo font-sans text-base text-texto;
+  html {
+    color-scheme: dark;
+    /* WCAG 2.4.11: el panel inferior es fijo; el elemento enfocado no debe quedar detrás de él. */
+    scroll-padding-bottom: calc(var(--footer-h, 0px) + 1rem);
   }
-  h1, h2, h3 {
-    @apply font-display;
+  body {
+    @apply bg-fondo font-sans text-base text-texto antialiased;
   }
   :focus-visible {
-    outline: 3px solid var(--color-foco);
-    outline-offset: 2px;
+    outline: 2px solid var(--color-foco);
+    outline-offset: 3px;
   }
 }
 
 @layer components {
   .btn-primario {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-primario bg-primario text-white hover:border-primario-hover hover:bg-primario-hover;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-primario bg-primario px-5 py-2.5 font-medium text-black transition-colors hover:border-primario-hover hover:bg-primario-hover;
   }
   .btn-secundario {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-primario bg-superficie text-primario hover:bg-primario-suave;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-borde bg-transparent px-5 py-2.5 font-medium text-texto transition-colors hover:bg-primario-suave;
   }
   .btn-peligro {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-2 font-semibold transition-colors border-error bg-error text-white hover:opacity-90;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-error bg-error px-5 py-2.5 font-medium text-black transition-colors hover:opacity-90;
   }
+}
+
+@layer utilities {
+  .led-mask {
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--color-led) 70%, transparent);
+  }
+  .led-dots {
+    background: radial-gradient(circle at center, transparent 0 0.9px, #000 1.3px) 0 0 / 3px 3px;
+    opacity: 0.55;
+  }
+}
+
+/* Campo LED de inicio de sesión: el candado alterna cerrado/abierto mientras el puntero (o el foco) está encima. */
+@keyframes lock-closed {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes lock-open {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+@layer utilities {
+  .lock-closed { animation: lock-closed 1.2s steps(1) infinite; }
+  .lock-open { animation: lock-open 1.2s steps(1) infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .lock-closed { animation: none; opacity: 0; }
+    .lock-open { animation: none; opacity: 1; }
+  }
+}
+
+/* Efecto CRT: líneas de barrido y parpadeo leve del fósforo. */
+@keyframes led-flicker {
+  0%, 100% { opacity: 1; }
+  47% { opacity: 1; }
+  50% { opacity: 0.82; }
+  53% { opacity: 1; }
+  80% { opacity: 0.92; }
+}
+@layer utilities {
+  .crt-scan {
+    background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.3) 2px 3px);
+    pointer-events: none;
+  }
+  .led-flicker { animation: led-flicker 2.4s linear infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .led-flicker { animation: none; }
+  }
+}
+
+/* Chat de demostración */
+@keyframes chat-pop {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes chat-caret {
+  50% { opacity: 0; }
+}
+@layer utilities {
+  .chat-pop { animation: chat-pop 0.25s ease-out; }
+  .chat-caret { animation: chat-caret 1s steps(1) infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-pop, .chat-caret { animation: none; }
+  }
+}
+
+@layer utilities {
+  .led-text { text-shadow: 0 0 8px color-mix(in srgb, var(--color-led) 70%, transparent); }
+}
+
+/* @utility (y no @layer) para que acepte variantes como hover: y focus:. */
+@utility led-glow {
+  box-shadow: 0 0 0 1px var(--color-led), 0 0 18px 2px color-mix(in srgb, var(--color-led) 55%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--color-led) 25%, transparent);
+}
+
+/* Brillo intermedio (reposo): entre el apagado y el encendido (led-glow). */
+@utility led-glow-soft {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-led) 45%, transparent),
+    0 0 10px 1px color-mix(in srgb, var(--color-led) 25%, transparent),
+    inset 0 0 8px color-mix(in srgb, var(--color-led) 12%, transparent);
+}
+
+@keyframes led-cursor {
+  50% { opacity: 0; }
+}
+@layer utilities {
+  .led-cursor {
+    animation: led-cursor 1.1s steps(1) infinite;
+    box-shadow: 0 0 10px 1px color-mix(in srgb, var(--color-led) 60%, transparent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .led-cursor { animation: none; }
+  }
+}
+
+/* Animaciones «por pasos» (estética pixel): saltos marcados y de poco desplazamiento. */
+@keyframes flotar {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-3px); }
+  50% { transform: translateY(-6px); }
+  75% { transform: translateY(-3px); }
+}
+@keyframes flecha {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(4px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(4px); }
+  80% { transform: translateX(0); }
+}
+@keyframes sprites-scroll {
+  to { transform: translateX(-50%); }
+}
+@layer utilities {
+  .sprite-fade {
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+}
+
+/* «Pausar animaciones» (Ajustes): detiene todo movimiento y deja cada elemento en su estado final. */
+:root[data-animaciones='pausadas'] *,
+:root[data-animaciones='pausadas'] *::before,
+:root[data-animaciones='pausadas'] *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+:root[data-animaciones='pausadas'] .lock-closed { opacity: 0; }
+:root[data-animaciones='pausadas'] .lock-open { opacity: 1; }
+
+/* Ondulación de las letras de «Iniciar sesión» (cuenta): salto corto de 2 px por pasos, en cadena. */
+@keyframes letra {
+  0% { transform: translateY(0); }
+  8% { transform: translateY(-2px); }
+  16%, 100% { transform: translateY(0); }
+}
+@theme {
+  --animate-letra: letra 1.6s steps(1) infinite;
 }
