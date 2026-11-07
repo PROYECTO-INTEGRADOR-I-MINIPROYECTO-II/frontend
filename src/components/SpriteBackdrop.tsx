@@ -5,7 +5,8 @@ const modulos = import.meta.glob('../assets/sprites/*.png', { eager: true, impor
 const SPRITES = Object.values(modulos);
 
 const ANCHO_PISTA = 3000; // px; debe superar el ancho de pantalla para que el bucle no deje huecos
-const CANTIDAD = 32;
+const CANTIDAD = 28;
+const ALTO = 190; // px aproximados del panel superior
 
 interface Colocado {
   src: string;
@@ -19,19 +20,32 @@ interface Colocado {
 
 const rnd = (min: number, max: number) => min + Math.random() * (max - min);
 
-// Reparte los sprites a lo largo de la pista con posición, tamaño, rotación y desenfoque aleatorios (distinto en cada carga).
+// Reparte los sprites por la pista con tamaño, rotación y desenfoque aleatorios (distinto en cada carga).
+// Cada posición se prueba contra las ya colocadas (con la pista como círculo, sin cruzar el borde) para evitar que se solapen.
 function generar(): Colocado[] {
   const barajados = [...SPRITES].sort(() => Math.random() - 0.5);
-  const paso = ANCHO_PISTA / CANTIDAD;
-  return Array.from({ length: CANTIDAD }, (_, i) => ({
-    src: barajados[i % barajados.length],
-    left: i * paso + rnd(-paso * 0.4, paso * 0.4),
-    top: rnd(-30, 80),
-    size: rnd(50, 190),
-    rot: rnd(-180, 180),
-    blur: rnd(1, 3),
-    op: rnd(0.22, 0.45),
-  }));
+  const puestos: Colocado[] = [];
+  for (let i = 0; i < CANTIDAD; i++) {
+    for (let intento = 0; intento < 60; intento++) {
+      const size = rnd(50, 130);
+      const left = rnd(0, ANCHO_PISTA - size);
+      const top = rnd(-size * 0.3, ALTO - size * 0.7);
+      const r = size * 0.6;
+      const cx = left + size / 2;
+      const cy = top + size / 2;
+      const libre = puestos.every((o) => {
+        const ro = o.size * 0.6;
+        const dx = Math.min(Math.abs(cx - (o.left + o.size / 2)), ANCHO_PISTA - Math.abs(cx - (o.left + o.size / 2)));
+        const dy = cy - (o.top + o.size / 2);
+        return Math.hypot(dx, dy) > r + ro;
+      });
+      if (libre) {
+        puestos.push({ src: barajados[i % barajados.length], left, top, size, rot: rnd(-180, 180), blur: rnd(1, 3), op: rnd(0.22, 0.45) });
+        break;
+      }
+    }
+  }
+  return puestos;
 }
 
 // Fondo decorativo del panel superior: franja de sprites desenfocados que se desplaza en horizontal.
@@ -47,7 +61,7 @@ export default function SpriteBackdrop() {
           className="absolute h-auto [image-rendering:pixelated] mix-blend-screen"
           style={{
             left: s.left,
-            top: `${s.top}%`,
+            top: s.top,
             width: s.size,
             opacity: s.op,
             filter: `blur(${s.blur}px)`,
