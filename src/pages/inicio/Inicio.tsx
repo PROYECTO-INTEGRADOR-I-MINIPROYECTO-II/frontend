@@ -1,8 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import CallPreview from '../main/animations/CallPreview';
-import ChatPreview from '../main/animations/ChatPreview';
+import CallPreview from '../estructura/animations/CallPreview';
+import ChatPreview from '../estructura/animations/ChatPreview';
 import LedPassphraseField from '../../utils/led/LedPassphraseField';
 import LedLoginField from '../../utils/led/LedLoginField';
 import { useSession } from '../../auth/useSession';
