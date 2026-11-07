@@ -27,7 +27,7 @@ export default function LedLoginField() {
       onClick={go}
       aria-label="Iniciar sesión"
       className={`group relative block h-14 w-full overflow-hidden rounded-2xl border bg-superficie transition-shadow duration-300 md:h-16 ${
-        done ? 'led-glow border-led' : 'border-borde hover:led-glow hover:border-led focus-visible:led-glow'
+        done ? 'led-glow border-led' : 'border-led/55 led-glow-soft hover:led-glow hover:border-led focus-visible:led-glow'
       }`}
     >
       <div

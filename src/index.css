@@ -132,3 +132,23 @@
   box-shadow: 0 0 0 1px var(--color-led), 0 0 18px 2px color-mix(in srgb, var(--color-led) 55%, transparent),
     inset 0 0 14px color-mix(in srgb, var(--color-led) 25%, transparent);
 }
+
+/* Brillo intermedio (reposo): entre el apagado y el encendido (led-glow). */
+@utility led-glow-soft {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-led) 45%, transparent),
+    0 0 10px 1px color-mix(in srgb, var(--color-led) 25%, transparent),
+    inset 0 0 8px color-mix(in srgb, var(--color-led) 12%, transparent);
+}
+
+@keyframes led-cursor {
+  50% { opacity: 0; }
+}
+@layer utilities {
+  .led-cursor {
+    animation: led-cursor 1.1s steps(1) infinite;
+    box-shadow: 0 0 10px 1px color-mix(in srgb, var(--color-led) 60%, transparent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .led-cursor { animation: none; }
+  }
+}

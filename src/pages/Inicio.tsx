@@ -45,9 +45,14 @@ export default function Inicio() {
               autoComplete="off"
               autoCapitalize="none"
               spellCheck={false}
-              placeholder="luna-roble-café-río"
-              className="led-text h-14 w-full rounded-2xl border border-borde bg-superficie px-6 text-center font-pixel text-xl font-semibold uppercase tracking-widest text-led caret-led transition-shadow duration-300 placeholder:text-led/45 focus:led-glow focus:border-led focus:outline-none md:h-16 md:text-2xl"
+              className={`led-text led-glow-soft h-14 w-full rounded-2xl border border-led/55 bg-superficie px-6 text-center font-pixel text-xl font-semibold uppercase tracking-widest text-led ${phrase === '' ? 'caret-transparent' : 'caret-led'} transition-shadow duration-300 focus:led-glow focus:border-led focus:outline-none md:h-16 md:text-2xl`}
             />
+            {/* Sin texto, un cursor LED parpadeante hace de placeholder e indica que es un campo de escritura. */}
+            {phrase === '' && (
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 grid place-items-center">
+                <span className="led-cursor h-7 w-3.5 bg-led md:h-8" />
+              </div>
+            )}
             <div aria-hidden="true" className="led-dots pointer-events-none absolute inset-0 rounded-2xl" />
             <div aria-hidden="true" className="crt-scan absolute inset-0 rounded-2xl" />
           </div>
