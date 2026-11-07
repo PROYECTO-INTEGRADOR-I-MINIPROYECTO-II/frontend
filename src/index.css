@@ -22,7 +22,14 @@
   --font-sans: 'Geist Variable', system-ui, sans-serif;
   --font-display: 'Geist Variable', system-ui, sans-serif;
   --color-led: #fafafa;
+  /* Color de acento (morado de la guía original, aclarado para tener contraste ≥3:1 sobre negro).
+     Para otra paleta basta redefinir esta variable, p. ej. :root[data-paleta='verde'] { --color-acento: #4ade80; }
+     o animarla (modo rainbow). Todo lo que use text-acento / bg-acento / border-acento la sigue. */
+  --color-acento: #5b4fe0;
   --animate-led: led-scroll 18s linear infinite;
+  --animate-sprites: sprites-scroll 140s linear infinite;
+  --animate-flotar: flotar 2.4s steps(1) infinite;
+  --animate-flecha: flecha 0.9s steps(1) infinite;
   --font-retro: 'Orbitron Variable', system-ui, sans-serif;
   --font-monokuro: 'Press Start 2P', ui-monospace, monospace;
   --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
@@ -150,5 +157,28 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .led-cursor { animation: none; }
+  }
+}
+
+/* Animaciones «por pasos» (estética pixel): saltos marcados y de poco desplazamiento. */
+@keyframes flotar {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-3px); }
+  50% { transform: translateY(-6px); }
+  75% { transform: translateY(-3px); }
+}
+@keyframes flecha {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(4px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(4px); }
+  80% { transform: translateX(0); }
+}
+@keyframes sprites-scroll {
+  to { transform: translateX(-50%); }
+}
+@layer utilities {
+  .sprite-fade {
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
   }
 }

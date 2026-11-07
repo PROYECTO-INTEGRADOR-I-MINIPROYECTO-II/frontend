@@ -54,7 +54,7 @@ export default function Inicio() {
               aria-label="Entrar a la Sala"
               className="led-text led-glow-soft group relative grid size-14 shrink-0 place-items-center rounded-2xl border border-led/55 bg-superficie text-led transition-shadow duration-300 hover:led-glow hover:border-led focus-visible:led-glow focus-visible:border-led focus-visible:outline-none md:size-16"
             >
-              <ArrowRight aria-hidden="true" className="size-8 transition-transform group-hover:translate-x-0.5" strokeWidth={3} />
+              <ArrowRight aria-hidden="true" className="size-8 motion-safe:group-hover:animate-flecha motion-safe:group-focus-visible:animate-flecha" strokeWidth={3} />
               <span aria-hidden="true" className="led-dots pointer-events-none absolute inset-0 rounded-2xl" />
               <span aria-hidden="true" className="crt-scan absolute inset-0 rounded-2xl" />
             </button>

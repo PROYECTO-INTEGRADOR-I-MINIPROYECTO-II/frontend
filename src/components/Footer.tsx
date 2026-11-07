@@ -14,7 +14,7 @@ const ENLACES = [
 function Etiqueta() {
   return (
     <span className="flex items-center gap-3 text-texto-secundario">
-      <img src={univalleLogo} alt="" aria-hidden="true" className="h-10 w-auto [image-rendering:pixelated]" />
+      <img src={univalleLogo} alt="" aria-hidden="true" className="h-10 w-auto motion-safe:animate-flotar [image-rendering:pixelated]" />
       <span>
         Proyecto Integrador I
         <br />
