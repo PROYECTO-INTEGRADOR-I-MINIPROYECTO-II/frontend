@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import './chat.css';
 import { DoodleAvatar, PersonaAvatar, type Persona } from './ChatAvatar';
 import { PEOPLE } from './CallPreview';
 import { sinMovimiento } from '../../../hooks/useAnimaciones';

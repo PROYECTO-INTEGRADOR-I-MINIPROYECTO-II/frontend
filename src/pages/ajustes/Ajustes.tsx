@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import TextoVivo from '../../utils/retro/TextoVivo';
 import { RetroWindow } from '../../utils/retro/RetroWindow';
 import { fijarPausadas, sistemaReduce, usePausadas } from '../../hooks/useAnimaciones';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -15,7 +16,7 @@ export default function Ajustes() {
         title={
           <nav aria-label="Ruta de navegación">
             <ol className="flex items-center justify-center gap-2">
-              <li><Link to="/" className="underline underline-offset-4 hover:text-texto-secundario">Inicio</Link></li>
+              <li><Link to="/" className="group"><TextoVivo>Inicio</TextoVivo></Link></li>
               <li aria-hidden="true">/</li>
               <li aria-current="page">Ajustes</li>
             </ol>

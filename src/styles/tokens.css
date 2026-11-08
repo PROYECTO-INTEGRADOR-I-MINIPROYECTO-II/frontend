@@ -1,0 +1,56 @@
+/* Rework oscuro (experimento): negro puro, monocromático, estilo v0. Todo texto cumple contraste AA sobre #000. */
+@theme {
+  --color-primario: #fafafa;
+  --color-primario-hover: #d4d4d8;
+  --color-primario-suave: #18181b;
+  --color-texto: #fafafa;
+  --color-texto-secundario: #a1a1aa;
+  --color-borde: #3f3f46;
+  --color-fondo: #000000;
+  --color-superficie: #0a0a0a;
+  --color-exito: #4ade80;
+  --color-exito-suave: #052e16;
+  --color-error: #f87171;
+  --color-error-suave: #2a0a0a;
+  --color-foco: #f59e0b;
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-display: 'Geist Variable', system-ui, sans-serif;
+  --color-led: #fafafa;
+  /* Color de acento (morado de la guía original, aclarado para tener contraste ≥3:1 sobre negro).
+     Para otra paleta basta redefinir esta variable, p. ej. :root[data-paleta='verde'] { --color-acento: #4ade80; }
+     o animarla (modo rainbow). Todo lo que use text-acento / bg-acento / border-acento la sigue. */
+  --color-acento: #5b4fe0;
+  /* Acento aclarado: para texto pequeño sobre negro (el acento puro solo da ~3,6:1). Sigue a --color-acento. */
+  --color-acento-claro: color-mix(in srgb, var(--color-acento) 60%, white);
+  /* Colores de la palabra «Google» (tonos suaves de su logo sobre fondo oscuro). */
+  --color-g-azul: #8ab4f8;
+  --color-g-rojo: #f28b82;
+  --color-g-amarillo: #fdd663;
+  --color-g-verde: #81c995;
+  --animate-panel: panel-subir 0.24s steps(4) both;
+  --animate-telon: telon-entrar 0.2s ease-out both;
+  --animate-led: led-scroll 18s linear infinite;
+  --animate-sprites: sprites-scroll 140s linear infinite;
+  --animate-flotar: flotar 2.4s steps(1) infinite;
+  --animate-flecha: flecha 0.9s steps(1) infinite;
+  --font-retro: 'Orbitron Variable', system-ui, sans-serif;
+  --font-monokuro: 'Press Start 2P', ui-monospace, monospace;
+  --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
+  --animate-letra: letra 1.6s steps(1) infinite;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    /* WCAG 2.4.11: el panel inferior es fijo; el elemento enfocado no debe quedar detrás de él. */
+    scroll-padding-bottom: calc(var(--footer-h, 0px) + 1rem);
+  }
+  body {
+    @apply bg-fondo font-sans text-base text-texto antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-foco);
+    outline-offset: 3px;
+  }
+}
+

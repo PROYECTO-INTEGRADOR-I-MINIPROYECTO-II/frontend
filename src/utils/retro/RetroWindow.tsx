@@ -15,18 +15,21 @@ export function RetroWindow({ heading, title, children }: { heading: string; tit
   );
 }
 
-// Tres puntos que aparecen de a uno y, en el cuarto paso, se borran para repetir (decorativo).
-export function PuntosAnimados() {
+// Puntos que aparecen de a uno (decorativo). Por defecto: 1, 2, 3 y en el cuarto paso se borran para repetir.
+// Con `sinVacio` el ciclo es 1, 2, 3 y vuelve a empezar (para textos como «Username...» que no deben quedarse sin puntos).
+export function PuntosAnimados({ sinVacio = false, intervalo = 420 }: { sinVacio?: boolean; intervalo?: number }) {
   const [paso, setPaso] = useState(0);
   const quieto = reducido();
+  const pasos = sinVacio ? 3 : 4;
   useEffect(() => {
     if (quieto) return;
-    const t = window.setInterval(() => setPaso((p) => (p + 1) % 4), 420);
+    const t = window.setInterval(() => setPaso((p) => (p + 1) % pasos), intervalo);
     return () => window.clearInterval(t);
-  }, [quieto]);
+  }, [quieto, pasos, intervalo]);
+  const n = sinVacio ? paso + 1 : paso;
   return (
     <span aria-hidden="true" className="inline-block w-[3ch] text-left">
-      {quieto ? '...' : '.'.repeat(paso)}
+      {quieto ? '...' : '.'.repeat(n)}
     </span>
   );
 }
@@ -57,18 +60,5 @@ export function BarraRetro({ modo, label }: { modo: 'cargando' | 'ok' | 'error';
         <span key={i} className={`h-4 flex-1 ${i < n ? 'bg-current' : 'bg-transparent'}`} />
       ))}
     </div>
-  );
-}
-
-// Botón con el lenguaje de la ventana: marco recto, tipografía pixel e inversión de colores al apuntar.
-export function BotonRetro({ children, onClick }: { children: ReactNode; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="border-2 border-texto bg-fondo px-6 py-3 font-monokuro text-xs lowercase text-texto transition-none hover:bg-texto hover:text-fondo focus-visible:bg-texto focus-visible:text-fondo"
-    >
-      {children}
-    </button>
   );
 }
