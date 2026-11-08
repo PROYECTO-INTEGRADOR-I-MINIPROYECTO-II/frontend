@@ -41,16 +41,16 @@ const entre = (min: number, max: number): number => min + (azar(1000) / 1000) * 
 const alfa = (color: string): number => {
   if (color === 'transparent') return 0;
   const barra = color.match(/\/\s*([\d.]+%?)\s*\)/); // color(srgb 0 0 0 / .5), oklab(... / .5)
-  if (barra) return barra[1].endsWith('%') ? parseFloat(barra[1]) / 100 : parseFloat(barra[1]);
+  if (barra) return barra[1].endsWith('%') ? Number.parseFloat(barra[1]) / 100 : Number.parseFloat(barra[1]);
   const rgba = color.match(/^rgba\((.+)\)$/);
-  if (rgba) return parseFloat(rgba[1].split(',')[3] ?? '1');
+  if (rgba) return Number.parseFloat(rgba[1].split(',')[3] ?? '1');
   return 1;
 };
 
 const pinta = (e: Element, cs: CSSStyleDeclaration): boolean => {
   if (['IMG', 'VIDEO', 'CANVAS', 'INPUT', 'TEXTAREA', 'SELECT', 'svg'].includes(e.tagName)) return true;
   if (alfa(cs.backgroundColor) > 0.05 || cs.backgroundImage !== 'none') return true;
-  return ['Top', 'Right', 'Bottom', 'Left'].some((l) => parseFloat(cs.getPropertyValue(`border-${l.toLowerCase()}-width`)) > 0 && cs.getPropertyValue(`border-${l.toLowerCase()}-style`) !== 'none');
+  return ['Top', 'Right', 'Bottom', 'Left'].some((l) => Number.parseFloat(cs.getPropertyValue(`border-${l.toLowerCase()}-width`)) > 0 && cs.getPropertyValue(`border-${l.toLowerCase()}-style`) !== 'none');
 };
 
 // Lo que un contenedor con `overflow` distinto de visible oculta no se ve, así que no cuenta: el texto del letrero LED, por ejemplo, corre
@@ -88,7 +88,7 @@ function leerPagina(): Caja[] {
   for (const e of raiz.querySelectorAll('*')) {
     if (e.closest('[data-fondo]') || (e.closest('svg') && e.tagName !== 'svg')) continue; // el fondo no cuenta; de un SVG cuenta su caja entera
     const cs = getComputedStyle(e);
-    if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) continue;
+    if (cs.display === 'none' || cs.visibility === 'hidden' || Number.parseFloat(cs.opacity) < 0.05) continue;
     if (pinta(e, cs)) anotar(e.getBoundingClientRect(), e.parentElement ? zonaDe(e.parentElement) : pantalla);
     for (const n of e.childNodes) {
       if (n.nodeType === Node.TEXT_NODE && n.textContent?.trim()) {
