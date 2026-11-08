@@ -27,7 +27,8 @@
 .synk-call .finger{ fill: none; stroke: #3a3a3a; stroke-width: 3.5; stroke-linecap: round; }
 .synk-call .ball  { fill: var(--accent); }
 .synk-call .pill  { fill: rgba(0, 0, 0, .6); }
-.synk-call .name  { fill: #cfcfcf; font: 400 11px 'Geist Variable', system-ui, sans-serif; }
+/* El nombre toma el color de su participante (--c lo fija el componente Label); gris solo si faltara. */
+.synk-call .name  { fill: var(--c, #cfcfcf); font: 400 11px 'Geist Variable', system-ui, sans-serif; }
 .synk-call .px { fill: #fff; }
 .synk-call .px-colgar { fill: #e5484d; }
 .synk-call .notif { fill: #e5484d; }
