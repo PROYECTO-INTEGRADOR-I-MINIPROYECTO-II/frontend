@@ -89,3 +89,8 @@
   .cursor-campo, .username-valido { animation: none; }
   .username-verificando { transition: none; }
 }
+
+/* Destellos del fondo: opacidad base 0 (así, con «Pausar animaciones» o «reducir movimiento», no se ve ninguno) y un ciclo 0 → --op (la del halo, 0,25) → 0. */
+@keyframes destello { 0%, 100% { opacity: 0; } 50% { opacity: var(--op, 0.25); } }
+.destello { opacity: 0; animation: destello var(--dur, 3s) ease-in-out var(--retraso, 0s) infinite; }
+@media (prefers-reduced-motion: reduce) { .destello { animation: none; } }
