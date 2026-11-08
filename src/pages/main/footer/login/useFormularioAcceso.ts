@@ -1,4 +1,5 @@
 import { useCallback, useId, useRef, useState, type FormEvent } from 'react';
+import { ApiError } from '../../../../api/base';
 import { validarClave, validarConfirmacion, validarCorreo } from '../../../../auth/validaciones';
 import { useCampoUsername } from './useCampoUsername';
 
@@ -6,9 +7,14 @@ export type Campo = 'correo' | 'clave' | 'confirmar';
 export type Errores = Partial<Record<Campo, string>>;
 
 // Estado y validación del formulario de acceso: iniciar sesión manual (correo y contraseña) y crear cuenta (+ username y confirmación).
-// Lo escrito se conserva al cambiar de vista. Al crear una cuenta válida llama a `alRegistrar` con los datos, y la cuenta se crea;
-// aún sin Firebase (Sprint 1).
-export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { username: string; correo: string }) => void) {
+// Lo escrito se conserva al cambiar de vista. Al crear una cuenta válida llama a `alRegistrar` con los datos (async: crea la cuenta
+// en la API); si falla, el error se muestra junto a su campo, con el foco, sin borrar lo escrito. Al iniciar sesión llama a `alIniciar`;
+// si los datos no coinciden, el aviso es el mismo para correo y contraseña (no revela si el correo existe).
+export function useFormularioAcceso(
+  registro: boolean,
+  alRegistrar: (d: { username: string; correo: string; clave: string }) => Promise<void>,
+  alIniciar: (d: { correo: string; clave: string }) => Promise<void>,
+) {
   const base = useId();
   const formulario = useRef<HTMLFormElement>(null);
   const username = useCampoUsername('campo-username-registro');
@@ -17,10 +23,13 @@ export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { userna
   const [confirmar, setConfirmar] = useState('');
   const [errores, setErrores] = useState<Errores>({});
   const [aviso, setAviso] = useState('');
+  const [errorGeneral, setErrorGeneral] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
   const limpiarAvisos = useCallback(() => {
     setErrores({});
     setAviso('');
+    setErrorGeneral('');
   }, []);
 
   // Al editar un campo se quita su error de envío (si lo hubo); se vuelve a validar al enviar o, en el username, mientras se escribe.
@@ -29,8 +38,10 @@ export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { userna
     setErrores((e) => (e[campo] ? { ...e, [campo]: undefined } : e));
   };
 
-  function enviar(e: FormEvent) {
+  async function enviar(e: FormEvent) {
     e.preventDefault();
+    if (enviando) return;
+    setErrorGeneral('');
     const er: Errores = {
       correo: validarCorreo(correo),
       clave: validarClave(clave, registro),
@@ -49,8 +60,58 @@ export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { userna
       document.getElementById(`${base}-${primero}`)?.focus();
       return;
     }
-    if (registro) return alRegistrar({ username: username.valor.trim(), correo: correo.trim() });
-    setAviso('Datos válidos. Falta conectar con Firebase (Sprint 1): todavía no se abre ninguna sesión.');
+    if (registro) return registrar();
+    return iniciar();
+  }
+
+  // Iniciar sesión. Los códigos de Firebase se traducen a un mensaje para la persona.
+  async function iniciar() {
+    setEnviando(true);
+    setAviso('Ingresando…');
+    try {
+      await alIniciar({ correo: correo.trim(), clave });
+      setClave('');
+    } catch (err) {
+      setAviso('');
+      const codigo = (err as { code?: string }).code;
+      setErrorGeneral(
+        ['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password'].includes(codigo ?? '')
+          ? 'Correo o contraseña incorrectos.'
+          : codigo === 'auth/network-request-failed'
+            ? 'No pudimos conectar con el servidor. Revisa tu conexión e intenta de nuevo.'
+            : codigo === 'auth/too-many-requests'
+              ? 'Demasiados intentos. Espera un momento e inténtalo de nuevo.'
+              : 'No pudimos iniciar tu sesión. Intenta de nuevo en un momento.',
+      );
+      document.getElementById(`${base}-correo`)?.focus();
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  // Crea la cuenta. Los errores de la API llevan el campo: cada uno se muestra junto al suyo (sin códigos para la persona).
+  async function registrar() {
+    setEnviando(true);
+    setAviso('Creando cuenta…');
+    try {
+      await alRegistrar({ username: username.valor.trim(), correo: correo.trim(), clave });
+      setClave('');
+      setConfirmar('');
+    } catch (err) {
+      setAviso('');
+      const e = err instanceof ApiError ? err : null;
+      const mensaje = e?.message ?? 'No pudimos crear tu cuenta. Intenta de nuevo en un momento.';
+      if (e?.code === 'EMAIL_TAKEN') {
+        setErrores({ correo: 'Ese correo ya tiene una cuenta. Usa «Ya tengo cuenta» para iniciar sesión.' });
+        document.getElementById(`${base}-correo`)?.focus();
+      } else if (e?.campo === 'username') username.ponerErrorApi(err, mensaje);
+      else if (e?.campo === 'correo' || e?.campo === 'clave') {
+        setErrores({ [e.campo]: mensaje });
+        document.getElementById(`${base}-${e.campo}`)?.focus();
+      } else setErrorGeneral(mensaje);
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return {
@@ -65,7 +126,11 @@ export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { userna
     },
     errores,
     aviso,
+    errorGeneral,
+    enviando,
     enviar,
+    /** Pone un aviso (p. ej. tras cambiar de vista, que borra los avisos). */
+    avisar: setAviso,
     enviarForm: () => formulario.current?.requestSubmit(),
     limpiarAvisos,
   };

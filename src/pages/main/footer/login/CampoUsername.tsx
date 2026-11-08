@@ -1,6 +1,6 @@
 import { analizarUsername, USERNAME_MAX, USERNAME_MIN } from '../../../../auth/validaciones';
 import CampoDestacado from '../../../../utils/ui/CampoDestacado';
-import type { CampoUsernameEstado } from './useCampoUsername';
+import { MENSAJE_OCUPADO, type CampoUsernameEstado } from './useCampoUsername';
 
 // El campo de username ya configurado (reglas, comprobación de disponibilidad, textos). Lo usan el registro, la vista de elegir
 // username y el modo editar del perfil.
@@ -14,7 +14,7 @@ export default function CampoUsername({ u, selectorFuente = false }: { u: CampoU
       onCambio={u.cambiar}
       analizar={analizarUsername}
       verificar={u.verificar}
-      mensajeOcupado={() => 'Ese username ya está en uso. Prueba con otro.'}
+      mensajeOcupado={() => MENSAJE_OCUPADO}
       textoDisponible="Username disponible"
       error={u.error}
       onEstado={u.alEstado}

@@ -20,14 +20,9 @@ VITE_API_URL=https://<api-en-render> docker compose up --build   # http://localh
 
 Las animaciones de la vista inicial (`CallPreview` y `ChatPreview`) son una ilustración: **aún no están basadas en la vista real de una Sala ni de su chat**. Hay que rehacerlas o retirarlas cuando existan esas pantallas.
 
-## Probar la vista con sesión
+## Sesión y Firebase
 
-Mientras no exista Firebase Auth (Sprint 1), `src/auth/useSession.ts` es un marcador. Con `VITE_DEMO_SESION=true` el inicio muestra el campo de passphrase activo, y el chat de demostración usa el usuario `demo`. Es una variable de build:
-
-```bash
-VITE_DEMO_SESION=true npm run dev                        # desarrollo
-VITE_DEMO_SESION=true npm run build && npm run preview   # build local
-```
+La sesión es de Firebase Auth (solo en el cliente: login y token); todos los datos pasan por la API con `Authorization: Bearer <idToken>` (`src/api/base.ts`). Copia `.env.example` a `.env.local`. Para probar sin tocar el proyecto real, levanta el emulador de Auth del backend y define `VITE_FIREBASE_AUTH_EMULATOR=http://127.0.0.1:9099`.
 
 ## Estructura de `src/`
 
@@ -56,51 +51,43 @@ El panel de acceso se comporta como un diálogo modal (el foco queda dentro; Esc
 La cuenta se crea con el **primer «Confirmar»**: en el registro manual el formulario pide username, correo, contraseña y confirmación; con Google, tras el acceso se elige el username (llega uno sugerido, hay que confirmarlo). La cuenta nace con el **nombre para mostrar igual al username**, una transición «Creando tu cuenta → Cuenta creada» lo indica y sigue la vista «Completa tu perfil», que solo personaliza (por eso ya no hay «Volver atrás»).
 
 - **Perfil:** de arriba abajo: resumen de 3 círculos (nombre, apellido, foto), foto grande, el nombre completo en vista previa y los campos separados por líneas. Se usa «Nombre/s» y «Apellido/s». ✓ válido, ✗ error, «E» gris opcional vacío. Con un ✗, `[1] Confirmar` queda en gris. Al nacer el nombre igual al username, se puede confirmar enseguida con apellido y foto vacíos.
-- **Editar perfil** («Cuenta» del pie, o el enlace directo `/perfil`): igual, con `[3] Vincular con Google` o, si ya está vinculada, `[3] Desvincular de Google`; después `Cambiar username` y `Cerrar sesión`. Vincular abre la vista de Google en modo «Vincular con Google» y, al salir bien, marca la cuenta y vuelve al perfil; desvincular es inmediato. Una cuenta creada con Google no ofrece desvincular (es su único método de acceso; en Firebase `unlink` no deja quitarlo).
+- **Editar perfil** («Cuenta» del pie, o el enlace directo `/perfil`): igual, con `[3] Vincular con Google` o, si ya está vinculada, `[3] Desvincular de Google`; después `Cambiar username` y `Cerrar sesión`. Vincular abre la vista de Google en modo «Vincular con Google» y, al salir bien, vuelve al perfil con el icono en color; desvincular llama a la API. Una cuenta creada con Google no ofrece desvincular (es su único método de acceso; en Firebase `unlink` no deja quitarlo).
 - **Icono de Google en el resumen:** gris si la cuenta no está vinculada, con sus colores si lo está. Al editar siempre se ve; al completar solo si la cuenta ya viene de Google (ahí no se ofrece vincular).
 - **Username:** todo username válido es también un nombre válido (sin puntos o guiones bajos repetidos), para que la asignación automática nunca falle.
 - **Cursor:** parpadea en el campo activo y en los campos vacíos (al centro); un campo con texto que no está activo no lo muestra.
 - **Nombre en blanco:** al completar el perfil el nombre puede quedar vacío (círculo «E») y se usa el username; al editar, los campos traen escritos los valores actuales y el nombre es obligatorio.
-- **Cuenta:** la sesión simulada vive en `localStorage['synk:sesion-demo']`. «Editar perfil» ofrece `Cambiar username` (vista «Editar username») y `Cerrar sesión`, que la borra y permite crear otra cuenta.
+- **Cuenta:** «Editar perfil» ofrece `Cambiar username` (vista «Editar username») y `Cerrar sesión`, que cierra la sesión de Firebase y permite crear otra cuenta.
 
 - **Completar (obligatorio):** `/registro/username`. Sin username no se puede entrar a ninguna ruta privada (`RutaPrivada` en `src/auth/`): se redirige aquí y, al terminar, se vuelve a la ruta pedida (o al Panel).
 - **Editar:** «Cuenta» (o `/perfil`) abre la misma vista con el título «Editar perfil», los datos actuales, y `[1] Guardar` / `[2] Cancelar`.
-- **La cuenta se crea al final:** en el registro manual, el correo y la contraseña solo se validan y se guardan en memoria; la cuenta y el perfil se crean juntos al confirmar el perfil. Con Google la cuenta de Firebase ya existe tras el acceso, y el perfil se completa después.
-- **Sesión simulada** (Sprint 1: Firebase): `localStorage['synk:sesion-demo']` con `{username, nombres, apellidos, foto, correo}`. Con `username: null` simula una cuenta sin perfil completo. Al terminar el perfil se guarda aquí.
+- **La cuenta se crea al primer «Confirmar»:** en el registro manual la API crea la cuenta (`POST /api/auth/registro`), se inicia sesión con ella y después se personaliza el perfil (`PATCH /api/usuarios/yo`). Los errores del servidor (correo repetido, username ocupado…) salen junto a su campo. Con Google la cuenta de Firebase ya existe tras el acceso, y el perfil se completa después.
+- **Iniciar sesión:** correo y contraseña con `signInWithEmailAndPassword` («Ingresando…» con el envío bloqueado). Si no coinciden, el aviso es siempre «Correo o contraseña incorrectos» (no dice cuál falló). Entra a la ruta pedida (`state.desde`) o a `/dashboard`. **Cerrar sesión** cierra la de Firebase y vuelve a la portada; con «atrás», `RutaPrivada` exige sesión y lleva a `/login`.
+- **Sesión:** `useSession` (`src/auth/useSession.ts`) escucha a Firebase y pide el perfil a `GET /api/usuarios/yo`. Mientras `cargando` ninguna ruta redirige. `refrescarSesion()` la actualiza tras un cambio; `cerrarSesion()` la cierra.
 
 Reglas (`src/auth/validaciones.ts`; el servidor debe aplicar las mismas):
 - **Username:** 3 a 20 caracteres, sin espacios; letras sin tilde, números, punto y guion bajo. Único, sin distinguir mayúsculas.
 - **Nombre para mostrar:** letras de cualquier idioma (con tildes y ñ), números y espacios entre palabras (uno solo, nunca al inicio); además punto, guion, guion bajo y apóstrofo sin repetirse; sin emojis, símbolos decorativos ni «<» «>»; hasta 60 caracteres entre nombres y apellidos. **No** hay comprobación de unicidad. El apellido es opcional (en Google también puede faltar).
 - En ambos se bloquean los términos que simulan ser oficiales (Admin, Soporte, Google, Verificado, Synk). Lenguaje ofensivo y suplantación de personas o marcas quedan fuera de alcance.
 
-Los campos destacados (`CampoDestacado`) validan mientras se escriben y, si el texto no cabe en una línea, bajan de renglón y reducen la letra por tramos. El botón «Aa» (en los tres campos) alterna la tipografía de todos ellos entre Press Start 2P (activado) y Geist, y se recuerda en el navegador. El username comprueba su disponibilidad (`src/auth/disponibilidadUsername.ts`, simulada: 0,4 s, y como mínimo 1,5 s de verificación visible); están «ocupados» `ana`, `demo` y `root`. En el Sprint 1 se reemplaza por la API.
+Los campos destacados (`CampoDestacado`) validan mientras se escriben y, si el texto no cabe en una línea, bajan de renglón y reducen la letra por tramos. El botón «Aa» (en los tres campos) alterna la tipografía de todos ellos entre Press Start 2P (activado) y Geist, y se recuerda en el navegador. El username comprueba su disponibilidad (`src/auth/disponibilidadUsername.ts`, consulta `GET /api/usernames/:u/disponible`; la verificación se ve como mínimo 1,5 s). Si la consulta falla (sin red) el campo no se bloquea y el servidor confirma la unicidad al enviar.
 
-La foto se valida (JPG, PNG o WebP, hasta 2 MB) y se previsualiza; la subida real llega en el Sprint 1.
+La foto se valida (JPG, PNG o WebP, hasta 2 MB) y se previsualiza. Al guardar se reduce a 256 px y se envía como `data:image/webp;base64` (`fotoParaApi` en `SelectorFoto.tsx`; la API acepta hasta 100 000 caracteres).
 
-## Probar los estados del acceso con Google
+## Acceso con Google
 
-Mientras no esté Firebase (Sprint 1), `src/auth/useAccesoGoogle.ts` simula el resultado: tras ~2,6 s falla con «no disponible». Para ver cada estado basta añadir `?google=` a la URL y abrir la opción de Google del panel (por ejemplo `/registro?google=cuenta-existente`):
-
-| Valor | Resultado |
-| --- | --- |
-| `espera` | se queda esperando (el icono armado) |
-| `exito` | acceso correcto, sin foto en la cuenta (lleva a «Completa tu perfil» rellena) |
-| `exito-foto`, `exito-sin-apellido` | igual, pero la cuenta trae foto / no trae apellido |
-| `cancelado`, `bloqueado`, `cuenta-existente`, `red` | error con su explicación |
-| (sin valor) | error «no disponible» |
-
-En el Sprint 1 solo cambia el interior del hook (signInWithPopup y el mapeo de errores de Firebase); la interfaz no se toca. Este parámetro debería quitarse o limitarse a desarrollo en el repo oficial.
+`src/auth/useAccesoGoogle.ts` abre la ventana de Google (`signInWithPopup`; con «Vincular», `linkWithPopup`) y después pide el perfil a la API. La interfaz solo conoce el resultado: éxito (con el `username` si la cuenta ya lo tiene; entonces entra directo, si no se le pide elegirlo) o error con un motivo (`cancelado`, `bloqueado`, `cuenta-existente`, `red`, `no-disponible`) que se explica en palabras. Elegir o cambiar el username usa `PUT /api/usuarios/yo/username`; desvincular, `DELETE /api/usuarios/yo/proveedores/google` (si Google es el único método de acceso, la API lo rechaza y se explica en el perfil). Con el emulador de Auth la ventana de Google ofrece cuentas falsas.
 
 ## Variables de entorno
 
 | Variable | Descripción |
 |---|---|
 | `VITE_API_URL` | URL base de la API (sin `/api`). Se incrusta en el build. |
-| `VITE_DEMO_SESION` | `true` simula una sesión iniciada (solo pruebas visuales). |
+| `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID` | Configuración pública de la app web de Firebase (ver `.env.example`). |
+| `VITE_FIREBASE_AUTH_EMULATOR` | Opcional: URL del emulador de Auth (p. ej. `http://127.0.0.1:9099`) para probar en local. |
 
 ## Despliegue
 
-Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` con la URL de Render. En Render, `CORS_ORIGIN` del backend debe incluir la URL de Vercel.
+Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` con la URL de Render y las `VITE_FIREBASE_*`. En Render, `CORS_ORIGIN` del backend debe incluir la URL de Vercel.
 
 ## Scripts
 
