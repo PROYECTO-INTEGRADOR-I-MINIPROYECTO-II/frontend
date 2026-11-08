@@ -85,7 +85,10 @@ export default function LoginPanel() {
   // Iniciar sesión con correo y contraseña: si va bien, entra al Panel (o a la ruta que se había pedido).
   async function iniciarSesion({ correo, clave }: { correo: string; clave: string }) {
     await signInWithEmailAndPassword(auth, correo, clave);
-    if (!(await refrescarSesion())) throw new Error('sin perfil'); // la API no respondió: mejor avisar que dejar en un limbo
+    if (!(await refrescarSesion())) {
+      await cerrarSesion(); // sin perfil no hay sesión útil: no se deja a medias en Firebase
+      throw new Error('sin perfil');
+    }
     cerrar(false);
     navegar(desde ?? '/dashboard');
   }
