@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from 'react';
-import { ApiError } from '../../../../api/base';
 import CampoUsername from './CampoUsername';
 import { useCampoUsername } from './useCampoUsername';
 
@@ -15,7 +14,7 @@ export default function VistaUsername({ inicial, actual, intro, alConfirmar, opc
     try {
       await alConfirmar(u.valor.trim());
     } catch (err) {
-      u.ponerError(err instanceof ApiError ? err.message : 'No pudimos guardar tu username. Intenta de nuevo en un momento.');
+      u.ponerErrorApi(err, 'No pudimos guardar tu username. Intenta de nuevo en un momento.');
     } finally {
       setEnviando(false);
     }
