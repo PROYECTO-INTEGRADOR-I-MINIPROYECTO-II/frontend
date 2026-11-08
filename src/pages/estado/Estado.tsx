@@ -73,7 +73,7 @@ export default function Estado() {
         }
       >
         <h2 className="sr-only">Dato desde Firestore</h2>
-        <div aria-live="polite" className="text-center font-pixel text-lg">
+        <div aria-live="polite" className="text-center text-sm leading-6">
           {state.status === 'loading' && (
             <p>
               <span className="sr-only">Cargando desde Firestore</span>
@@ -107,7 +107,7 @@ export default function Estado() {
           />
         </div>
 
-        <ul className="mt-5 space-y-3 font-pixel text-base">
+        <ul className="mt-5 space-y-3 font-pixel text-xs leading-6">
           <Fila estado="ok" label="Aplicación web (Vercel)" />
           <Fila estado={apiOk} label="API (Render)" />
           <Fila estado={dbOk} label="Base de datos (Firestore)" />

@@ -5,7 +5,7 @@ export const TAMANOS_TEXTO = {
   clara: [[22, 20], [40, 16], [Infinity, 14]],
 } as const;
 
-export const FUENTE_CLASE = { pixel: 'font-monokuro', clara: 'font-sans font-medium' } as const;
+export const FUENTE_CLASE = { pixel: 'font-pixel', clara: 'font-sans font-medium' } as const;
 
 export const tamanoPara = (largo: number, clara: boolean) => (clara ? TAMANOS_TEXTO.clara : TAMANOS_TEXTO.pixel).find(([max]) => largo <= max)![1];
 export const interlineadoPara = (tam: number, clara: boolean) => (clara ? Math.round(tam * 1.5) : tam * 2);

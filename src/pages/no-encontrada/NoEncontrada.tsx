@@ -6,7 +6,7 @@ export default function NoEncontrada() {
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-20 text-center">
-      <p className="font-display text-7xl font-bold text-primario" aria-hidden="true">404</p>
+      <p className="font-sans text-7xl font-bold text-primario" aria-hidden="true">404</p>
       <h1 className="mt-4 text-4xl font-bold">Página no encontrada</h1>
       <p className="mt-3 text-texto-secundario">
         La dirección que abriste no existe o la Sala ya no está disponible. Revisa que esté bien escrita.

@@ -24,7 +24,7 @@ export default function CampoTexto({ id, etiqueta, tipo, valor, onCambio, error,
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
-        <label htmlFor={id} className="block font-monokuro text-[11px] leading-5">{etiqueta}</label>
+        <label htmlFor={id} className="block font-pixel text-[11px] leading-5">{etiqueta}</label>
         {esClave && (
           <button
             type="button"

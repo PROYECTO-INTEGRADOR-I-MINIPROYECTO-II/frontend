@@ -29,7 +29,7 @@ export default function VistaCreando({ alTerminar }: { alTerminar: () => void })
             <PixelIcon nombre="visto" x={11} y={11} escala={2} />
           </svg>
         ) : (
-          <p className="font-monokuro text-xs leading-5">
+          <p className="font-pixel text-xs leading-5">
             Creando tu cuenta
             <PuntosAnimados sinVacio intervalo={350} />
           </p>
@@ -38,7 +38,7 @@ export default function VistaCreando({ alTerminar }: { alTerminar: () => void })
       <div className="w-full">
         <BarraRetro modo={creada ? 'ok' : 'cargando'} label={creada ? 'Cuenta creada' : 'Creando tu cuenta'} />
       </div>
-      <p className="min-h-5 font-monokuro text-xs leading-5">{creada ? 'Cuenta creada' : ''}</p>
+      <p className="min-h-5 font-pixel text-xs leading-5">{creada ? 'Cuenta creada' : ''}</p>
       <span className="sr-only">{creada ? 'Tu cuenta fue creada. Ahora puedes personalizar tu perfil.' : 'Creando tu cuenta.'}</span>
     </div>
   );

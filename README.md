@@ -105,3 +105,7 @@ Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` con la URL de Re
 ## Scripts
 
 `npm run dev` · `npm run build` · `npm run typecheck`
+
+## Tipografías
+
+Solo dos (S0-C03): **Geist** para el texto y **Press Start 2P** para lo retro (títulos, etiquetas, campos destacados, campo LED y estado). `font-sans` y `font-pixel` son sus únicas clases; Pixelify Sans y Orbitron se quitaron.

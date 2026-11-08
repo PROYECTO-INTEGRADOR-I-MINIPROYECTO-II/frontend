@@ -28,7 +28,7 @@ export default function OpcionNumerada({
       aria-keyshortcuts={tecla}
       aria-disabled={deshabilitada || undefined}
       data-primero={primero ? '' : undefined}
-      className={`relative block w-full py-1 text-center font-monokuro text-[11px] leading-5 ${deshabilitada ? 'cursor-not-allowed text-texto-secundario/60' : 'group'}`}
+      className={`relative block w-full py-1 text-center font-pixel text-[11px] leading-5 ${deshabilitada ? 'cursor-not-allowed text-texto-secundario/60' : 'group'}`}
     >
       <span
         aria-hidden="true"

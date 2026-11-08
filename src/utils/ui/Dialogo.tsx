@@ -68,7 +68,7 @@ export default function Dialogo({ id, titulo, onCerrar, onTecla, reenfocar, igno
 
   return (
     <div ref={raiz} id={id} role="dialog" aria-modal={modal || undefined} aria-labelledby={idTitulo} onKeyDown={alTeclear} className={`border-2 border-texto bg-fondo ${className}`}>
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-texto bg-fondo px-4 py-3 font-monokuro text-[11px] leading-5">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-texto bg-fondo px-4 py-3 font-pixel text-[11px] leading-5">
         <h2 id={idTitulo}>{titulo}</h2>
         <button type="button" onClick={() => onCerrar()} aria-label="Cerrar" className="-m-1 p-1 hover:text-acento-claro">
           <X aria-hidden="true" className="size-4" />
