@@ -82,7 +82,14 @@ export default function LoginPanel() {
     await refrescarSesion();
     irACreando({ username, nombres: username, apellidos: '', foto: null }, correo);
   }
-  const form = useFormularioAcceso(registro, crearCuentaManual);
+  // Iniciar sesión con correo y contraseña: si va bien, entra al Panel (o a la ruta que se había pedido).
+  async function iniciarSesion({ correo, clave }: { correo: string; clave: string }) {
+    await signInWithEmailAndPassword(auth, correo, clave);
+    if (!(await refrescarSesion())) throw new Error('sin perfil'); // la API no respondió: mejor avisar que dejar en un limbo
+    cerrar(false);
+    navegar(desde ?? '/dashboard');
+  }
+  const form = useFormularioAcceso(registro, crearCuentaManual, iniciarSesion);
   const { limpiarAvisos } = form;
   // Cerrar el panel. Si se abrió desde el enlace directo /perfil, se vuelve a la portada para que «Cuenta» pueda abrirlo de nuevo.
   function cerrarPanel(devolverFoco?: boolean) {

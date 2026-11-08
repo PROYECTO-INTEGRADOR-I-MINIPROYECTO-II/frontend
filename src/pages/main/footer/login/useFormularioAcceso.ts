@@ -8,8 +8,13 @@ export type Errores = Partial<Record<Campo, string>>;
 
 // Estado y validación del formulario de acceso: iniciar sesión manual (correo y contraseña) y crear cuenta (+ username y confirmación).
 // Lo escrito se conserva al cambiar de vista. Al crear una cuenta válida llama a `alRegistrar` con los datos (async: crea la cuenta
-// en la API); si falla, el error se muestra junto a su campo, con el foco, sin borrar lo escrito.
-export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { username: string; correo: string; clave: string }) => Promise<void>) {
+// en la API); si falla, el error se muestra junto a su campo, con el foco, sin borrar lo escrito. Al iniciar sesión llama a `alIniciar`;
+// si los datos no coinciden, el aviso es el mismo para correo y contraseña (no revela si el correo existe).
+export function useFormularioAcceso(
+  registro: boolean,
+  alRegistrar: (d: { username: string; correo: string; clave: string }) => Promise<void>,
+  alIniciar: (d: { correo: string; clave: string }) => Promise<void>,
+) {
   const base = useId();
   const formulario = useRef<HTMLFormElement>(null);
   const username = useCampoUsername('campo-username-registro');
@@ -56,7 +61,32 @@ export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { userna
       return;
     }
     if (registro) return registrar();
-    setAviso('Datos válidos. Falta conectar con Firebase (Sprint 1): todavía no se abre ninguna sesión.');
+    return iniciar();
+  }
+
+  // Iniciar sesión. Los códigos de Firebase se traducen a un mensaje para la persona.
+  async function iniciar() {
+    setEnviando(true);
+    setAviso('Ingresando…');
+    try {
+      await alIniciar({ correo: correo.trim(), clave });
+      setClave('');
+    } catch (err) {
+      setAviso('');
+      const codigo = (err as { code?: string }).code;
+      setErrorGeneral(
+        ['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password'].includes(codigo ?? '')
+          ? 'Correo o contraseña incorrectos.'
+          : codigo === 'auth/network-request-failed'
+            ? 'No pudimos conectar con el servidor. Revisa tu conexión e intenta de nuevo.'
+            : codigo === 'auth/too-many-requests'
+              ? 'Demasiados intentos. Espera un momento e inténtalo de nuevo.'
+              : 'No pudimos iniciar tu sesión. Intenta de nuevo en un momento.',
+      );
+      document.getElementById(`${base}-correo`)?.focus();
+    } finally {
+      setEnviando(false);
+    }
   }
 
   // Crea la cuenta. Los errores de la API llevan el campo: cada uno se muestra junto al suyo (sin códigos para la persona).
