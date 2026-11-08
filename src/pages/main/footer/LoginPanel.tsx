@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { api } from '../../../api/base';
+import { api, ApiError } from '../../../api/base';
 import { auth } from '../../../firebase';
 import { cerrarSesion, refrescarSesion, useSession } from '../../../auth/useSession';
 import { sugerirUsername } from '../../../auth/validaciones';
@@ -65,6 +65,7 @@ export default function LoginPanel() {
   const { state, pathname } = useLocation();
   const desde = (state as { desde?: string } | null)?.desde;
   const avisoAlCambiar = useRef(''); // aviso a mostrar al llegar a la siguiente vista (cambiar de vista borra los avisos)
+  const [errorCuenta, setErrorCuenta] = useState(''); // error de desvincular, se muestra en el perfil
   const [perfilBloqueado, setPerfilBloqueado] = useState(false); // hay datos con error: la confirmación queda en gris
 
   // Crear la cuenta con correo: la API la registra, se inicia sesión con ella y se pide el perfil. La cuenta nace con el nombre igual al
@@ -81,19 +82,34 @@ export default function LoginPanel() {
     await refrescarSesion();
     irACreando({ username, nombres: username, apellidos: '', foto: null }, correo);
   }
-  // Crear la cuenta tras Google (simulado hasta US-02).
-  function crearCuenta(datos: InicialPerfil, correo?: string) {
-    irACreando(datos, correo);
+  // Iniciar sesión con correo y contraseña: si va bien, entra al Panel (o a la ruta que se había pedido).
+  async function iniciarSesion({ correo, clave }: { correo: string; clave: string }) {
+    await signInWithEmailAndPassword(auth, correo, clave);
+    if (!(await refrescarSesion())) {
+      await cerrarSesion(); // sin perfil no hay sesión útil: no se deja a medias en Firebase
+      throw new Error('sin perfil');
+    }
+    cerrar(false);
+    navegar(desde ?? '/dashboard');
   }
-  const form = useFormularioAcceso(registro, crearCuentaManual);
+  const form = useFormularioAcceso(registro, crearCuentaManual, iniciarSesion);
   const { limpiarAvisos } = form;
   // Cerrar el panel. Si se abrió desde el enlace directo /perfil, se vuelve a la portada para que «Cuenta» pueda abrirlo de nuevo.
   function cerrarPanel(devolverFoco?: boolean) {
     cerrar(devolverFoco);
     if (pathname === '/perfil') navegar('/', { replace: true });
   }
-  // Desvincular Google (simulado; en Firebase es unlink): la cuenta sigue con su correo y contraseña. El icono del resumen vuelve a gris.
-  function desvincular() {
+  // Desvincular Google: la API lo quita de la cuenta, que sigue con su correo y contraseña. El icono del resumen vuelve a gris.
+  // Si no se puede (es su único método de acceso) se explica en el perfil.
+  async function desvincular() {
+    setErrorCuenta('');
+    try {
+      await api('/api/usuarios/yo/proveedores/google', { method: 'DELETE' });
+      await auth.currentUser?.reload();
+      await refrescarSesion();
+    } catch (err) {
+      return setErrorCuenta(err instanceof ApiError ? err.message : 'No pudimos desvincular Google. Intenta de nuevo en un momento.');
+    }
     irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo);
   }
   // Cerrar sesión: vuelve a la portada y cierra la sesión de Firebase, desde donde se puede crear otra cuenta.
@@ -105,23 +121,35 @@ export default function LoginPanel() {
   }
   // Envía el formulario de la vista actual.
   const enviarForm = () => document.querySelector<HTMLFormElement>('#panel-login form')?.requestSubmit();
-  const google = useAccesoGoogle(abierto && (fase === 'google' || fase === 'vincular'));
+  const google = useAccesoGoogle();
+  // Ir a la vista de Google abre ya la ventana de Google: tiene que ser dentro del gesto de la persona (clic o tecla), no en un efecto.
+  const abrirGoogle = (vincular = false) => {
+    irA(vincular ? 'vincular' : 'google');
+    google.iniciar(vincular);
+  };
 
   // Al abrir o cambiar de vista se limpian los avisos; lo escrito se conserva.
   useEffect(() => {
     if (abierto) limpiarAvisos();
+    setErrorCuenta('');
   }, [abierto, fase, limpiarAvisos]);
 
-  // Un acceso correcto con Google lleva a elegir el username (con uno sugerido); lo que Google entrega se usará para el perfil.
+  // Un acceso correcto con Google: si la cuenta ya tiene username entra (al Panel o a la ruta pedida); si no, lleva a elegirlo (con uno
+  // sugerido); lo que Google entrega se usará para el perfil.
   const resultadoGoogle = google.resultado;
   useEffect(() => {
     if (resultadoGoogle.estado !== 'exito') return;
     if (fase === 'vincular') {
-      // Vincular: la cuenta queda marcada y se vuelve a «Editar perfil», donde el icono de Google pasa a color.
+      // Vincular: la sesión ya se refrescó y se vuelve a «Editar perfil», donde el icono de Google pasa a color.
       irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo);
       return;
     }
     if (fase !== 'google') return;
+    if (resultadoGoogle.username) {
+      cerrar(false);
+      navegar(desde ?? '/dashboard');
+      return;
+    }
     const { nombres, apellidos, foto, correo } = resultadoGoogle.perfil;
     irAUsername({ username: sugerirUsername(nombres, apellidos), nombres, apellidos, foto }, correo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,18 +162,18 @@ export default function LoginPanel() {
     elegir: [{ tecla: '1', contenido: 'No tengo cuenta :(', accion: () => irA('registro') }],
     manual: [
       { tecla: '1', contenido: 'Confirmar', enviar: true },
-      { tecla: '2', contenido: <>Iniciar con <PalabraGoogle /></>, accion: () => irA('google') },
+      { tecla: '2', contenido: <>Iniciar con <PalabraGoogle /></>, accion: () => abrirGoogle() },
       { tecla: '3', contenido: 'No tengo cuenta :(', accion: () => irA('registro') },
     ],
     registro: [
       { tecla: '1', contenido: 'Confirmar', enviar: true },
-      { tecla: '2', contenido: <>Crear con <PalabraGoogle /></>, accion: () => irA('google') },
+      { tecla: '2', contenido: <>Crear con <PalabraGoogle /></>, accion: () => abrirGoogle() },
       { tecla: '3', contenido: 'Ya tengo cuenta', accion: () => irA('elegir') },
     ],
     google:
       google.resultado.estado === 'error'
         ? [
-            { tecla: '1', contenido: 'Intentar de nuevo', accion: google.reintentar, primero: true },
+            { tecla: '1', contenido: 'Intentar de nuevo', accion: () => google.iniciar(false), primero: true },
             { tecla: '2', contenido: 'Iniciar manualmente', accion: () => irA('manual') },
           ]
         : google.resultado.estado === 'exito'
@@ -158,7 +186,7 @@ export default function LoginPanel() {
     vincular:
       google.resultado.estado === 'error'
         ? [
-            { tecla: '1', contenido: 'Intentar de nuevo', accion: google.reintentar, primero: true },
+            { tecla: '1', contenido: 'Intentar de nuevo', accion: () => google.iniciar(true), primero: true },
             { tecla: '2', contenido: 'Volver atrás', accion: () => irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo) },
           ]
         : [{ tecla: '1', contenido: 'Cancelar', accion: () => irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo), primero: true }],
@@ -175,7 +203,7 @@ export default function LoginPanel() {
             // Vincular o desvincular Google. Una cuenta creada con Google no se puede desvincular (Firebase no deja quitar el único
             // método de acceso, y esa cuenta no tiene contraseña): ahí no hay opción y el icono del resumen indica que está vinculada.
             ...(!user?.google
-              ? [{ contenido: <>Vincular con <PalabraGoogle /></>, accion: () => irA('vincular') }]
+              ? [{ contenido: <>Vincular con <PalabraGoogle /></>, accion: () => abrirGoogle(true) }]
               : user.creadaConGoogle
                 ? []
                 : [{ contenido: <>Desvincular de <PalabraGoogle /></>, accion: desvincular }]),
@@ -229,25 +257,31 @@ export default function LoginPanel() {
         ignorarClic="[data-login-opener]"
         className={`${COLOCACION} overflow-y-auto font-sans text-sm leading-6 tracking-normal motion-safe:animate-panel`}
       >
-        {fase === 'elegir' && <VistaElegir irA={irA} opciones={lista('elegir')} />}
+        {fase === 'elegir' && <VistaElegir irA={(f) => (f === 'google' ? abrirGoogle() : irA(f))} opciones={lista('elegir')} />}
         {(fase === 'manual' || registro) && <VistaFormulario registro={registro} form={form} opciones={lista(fase, form.enviando ? ['1'] : [])} />}
         {fase === 'google' && <VistaGoogle resultado={google.resultado} opciones={lista('google')} />}
         {fase === 'vincular' && <VistaGoogle vincular resultado={google.resultado} opciones={lista('vincular')} />}
-        {fase === 'username' && <VistaUsername key={perfil.clave} inicial={perfil.inicial.username} intro="Tu cuenta está lista. Elige tu username: es el nombre de usuario único con el que te identificas en Synk." alConfirmar={(username) => crearCuenta({ ...perfil.inicial, username, nombres: perfil.inicial.nombres || username }, perfil.correo)} opciones={lista('username')} />}
+        {fase === 'username' && <VistaUsername key={perfil.clave} inicial={perfil.inicial.username} intro="Tu cuenta está lista. Elige tu username: es el nombre de usuario único con el que te identificas en Synk." alConfirmar={async (username) => {
+          await api('/api/usuarios/yo/username', { method: 'PUT', body: { username } });
+          await refrescarSesion();
+          irACreando({ ...perfil.inicial, username, nombres: perfil.inicial.nombres || username }, perfil.correo);
+        }} opciones={lista('username')} />}
         {fase === 'editarUsername' && (
           <VistaUsername
             key={perfil.clave}
             inicial={perfil.inicial.username}
             actual={perfil.inicial.username}
             intro="Cambia el nombre de usuario único con el que te identificas en Synk. Tu nombre para mostrar no cambia."
-            alConfirmar={(username) => {
+            alConfirmar={async (username) => {
+              await api('/api/usuarios/yo/username', { method: 'PUT', body: { username } });
+              await refrescarSesion();
               irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username }, perfil.correo);
             }}
             opciones={lista('editarUsername')}
           />
         )}
         {fase === 'creando' && <VistaCreando key={perfil.clave} alTerminar={() => irAPerfil('completar', perfil.inicial, perfil.correo)} />}
-        {fase === 'perfil' && <VistaPerfil key={perfil.clave} modo={perfil.modo} google={!!user?.google} inicial={perfil.inicial} alGuardar={guardarPerfil} alBorrador={guardarBorrador} alBloquear={setPerfilBloqueado} opciones={lista('perfil', perfilBloqueado ? ['1'] : [])} />}
+        {fase === 'perfil' && <VistaPerfil key={perfil.clave} modo={perfil.modo} google={!!user?.google} inicial={perfil.inicial} alGuardar={guardarPerfil} alBorrador={guardarBorrador} alBloquear={setPerfilBloqueado} errorExterno={errorCuenta} opciones={lista('perfil', perfilBloqueado ? ['1'] : [])} />}
       </Dialogo>
     </>
   );

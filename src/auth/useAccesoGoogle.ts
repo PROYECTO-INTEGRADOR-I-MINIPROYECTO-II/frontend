@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
-import fotoDePrueba from '../assets/imagen-prueba.png';
+import { useCallback, useRef, useState } from 'react';
+import { GoogleAuthProvider, linkWithPopup, signInWithPopup } from 'firebase/auth';
+import { auth } from '../firebase';
+import { refrescarSesion } from './useSession';
 
-// Contrato del acceso con Google (iniciar sesión y crear cuenta). La interfaz solo conoce este resultado; en el Sprint 1 se sustituye
-// `simular` por signInWithPopup de Firebase y se mapean sus errores a un motivo:
-//   auth/popup-closed-by-user → cancelado · auth/popup-blocked → bloqueado
-//   auth/account-exists-with-different-credential → cuenta-existente · auth/network-request-failed → red
+// Contrato del acceso con Google (iniciar sesión, crear cuenta y vincular). La interfaz solo conoce este resultado. Los errores de
+// Firebase se traducen a un motivo:
+//   auth/popup-closed-by-user, auth/cancelled-popup-request → cancelado · auth/popup-blocked → bloqueado
+//   auth/account-exists-with-different-credential, auth/credential-already-in-use → cuenta-existente · auth/network-request-failed → red
 export type MotivoErrorGoogle = 'cancelado' | 'bloqueado' | 'cuenta-existente' | 'red' | 'no-disponible';
 /** Lo que Google entrega de la cuenta: con él se rellena el perfil (la foto puede faltar; el apellido puede venir vacío). */
 export interface PerfilGoogle {
@@ -13,36 +15,41 @@ export interface PerfilGoogle {
   foto: string | null;
   correo: string;
 }
-export type ResultadoGoogle = { estado: 'espera' } | { estado: 'exito'; perfil: PerfilGoogle } | { estado: 'error'; motivo: MotivoErrorGoogle };
+/** `username`: el que ya tiene la cuenta (null si aún no lo ha elegido: hay que pedirlo). */
+export type ResultadoGoogle = { estado: 'espera' } | { estado: 'exito'; perfil: PerfilGoogle; username: string | null } | { estado: 'error'; motivo: MotivoErrorGoogle };
 
-const ESPERA_MS = 2600; // tiempo de la espera simulada: deja ver cómo se arma el icono
+const MOTIVOS: Record<string, MotivoErrorGoogle> = {
+  'auth/popup-closed-by-user': 'cancelado',
+  'auth/cancelled-popup-request': 'cancelado',
+  'auth/popup-blocked': 'bloqueado',
+  'auth/account-exists-with-different-credential': 'cuenta-existente',
+  'auth/credential-already-in-use': 'cuenta-existente',
+  'auth/network-request-failed': 'red',
+};
 
-// Mientras no haya Firebase: con ?google=… se fuerza un resultado para probar cada vista
-// (espera = se queda esperando; exito; exito-foto = la cuenta trae foto; exito-sin-apellido; cancelado; bloqueado; cuenta-existente; red).
-// Sin parámetro falla con «no-disponible».
-function simular(forzado: string | null): ResultadoGoogle {
-  if (forzado === 'exito') return { estado: 'exito', perfil: { nombres: 'Juan Carlos', apellidos: 'Pérez Gómez', foto: null, correo: 'juan.carlos@gmail.com' } };
-  if (forzado === 'exito-foto') return { estado: 'exito', perfil: { nombres: 'Juan Carlos', apellidos: 'Pérez Gómez', foto: fotoDePrueba, correo: 'juan.carlos@gmail.com' } };
-  if (forzado === 'exito-sin-apellido') return { estado: 'exito', perfil: { nombres: 'Sofía', apellidos: '', foto: null, correo: 'sofia@gmail.com' } };
-  if (forzado === 'cancelado' || forzado === 'bloqueado' || forzado === 'cuenta-existente' || forzado === 'red') {
-    return { estado: 'error', motivo: forzado };
+/** Abre la ventana de Google (con `vincular`, añade Google a la cuenta que ya tiene sesión) y pide el perfil a la API. */
+async function acceder(vincular: boolean): Promise<ResultadoGoogle> {
+  try {
+    const proveedor = new GoogleAuthProvider();
+    if (vincular && auth.currentUser) await linkWithPopup(auth.currentUser, proveedor);
+    else await signInWithPopup(auth, proveedor);
+  } catch (err) {
+    return { estado: 'error', motivo: MOTIVOS[(err as { code?: string }).code ?? ''] ?? 'no-disponible' };
   }
-  return { estado: 'error', motivo: 'no-disponible' };
+  const user = await refrescarSesion();
+  if (!user) return { estado: 'error', motivo: 'no-disponible' };
+  return { estado: 'exito', username: user.username, perfil: { nombres: user.nombres, apellidos: user.apellidos, foto: user.foto, correo: user.correo ?? '' } };
 }
 
-export function useAccesoGoogle(activo: boolean) {
+// `iniciar` debe llamarse desde el clic (o la tecla) de la persona: los navegadores solo dejan abrir la ventana de Google dentro de ese
+// gesto; abrirla más tarde (p. ej. en un efecto) la bloquea. Un resultado de un intento anterior se descarta.
+export function useAccesoGoogle() {
   const [resultado, setResultado] = useState<ResultadoGoogle>({ estado: 'espera' });
-  const [intento, setIntento] = useState(0);
-
-  useEffect(() => {
-    if (!activo) return;
+  const intento = useRef(0);
+  const iniciar = useCallback((vincular: boolean) => {
+    const este = ++intento.current;
     setResultado({ estado: 'espera' });
-    const forzado = new URLSearchParams(window.location.search).get('google');
-    if (forzado === 'espera') return;
-    const t = window.setTimeout(() => setResultado(simular(forzado)), ESPERA_MS);
-    return () => window.clearTimeout(t);
-  }, [activo, intento]);
-
-  const reintentar = useCallback(() => setIntento((n) => n + 1), []);
-  return { resultado, reintentar };
+    void acceder(vincular).then((r) => este === intento.current && setResultado(r));
+  }, []);
+  return { resultado, iniciar };
 }
