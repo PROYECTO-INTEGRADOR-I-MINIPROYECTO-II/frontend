@@ -180,6 +180,7 @@ export default function CampoDestacado({ id, etiqueta, valor, onCambio, analizar
       <div aria-live="polite" className="min-h-0">
         {visible && <p id={idMensaje} className="mt-1 text-center text-xs text-error">{visible}</p>}
         {!visible && estado === 'disponible' && textoDisponible && <p className="mt-1 text-center text-xs text-exito">{textoDisponible}</p>}
+        {!visible && estado === 'sin-comprobar' && <p className="mt-1 text-center text-xs text-texto-secundario">No pudimos comprobarlo; lo confirmaremos al crear la cuenta.</p>}
         {estado === 'verificando' && <span className="sr-only">Verificando disponibilidad.</span>}
       </div>
       {ayuda && <p id={ayudaId} className="mt-1 text-center text-xs text-texto-secundario">{ayuda}</p>}

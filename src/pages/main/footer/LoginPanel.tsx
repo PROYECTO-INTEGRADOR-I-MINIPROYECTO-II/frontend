@@ -64,13 +64,20 @@ export default function LoginPanel() {
   const navegar = useNavigate();
   const { state, pathname } = useLocation();
   const desde = (state as { desde?: string } | null)?.desde;
+  const avisoAlCambiar = useRef(''); // aviso a mostrar al llegar a la siguiente vista (cambiar de vista borra los avisos)
   const [perfilBloqueado, setPerfilBloqueado] = useState(false); // hay datos con error: la confirmación queda en gris
 
   // Crear la cuenta con correo: la API la registra, se inicia sesión con ella y se pide el perfil. La cuenta nace con el nombre igual al
   // username; luego se personaliza. Los errores (correo repetido, username ocupado…) los muestra el formulario junto a su campo.
   async function crearCuentaManual({ username, correo, clave }: { username: string; correo: string; clave: string }) {
     await api('/api/auth/registro', { method: 'POST', body: { nombres: username, apellidos: '', username, correo, clave } });
-    await signInWithEmailAndPassword(auth, correo, clave);
+    try {
+      await signInWithEmailAndPassword(auth, correo, clave);
+    } catch {
+      // La cuenta ya existe: se lleva a iniciar sesión (el correo queda escrito) en vez de mostrar un error de registro.
+      avisoAlCambiar.current = 'Tu cuenta se creó. Inicia sesión para entrar.';
+      return irA('manual');
+    }
     await refrescarSesion();
     irACreando({ username, nombres: username, apellidos: '', foto: null }, correo);
   }

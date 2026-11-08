@@ -8,9 +8,10 @@ export type EstadoFoto = 'sin' | 'ok' | 'error';
 const TIPOS = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_MB = 2;
 
-const FOTO_MAX_PX = 256; // lado mayor de la foto enviada: así cabe de sobra en el tope de la API (100 000 caracteres)
+const FOTO_MAX_PX = 256; // lado mayor de la foto enviada
+const FOTO_MAX_CHARS = 100_000; // tope de la API
 
-/** Foto lista para la API: un blob: (vista previa) se reduce a 256 px y pasa a data:image/webp;base64; una URL https o null se envía tal cual. */
+/** Foto lista para la API: un blob: (vista previa) se reduce a 256 px y pasa a data:image/webp;base64 (o jpeg); una URL https o null se envía tal cual. */
 export async function fotoParaApi(url: string | null): Promise<string | null> {
   if (!url?.startsWith('blob:')) return url;
   const imagen = await createImageBitmap(await (await fetch(url)).blob());
@@ -20,7 +21,15 @@ export async function fotoParaApi(url: string | null): Promise<string | null> {
   lienzo.height = Math.max(1, Math.round(imagen.height * escala));
   lienzo.getContext('2d')?.drawImage(imagen, 0, 0, lienzo.width, lienzo.height);
   imagen.close();
-  return lienzo.toDataURL('image/webp', 0.85);
+  // Si el navegador no sabe webp devuelve png: se usa jpeg. Si aun así pasa del tope de la API, se baja la calidad hasta que quepa.
+  let tipo = 'image/webp';
+  let datos = lienzo.toDataURL(tipo, 0.85);
+  if (!datos.startsWith('data:image/webp')) {
+    tipo = 'image/jpeg';
+    datos = lienzo.toDataURL(tipo, 0.85);
+  }
+  for (let calidad = 0.7; datos.length > FOTO_MAX_CHARS && calidad > 0.1; calidad -= 0.15) datos = lienzo.toDataURL(tipo, calidad);
+  return datos;
 }
 
 interface Props {

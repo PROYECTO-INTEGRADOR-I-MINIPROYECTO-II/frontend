@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ApiError } from '../api/base';
 import type { Analisis } from '../auth/validaciones';
 
 // Estado de un campo destacado mientras se escribe. Lo sintáctico se juzga al instante; tras una pausa de escribir se avisa si es
@@ -17,7 +18,7 @@ interface Opciones {
   mensajeOcupado?: (valor: string) => string;
 }
 
-type Tardio = { valor: string; estado: 'corto' | 'verificando' | 'disponible' | 'ocupado' | 'sin-comprobar' };
+type Tardio = { valor: string; estado: 'corto' | 'verificando' | 'disponible' | 'ocupado' | 'sin-comprobar' | 'invalido'; mensaje?: string };
 const esperar = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 
 export function useEstadoCampo(valor: string, opciones: Opciones): { estado: EstadoCampo; mensaje?: string } {
@@ -39,8 +40,11 @@ export function useEstadoCampo(valor: string, opciones: Opciones): { estado: Est
       try {
         const [libre] = await Promise.all([ref.current.verificar!(limpio), esperar(MIN_VERIFICANDO_MS)]);
         if (vigente) setTardio({ valor, estado: libre ? 'disponible' : 'ocupado' });
-      } catch {
-        if (vigente) setTardio({ valor, estado: 'sin-comprobar' }); // que un fallo de red no deje el campo en «verificando»
+      } catch (err) {
+        if (!vigente) return;
+        // El servidor dice que no es un username válido: se trata como inválido. Cualquier otro fallo (p. ej. sin red) no deja el campo en «verificando».
+        if (err instanceof ApiError && err.code === 'USERNAME_INVALID') setTardio({ valor, estado: 'invalido', mensaje: err.message });
+        else setTardio({ valor, estado: 'sin-comprobar' });
       }
     }, PAUSA_MS);
     return () => {
@@ -53,6 +57,7 @@ export function useEstadoCampo(valor: string, opciones: Opciones): { estado: Est
   if (analisis.tipo === 'invalido') return { estado: 'invalido', mensaje: analisis.mensaje };
   // El resultado tardío solo vale para el texto con el que se pidió (si se sigue escribiendo, vuelve a «escribiendo»).
   const t = tardio?.valor === valor ? tardio.estado : null;
+  if (t === 'invalido') return { estado: 'invalido', mensaje: tardio?.mensaje };
   if (t === 'corto') return { estado: 'corto', mensaje: analisis.mensaje };
   if (t === 'ocupado') return { estado: 'ocupado', mensaje: opciones.mensajeOcupado?.(valor) ?? 'Ya está en uso.' };
   return { estado: t ?? 'escribiendo' };

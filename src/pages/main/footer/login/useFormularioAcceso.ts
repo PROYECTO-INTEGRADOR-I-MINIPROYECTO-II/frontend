@@ -99,6 +99,8 @@ export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { userna
     errorGeneral,
     enviando,
     enviar,
+    /** Pone un aviso (p. ej. tras cambiar de vista, que borra los avisos). */
+    avisar: setAviso,
     enviarForm: () => formulario.current?.requestSubmit(),
     limpiarAvisos,
   };
