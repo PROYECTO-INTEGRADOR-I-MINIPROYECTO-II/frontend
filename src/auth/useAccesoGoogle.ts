@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { GoogleAuthProvider, linkWithPopup, signInWithPopup } from 'firebase/auth';
 import { auth } from '../firebase';
 import { refrescarSesion } from './useSession';
@@ -41,20 +41,15 @@ async function acceder(vincular: boolean): Promise<ResultadoGoogle> {
   return { estado: 'exito', username: user.username, perfil: { nombres: user.nombres, apellidos: user.apellidos, foto: user.foto, correo: user.correo ?? '' } };
 }
 
-export function useAccesoGoogle(activo: boolean, vincular = false) {
+// `iniciar` debe llamarse desde el clic (o la tecla) de la persona: los navegadores solo dejan abrir la ventana de Google dentro de ese
+// gesto; abrirla más tarde (p. ej. en un efecto) la bloquea. Un resultado de un intento anterior se descarta.
+export function useAccesoGoogle() {
   const [resultado, setResultado] = useState<ResultadoGoogle>({ estado: 'espera' });
-  const [intento, setIntento] = useState(0);
-
-  useEffect(() => {
-    if (!activo) return;
+  const intento = useRef(0);
+  const iniciar = useCallback((vincular: boolean) => {
+    const este = ++intento.current;
     setResultado({ estado: 'espera' });
-    let vigente = true;
-    void acceder(vincular).then((r) => vigente && setResultado(r));
-    return () => {
-      vigente = false;
-    };
-  }, [activo, intento, vincular]);
-
-  const reintentar = useCallback(() => setIntento((n) => n + 1), []);
-  return { resultado, reintentar };
+    void acceder(vincular).then((r) => este === intento.current && setResultado(r));
+  }, []);
+  return { resultado, iniciar };
 }

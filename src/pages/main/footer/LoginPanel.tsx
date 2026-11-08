@@ -111,7 +111,12 @@ export default function LoginPanel() {
   }
   // Envía el formulario de la vista actual.
   const enviarForm = () => document.querySelector<HTMLFormElement>('#panel-login form')?.requestSubmit();
-  const google = useAccesoGoogle(abierto && (fase === 'google' || fase === 'vincular'), fase === 'vincular');
+  const google = useAccesoGoogle();
+  // Ir a la vista de Google abre ya la ventana de Google: tiene que ser dentro del gesto de la persona (clic o tecla), no en un efecto.
+  const abrirGoogle = (vincular = false) => {
+    irA(vincular ? 'vincular' : 'google');
+    google.iniciar(vincular);
+  };
 
   // Al abrir o cambiar de vista se limpian los avisos; lo escrito se conserva.
   useEffect(() => {
@@ -147,18 +152,18 @@ export default function LoginPanel() {
     elegir: [{ tecla: '1', contenido: 'No tengo cuenta :(', accion: () => irA('registro') }],
     manual: [
       { tecla: '1', contenido: 'Confirmar', enviar: true },
-      { tecla: '2', contenido: <>Iniciar con <PalabraGoogle /></>, accion: () => irA('google') },
+      { tecla: '2', contenido: <>Iniciar con <PalabraGoogle /></>, accion: () => abrirGoogle() },
       { tecla: '3', contenido: 'No tengo cuenta :(', accion: () => irA('registro') },
     ],
     registro: [
       { tecla: '1', contenido: 'Confirmar', enviar: true },
-      { tecla: '2', contenido: <>Crear con <PalabraGoogle /></>, accion: () => irA('google') },
+      { tecla: '2', contenido: <>Crear con <PalabraGoogle /></>, accion: () => abrirGoogle() },
       { tecla: '3', contenido: 'Ya tengo cuenta', accion: () => irA('elegir') },
     ],
     google:
       google.resultado.estado === 'error'
         ? [
-            { tecla: '1', contenido: 'Intentar de nuevo', accion: google.reintentar, primero: true },
+            { tecla: '1', contenido: 'Intentar de nuevo', accion: () => google.iniciar(false), primero: true },
             { tecla: '2', contenido: 'Iniciar manualmente', accion: () => irA('manual') },
           ]
         : google.resultado.estado === 'exito'
@@ -171,7 +176,7 @@ export default function LoginPanel() {
     vincular:
       google.resultado.estado === 'error'
         ? [
-            { tecla: '1', contenido: 'Intentar de nuevo', accion: google.reintentar, primero: true },
+            { tecla: '1', contenido: 'Intentar de nuevo', accion: () => google.iniciar(true), primero: true },
             { tecla: '2', contenido: 'Volver atrás', accion: () => irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo) },
           ]
         : [{ tecla: '1', contenido: 'Cancelar', accion: () => irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo), primero: true }],
@@ -188,7 +193,7 @@ export default function LoginPanel() {
             // Vincular o desvincular Google. Una cuenta creada con Google no se puede desvincular (Firebase no deja quitar el único
             // método de acceso, y esa cuenta no tiene contraseña): ahí no hay opción y el icono del resumen indica que está vinculada.
             ...(!user?.google
-              ? [{ contenido: <>Vincular con <PalabraGoogle /></>, accion: () => irA('vincular') }]
+              ? [{ contenido: <>Vincular con <PalabraGoogle /></>, accion: () => abrirGoogle(true) }]
               : user.creadaConGoogle
                 ? []
                 : [{ contenido: <>Desvincular de <PalabraGoogle /></>, accion: desvincular }]),
@@ -242,7 +247,7 @@ export default function LoginPanel() {
         ignorarClic="[data-login-opener]"
         className={`${COLOCACION} overflow-y-auto font-sans text-sm leading-6 tracking-normal motion-safe:animate-panel`}
       >
-        {fase === 'elegir' && <VistaElegir irA={irA} opciones={lista('elegir')} />}
+        {fase === 'elegir' && <VistaElegir irA={(f) => (f === 'google' ? abrirGoogle() : irA(f))} opciones={lista('elegir')} />}
         {(fase === 'manual' || registro) && <VistaFormulario registro={registro} form={form} opciones={lista(fase, form.enviando ? ['1'] : [])} />}
         {fase === 'google' && <VistaGoogle resultado={google.resultado} opciones={lista('google')} />}
         {fase === 'vincular' && <VistaGoogle vincular resultado={google.resultado} opciones={lista('vincular')} />}
