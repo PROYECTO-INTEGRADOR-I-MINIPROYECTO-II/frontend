@@ -10,7 +10,7 @@ const DETALLE: Record<MotivoErrorGoogle, string> = {
   bloqueado: 'Tu navegador bloqueó la ventana de Google. Permite las ventanas emergentes de este sitio.',
   'cuenta-existente': 'Ese correo ya tiene una cuenta con contraseña. Inicia manualmente para continuar.',
   red: 'Revisa tu conexión e inténtalo de nuevo.',
-  'no-disponible': 'El acceso con Google se conectará en el Sprint 1.',
+  'no-disponible': 'No pudimos conectar con Google. Inténtalo de nuevo en un momento.',
 };
 
 // Vista de Google (iniciar sesión, crear cuenta o, con `vincular`, vincular la cuenta desde «Editar perfil»): mientras se espera, el icono se arma desde líneas horizontales (overflow-hidden recorta las que entran desde
@@ -27,7 +27,7 @@ export default function VistaGoogle({ resultado, opciones, vincular = false }: {
       {resultado.estado === 'espera' && <p role="status" className="sr-only">Conectando con Google. Elige tu cuenta en la ventana de Google.</p>}
       {resultado.estado === 'exito' && (
         <Mensaje tipo="exito" titulo="Acceso con Google correcto" className="text-center">
-          Falta conectar con Firebase (Sprint 1): todavía no se abre ninguna sesión.
+          Ya puedes continuar.
         </Mensaje>
       )}
       {resultado.estado === 'error' && (

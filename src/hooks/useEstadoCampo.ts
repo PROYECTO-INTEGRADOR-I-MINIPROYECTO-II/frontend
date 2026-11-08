@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
+import { ApiError } from '../api/base';
 import type { Analisis } from '../auth/validaciones';
 
 // Estado de un campo destacado mientras se escribe. Lo sintáctico se juzga al instante; tras una pausa de escribir se avisa si es
 // muy corto o, si el campo tiene `verificar`, se consulta si está libre. La comprobación dura como mínimo MIN_VERIFICANDO_MS aunque
 // la API responda antes, para que se alcance a ver, y nunca se reutiliza un resultado anterior: cada edición obliga a comprobar de nuevo.
 //   vacio · escribiendo (válido; sin `verificar` se queda aquí) · invalido · corto (tras la pausa) · verificando · disponible · ocupado
-export type EstadoCampo = 'vacio' | 'escribiendo' | 'invalido' | 'corto' | 'verificando' | 'disponible' | 'ocupado';
+//   · sin-comprobar (la consulta falló, p. ej. sin red: el campo no se bloquea, la unicidad la confirma el servidor al enviar)
+export type EstadoCampo = 'vacio' | 'escribiendo' | 'invalido' | 'corto' | 'verificando' | 'disponible' | 'ocupado' | 'sin-comprobar';
 const PAUSA_MS = 700;
 const MIN_VERIFICANDO_MS = 1500;
 
@@ -16,7 +18,7 @@ interface Opciones {
   mensajeOcupado?: (valor: string) => string;
 }
 
-type Tardio = { valor: string; estado: 'corto' | 'verificando' | 'disponible' | 'ocupado' };
+type Tardio = { valor: string; estado: 'corto' | 'verificando' | 'disponible' | 'ocupado' | 'sin-comprobar' | 'invalido'; mensaje?: string };
 const esperar = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 
 export function useEstadoCampo(valor: string, opciones: Opciones): { estado: EstadoCampo; mensaje?: string } {
@@ -35,8 +37,15 @@ export function useEstadoCampo(valor: string, opciones: Opciones): { estado: Est
     const t = window.setTimeout(async () => {
       if (tipo === 'corto') return setTardio({ valor, estado: 'corto' });
       setTardio({ valor, estado: 'verificando' });
-      const [libre] = await Promise.all([ref.current.verificar!(limpio), esperar(MIN_VERIFICANDO_MS)]);
-      if (vigente) setTardio({ valor, estado: libre ? 'disponible' : 'ocupado' });
+      try {
+        const [libre] = await Promise.all([ref.current.verificar!(limpio), esperar(MIN_VERIFICANDO_MS)]);
+        if (vigente) setTardio({ valor, estado: libre ? 'disponible' : 'ocupado' });
+      } catch (err) {
+        if (!vigente) return;
+        // El servidor dice que no es un username válido: se trata como inválido. Cualquier otro fallo (p. ej. sin red) no deja el campo en «verificando».
+        if (err instanceof ApiError && err.code === 'USERNAME_INVALID') setTardio({ valor, estado: 'invalido', mensaje: err.message });
+        else setTardio({ valor, estado: 'sin-comprobar' });
+      }
     }, PAUSA_MS);
     return () => {
       vigente = false;
@@ -48,6 +57,7 @@ export function useEstadoCampo(valor: string, opciones: Opciones): { estado: Est
   if (analisis.tipo === 'invalido') return { estado: 'invalido', mensaje: analisis.mensaje };
   // El resultado tardío solo vale para el texto con el que se pidió (si se sigue escribiendo, vuelve a «escribiendo»).
   const t = tardio?.valor === valor ? tardio.estado : null;
+  if (t === 'invalido') return { estado: 'invalido', mensaje: tardio?.mensaje };
   if (t === 'corto') return { estado: 'corto', mensaje: analisis.mensaje };
   if (t === 'ocupado') return { estado: 'ocupado', mensaje: opciones.mensajeOcupado?.(valor) ?? 'Ya está en uso.' };
   return { estado: t ?? 'escribiendo' };

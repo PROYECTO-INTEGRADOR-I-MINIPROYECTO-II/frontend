@@ -17,16 +17,19 @@ export default function VistaPerfil({
   alGuardar,
   alBloquear,
   alBorrador,
+  errorExterno,
   opciones,
 }: {
   modo: 'completar' | 'editar';
   /** La cuenta está vinculada con Google. */
   google?: boolean;
   inicial: InicialPerfil;
-  alGuardar: (d: DatosPerfil) => void;
+  alGuardar: (d: DatosPerfil) => Promise<void>;
   /** Avisa de si la confirmación debe estar bloqueada (hay datos con error). */
   alBloquear: (bloqueada: boolean) => void;
   alBorrador?: (d: DatosPerfil) => void;
+  /** Error de una acción de fuera del formulario (p. ej. desvincular Google). */
+  errorExterno?: string;
   opciones: ReactNode;
 }) {
   const f = useFormularioPerfil({ inicial, modo, google, alGuardar, alBorrador });
@@ -66,6 +69,7 @@ export default function VistaPerfil({
         autoComplete="family-name"
       />
       <Mensaje tipo="info" className="text-center">{f.aviso}</Mensaje>
+      <Mensaje tipo="error" className="text-center">{f.errorGeneral || errorExterno}</Mensaje>
 
       {/* Las acciones quedan fijas al fondo del panel si hay scroll. */}
       <div className="sticky bottom-0 -mx-4 -mb-4 grid gap-0.5 border-t border-texto/80 bg-fondo px-4 pb-2 pt-2">{opciones}</div>
