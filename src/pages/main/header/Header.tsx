@@ -9,7 +9,7 @@ export default function Header() {
       <Link to="/" aria-label="Synk, ir al inicio" className="group relative rounded-xl">
         <Logo />
       </Link>
-      <p className="relative rounded-full border border-borde bg-primario-suave px-4 py-1.5 font-pixel text-xs font-medium uppercase tracking-[0.2em] text-texto">
+      <p className="relative rounded-full border border-borde bg-primario-suave px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.2em] text-texto">
         Salas y chat en tiempo real
       </p>
       <hr className="relative mt-2 w-full border-t border-texto/80" />
