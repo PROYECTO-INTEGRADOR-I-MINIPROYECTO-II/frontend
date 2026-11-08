@@ -109,3 +109,10 @@ Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` con la URL de Re
 ## Tipografías
 
 Solo dos (S0-C03): **Geist** para el texto y **Press Start 2P** para lo retro (títulos, etiquetas, campos destacados, campo LED y estado). `font-sans` y `font-pixel` son sus únicas clases; Pixelify Sans y Orbitron se quitaron.
+
+## Contraseñas con iconos
+
+Los campos de contraseña dibujan un icono pixel por cada carácter, siempre uno distinto (los primeros 16 no se repiten; después el ciclo vuelve a empezar, sin repetir nunca el icono contiguo). Con la contraseña revelada el texto va a 20 px y el campo mantiene su altura. El icono depende solo de la posición, no del carácter, así que no revela nada. El `<input type="password">` real sigue ahí con el texto invisible (teclado, autocompletado, gestores de contraseñas y lectores de pantalla funcionan igual); `CampoClave` dibuja iconos y cursor encima. Con contraseñas largas se ve una ventana con los últimos iconos que caben.
+
+- Recursos: `src/assets/iconos/` (fuente `IconosPixel16.woff2`, hoja de sprites y `iconos.json`), el orden de los iconos es **aleatorio por campo** (`crearOrden` en `utils/ui/iconosClave.ts`, con `crypto.getRandomValues`): cambia en cada carga, pero no al escribir ni al mostrar y ocultar la contraseña.
+- `MODO_ICONOS` en `CampoClave.tsx`: `'fuente'` usa la fuente de iconos y `'sprites'` la hoja como máscara CSS. Se ven idénticos; con `'sprites'` no se declara ninguna fuente más (S0-C03: máximo 2 tipografías).
