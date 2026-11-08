@@ -1,6 +1,7 @@
 // Reglas de validación de acceso y perfil. El servidor debe aplicar las mismas (la unicidad de username y correo solo la puede
 // comprobar él). Cada función devuelve el mensaje de error, que explica cómo corregir, o undefined si el valor es válido.
-export const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Cada tramo del dominio excluye el punto, así la expresión no tiene alternativas ambiguas (tiempo lineal, sin backtracking costoso).
+export const CORREO = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
 export const MIN_CLAVE = 8;
 // Dos conceptos distintos (decisión del equipo, a partir de lo que exige el curso):
 //  · Username: nombre de usuario ÚNICO de la cuenta (US-01, US-02, US-04). 3 a 20 caracteres, sin espacios; letras sin tilde, números,
@@ -79,6 +80,13 @@ export const iniciales = (nombres: string, apellidos: string) =>
     .join('')
     .toLocaleUpperCase('es');
 
+// Quita los espacios del final con un recorrido simple (una expresión como / +$/ es de tiempo cuadrático con muchos espacios).
+const sinEspaciosFinales = (s: string) => {
+  let fin = s.length;
+  while (fin > 0 && s[fin - 1] === ' ') fin--;
+  return s.slice(0, fin);
+};
+
 /**
  * Qué le pasa a un campo del nombre (nombres o apellidos). `disponibles` = cuántos caracteres le quedan según lo que ya ocupa el otro
  * campo (el total entre ambos es NOMBRE_MAX_TOTAL). Un espacio al final se tolera: se está escribiendo la siguiente palabra.
@@ -86,7 +94,7 @@ export const iniciales = (nombres: string, apellidos: string) =>
 export function analizarNombre(crudo: string, disponibles = NOMBRE_MAX_TOTAL): Analisis {
   if (!crudo) return { tipo: 'vacio' };
   if (crudo[0] === ' ') return { tipo: 'invalido', mensaje: 'No puede empezar con un espacio.' };
-  const v = crudo.replace(/ +$/, '');
+  const v = sinEspaciosFinales(crudo);
   const raro = [...v].find((c) => !/[\p{L}\p{M}\p{N} ._'’-]/u.test(c));
   if (raro !== undefined) {
     if (raro === '<' || raro === '>') return { tipo: 'invalido', mensaje: 'Los caracteres «<» y «>» no están permitidos.' };
