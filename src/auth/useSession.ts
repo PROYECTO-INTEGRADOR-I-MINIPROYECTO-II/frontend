@@ -90,7 +90,8 @@ export function guardarSesionDemo(usuario: Usuario) {
   if (!limpio) return; // datos que no pasan la validación nunca se guardan
   try {
     const serializado = JSON.stringify(limpio);
-    if (serializado.length <= MAX_BYTES) localStorage.setItem(CLAVE, serializado);
+    // NOSONAR (S8475): `limpio` salió de `limpiarUsuario` (campos conocidos, tipo, forma y largo validados); el análisis de Sonar no sigue esa validación.
+    if (serializado.length <= MAX_BYTES) localStorage.setItem(CLAVE, serializado); // NOSONAR
   } catch {
     /* sin almacenamiento: la sesión simulada dura solo esta visita */
   }
