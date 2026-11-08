@@ -78,11 +78,11 @@ export default function LoginPanel() {
     irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo);
   }
   // Cerrar sesión: vuelve a la portada y cierra la sesión de Firebase, desde donde se puede crear otra cuenta.
-  async function salir() {
+  function salir() {
     borrador.current = null;
     cerrar(false);
-    navegar('/'); // primero la ruta: si no, PerfilRuta vería la sesión vacía en /perfil y mandaría a /login
-    await cerrarSesion();
+    navegar('/'); // primero la ruta: si no, RutaPrivada vería la sesión vacía en /perfil y mandaría a /login
+    window.setTimeout(() => void cerrarSesion(), 50); // da tiempo a que la navegación se aplique antes de cerrar la sesión
   }
   // Envía el formulario de la vista actual.
   const enviarForm = () => document.querySelector<HTMLFormElement>('#panel-login form')?.requestSubmit();
