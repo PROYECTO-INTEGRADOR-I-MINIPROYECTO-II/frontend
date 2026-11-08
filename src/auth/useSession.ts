@@ -41,24 +41,33 @@ const suscribir = (f: () => void) => {
   return () => void oyentes.delete(f);
 };
 
-/** Vuelve a pedir el perfil a la API (tras crear la cuenta, guardar cambios, vincular…) y actualiza la sesión. */
-export async function refrescarSesion() {
-  if (!auth.currentUser) return poner({ cargando: false, user: null });
-  let user: Usuario | null = null;
+let secuencia = 0; // cada petición de perfil lleva un número: una respuesta vieja (otra petición o cierre de sesión) se descarta
+
+/** Vuelve a pedir el perfil a la API (tras crear la cuenta, guardar cambios, vincular…), actualiza la sesión y lo devuelve (null = sin sesión). */
+export async function refrescarSesion(): Promise<Usuario | null> {
+  const fb = auth.currentUser;
+  const n = ++secuencia;
+  if (!fb) {
+    poner({ cargando: false, user: null });
+    return null;
+  }
+  let user: Usuario | null;
   try {
     const y = await api<Yo>('/api/usuarios/yo');
     user = { username: y.username, nombres: y.nombres, apellidos: y.apellidos, foto: y.foto, correo: y.correo, google: y.proveedores.includes('google.com'), creadaConGoogle: !y.proveedores.includes('password') };
   } catch {
-    /* sin perfil no hay sesión útil: se trata como sin sesión */
+    user = estado.user; // un fallo de la API (red, 5xx) no cierra la sesión: se conserva lo que había y se deja de «cargar»
   }
-  if (auth.currentUser) poner({ cargando: false, user }); // si mientras tanto cerró sesión, no se resucita
+  if (n !== secuencia || auth.currentUser?.uid !== fb.uid) return estado.user; // llegó tarde: ya hay algo más reciente
+  poner({ cargando: false, user });
+  return user;
 }
 
 export async function cerrarSesion() {
   await signOut(auth);
 }
 
-onAuthStateChanged(auth, (fb) => (fb ? void refrescarSesion() : poner({ cargando: false, user: null })));
+onAuthStateChanged(auth, () => void refrescarSesion()); // sin usuario también pasa por aquí: sube la secuencia y descarta lo pendiente
 
 export function useSession(): Session {
   return useSyncExternalStore(suscribir, () => estado);
