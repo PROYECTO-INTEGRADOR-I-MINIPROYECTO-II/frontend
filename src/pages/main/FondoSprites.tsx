@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { SPRITES } from '../../utils/sprites/sprites';
+import { useLoginPanel } from './footer/loginPanelContext';
 
 // Cuadrícula aleatoria de sprites sobre todo el fondo. Se dibuja dos veces en canvas: una capa casi apagada
 // y otra más visible que solo se deja ver dentro de un radio alrededor del cursor (máscara radial por CSS).
@@ -19,6 +20,13 @@ export default function FondoSprites() {
   const base = useRef<HTMLCanvasElement>(null);
   const luz = useRef<HTMLCanvasElement>(null);
   const raiz = useRef<HTMLDivElement>(null);
+  // Con el panel de acceso abierto (y la página atenuada) el halo del cursor se apaga y no reacciona al ratón.
+  const { abierto } = useLoginPanel();
+  const bloqueado = useRef(abierto);
+  useEffect(() => {
+    bloqueado.current = abierto;
+    if (abierto) raiz.current?.style.setProperty('--luz', '0');
+  }, [abierto]);
 
   useEffect(() => {
     const cb = base.current; // null si la capa base está apagada (OP_BASE = 0)
@@ -74,7 +82,7 @@ export default function FondoSprites() {
     // El halo sigue al cursor (una actualización por fotograma como máximo).
     let marco = 0;
     const mover = (e: PointerEvent) => {
-      if (e.pointerType === 'touch') return;
+      if (e.pointerType === 'touch' || bloqueado.current) return;
       cancelAnimationFrame(marco);
       marco = requestAnimationFrame(() => {
         el.style.setProperty('--mx', `${e.clientX}px`);
