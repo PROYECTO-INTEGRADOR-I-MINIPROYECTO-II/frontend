@@ -80,7 +80,8 @@ export default function ChatPreview() {
     const instantaneo = reducido();
     const patch = (id: number, f: (i: Item) => Item) => setItems((prev) => prev.map((i) => (i.id === id ? f(i) : i)));
 
-    (async () => {
+    // La demostración corre sola: la promesa se descarta a propósito (los temporizadores se cancelan al desmontar).
+    void (async () => {
       await wait(instantaneo ? 0 : 900);
       for (const paso of GUION) {
         const id = nextId.current++;
