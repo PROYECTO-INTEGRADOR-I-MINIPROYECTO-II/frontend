@@ -74,7 +74,7 @@ export function useFormularioAcceso(registro: boolean, alRegistrar: (d: { userna
       if (e?.code === 'EMAIL_TAKEN') {
         setErrores({ correo: 'Ese correo ya tiene una cuenta. Usa «Ya tengo cuenta» para iniciar sesión.' });
         document.getElementById(`${base}-correo`)?.focus();
-      } else if (e?.campo === 'username') username.ponerError(mensaje);
+      } else if (e?.campo === 'username') username.ponerErrorApi(err, mensaje);
       else if (e?.campo === 'correo' || e?.campo === 'clave') {
         setErrores({ [e.campo]: mensaje });
         document.getElementById(`${base}-${e.campo}`)?.focus();
