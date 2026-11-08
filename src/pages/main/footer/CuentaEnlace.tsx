@@ -1,0 +1,37 @@
+import { UserRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useSession } from '../../../auth/useSession';
+
+const ETIQUETA = 'Iniciar sesión';
+
+// Entrada de cuenta del pie: icono «Cuenta» con sesión; sin sesión, el texto «Iniciar sesión»
+// con una ondulación por letra (en pasos, de poca amplitud) para que se distinga del resto.
+export default function CuentaEnlace({ className = '' }: { className?: string }) {
+  const { user } = useSession();
+
+  if (user) {
+    return (
+      <Link to="/perfil" className={`inline-flex items-center gap-2 ${className}`}>
+        <UserRound aria-hidden="true" className="size-5" />
+        Cuenta
+      </Link>
+    );
+  }
+
+  return (
+    <Link to="/login" className={`group ${className}`}>
+      <span className="sr-only">{ETIQUETA}</span>
+      <span aria-hidden="true" className="relative inline-flex pb-[3px] text-[color-mix(in_srgb,var(--color-acento)_60%,white)] transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-current group-hover:text-texto-secundario group-focus-visible:text-texto-secundario">
+        {[...ETIQUETA].map((c, i) => (
+          <span
+            key={i}
+            className="inline-block whitespace-pre motion-safe:animate-letra"
+            style={{ animationDelay: `${i * 90}ms` }}
+          >
+            {c}
+          </span>
+        ))}
+      </span>
+    </Link>
+  );
+}
