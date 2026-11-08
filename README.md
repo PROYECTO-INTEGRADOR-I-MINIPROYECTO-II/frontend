@@ -13,8 +13,11 @@ npm run dev            # http://localhost:5173
 ## Docker
 
 ```bash
-VITE_API_URL=https://<api-en-render> docker compose up --build   # http://localhost:5173
+cp .env.example .env            # VITE_API_URL y la configuración web (pública) de Firebase
+docker compose up --build       # http://localhost:5173
 ```
+
+Vite incrusta las `VITE_*` al compilar y las lee del `.env` de la raíz, que entra solo en la etapa de build de la imagen (la imagen final únicamente recibe `dist/`). Si falta el `.env` o alguna `VITE_FIREBASE_*`, el build se detiene con un aviso. Si cambias el `.env`, reconstruye (`--build`).
 
 ## Prototipo visual (rama de rework)
 
