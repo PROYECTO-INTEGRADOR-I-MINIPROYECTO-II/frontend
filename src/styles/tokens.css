@@ -34,6 +34,8 @@
   --animate-flecha: flecha 0.9s steps(1) infinite;
   /* Solo dos tipografías (S0-C03): Geist para el texto y Press Start 2P para lo retro (títulos, etiquetas, campos y LED). */
   --font-pixel: 'Press Start 2P', ui-monospace, monospace;
+  /* Fuente de iconos (no es una tipografía de texto): solo dibuja los iconos de la máscara de contraseña. */
+  --font-iconos: 'IconosPixel16', monospace;
   --animate-letra: letra 1.6s steps(1) infinite;
 }
 

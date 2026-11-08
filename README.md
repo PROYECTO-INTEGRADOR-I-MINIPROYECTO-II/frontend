@@ -96,3 +96,14 @@ Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` con la URL de Re
 ## Tipografías
 
 Solo dos (S0-C03): **Geist** para el texto y **Press Start 2P** para lo retro (títulos, etiquetas, campos destacados, campo LED y estado). `font-sans` y `font-pixel` son sus únicas clases; Pixelify Sans y Orbitron se quitaron.
+
+## Contraseñas con iconos
+
+Los campos de contraseña dibujan un icono pixel por cada carácter, siempre uno distinto (los primeros 16 no se repiten; después el ciclo vuelve a empezar, sin repetir nunca el icono contiguo). Con la contraseña revelada el texto va a 20 px y el campo mantiene su altura. El icono depende solo de la posición, no del carácter, así que no revela nada. El `<input type="password">` real sigue ahí con el texto invisible (teclado, autocompletado, gestores de contraseñas y lectores de pantalla funcionan igual); `CampoClave` dibuja iconos y cursor encima. Con contraseñas largas se ve una ventana con los últimos iconos que caben.
+
+- Recursos: `src/assets/iconos/` (fuente `IconosPixel16.woff2`, hoja de sprites y `iconos.json`), el orden de los iconos es **aleatorio por campo** (`crearOrden` en `utils/ui/iconosClave.ts`, con `crypto.getRandomValues`): cambia en cada carga, pero no al escribir ni al mostrar y ocultar la contraseña.
+- `MODO_ICONOS` en `CampoClave.tsx`: `'fuente'` usa la fuente de iconos y `'sprites'` la hoja como máscara CSS. Se ven idénticos; con `'sprites'` no se declara ninguna fuente más (S0-C03: máximo 2 tipografías).
+
+## Fondo: destellos (experimento)
+
+`EFECTO` en `pages/main/FondoSprites.tsx` elige el efecto del fondo: `'halo'` (iconos que se revelan cerca del cursor), `'destellos'` o `'ambos'`. Con `'destellos'`, `DESTELLOS` iconos (sprite y punto al azar, sin cuadrícula) suben hasta `OP_LUZ` (0,25) de opacidad y vuelven a 0, cada uno con su duración (2,4 a 4,4 s), y al terminar saltan a otro punto y otro sprite. Cada punto se elige a `DISTANCIA_MIN` px o más de cualquier elemento visible de la página (texto, imágenes, bordes, fondos, controles; lo que un contenedor recorta no cuenta) y de los demás destellos, así que caben menos de los pedidos si el espacio es poco. No se aplica en móvil (menos de 768 px). El azar usa `crypto.getRandomValues`. Con «Pausar animaciones» o «reducir movimiento» no se ve ninguno (la opacidad base es 0).
