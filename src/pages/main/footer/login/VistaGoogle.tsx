@@ -13,9 +13,9 @@ const DETALLE: Record<MotivoErrorGoogle, string> = {
   'no-disponible': 'El acceso con Google se conectará en el Sprint 1.',
 };
 
-// Vista de Google: mientras se espera, el icono se arma desde líneas horizontales (overflow-hidden recorta las que entran desde
+// Vista de Google (iniciar sesión, crear cuenta o, con `vincular`, vincular la cuenta desde «Editar perfil»): mientras se espera, el icono se arma desde líneas horizontales (overflow-hidden recorta las que entran desde
 // fuera del panel); si falla, el icono pasa a rojo y se inclina, con el mensaje; si sale bien, queda armado.
-export default function VistaGoogle({ resultado, opciones }: { resultado: ResultadoGoogle; opciones: ReactNode }) {
+export default function VistaGoogle({ resultado, opciones, vincular = false }: { resultado: ResultadoGoogle; opciones: ReactNode; vincular?: boolean }) {
   return (
     <div className="grid justify-items-center gap-4 overflow-hidden p-6">
       {resultado.estado === 'error' ? (
@@ -31,8 +31,8 @@ export default function VistaGoogle({ resultado, opciones }: { resultado: Result
         </Mensaje>
       )}
       {resultado.estado === 'error' && (
-        <Mensaje tipo="error" titulo="No hemos podido iniciar tu sesión" className="text-center">
-          {DETALLE[resultado.motivo]}
+        <Mensaje tipo="error" titulo={vincular ? 'No hemos podido vincular tu cuenta' : 'No hemos podido iniciar tu sesión'} className="text-center">
+          {vincular && resultado.motivo === 'cuenta-existente' ? 'Esa cuenta de Google ya está vinculada a otra cuenta de Synk.' : DETALLE[resultado.motivo]}
         </Mensaje>
       )}
 

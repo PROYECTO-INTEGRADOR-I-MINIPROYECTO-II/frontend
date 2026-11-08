@@ -5,8 +5,8 @@ import type { InicialPerfil } from './login/useFormularioPerfil';
 //   elegir: ¿manual o Google? · manual: iniciar sesión con correo y contraseña · registro: crear cuenta (username, correo y contraseña)
 //   google: espera del acceso con Google · username: elegir el username (tras Google, o si la cuenta no lo tiene aún)
 //   creando: transición «creando tu cuenta» · perfil: personalizar (foto, nombre y apellido) o, después, editar el perfil
-//   editarUsername: cambiar el username desde «Editar perfil».
-export type FasePanel = 'elegir' | 'manual' | 'registro' | 'google' | 'username' | 'creando' | 'perfil' | 'editarUsername';
+//   editarUsername: cambiar el username desde «Editar perfil» · vincular: vincular la cuenta con Google desde «Editar perfil».
+export type FasePanel = 'elegir' | 'manual' | 'registro' | 'google' | 'username' | 'creando' | 'perfil' | 'editarUsername' | 'vincular';
 
 /** Datos del perfil en curso, compartidos por las vistas username, creando y perfil. */
 export interface PerfilPanel {

@@ -12,6 +12,7 @@ import { useFormularioPerfil, type DatosPerfil, type InicialPerfil } from './use
 // Mientras haya un ✗ la confirmación queda en gris. Al completarlo el nombre puede quedar en blanco (se usa el username), así que se puede confirmar ya.
 export default function VistaPerfil({
   modo,
+  google,
   inicial,
   alGuardar,
   alBloquear,
@@ -19,6 +20,8 @@ export default function VistaPerfil({
   opciones,
 }: {
   modo: 'completar' | 'editar';
+  /** La cuenta está vinculada con Google. */
+  google?: boolean;
   inicial: InicialPerfil;
   alGuardar: (d: DatosPerfil) => void;
   /** Avisa de si la confirmación debe estar bloqueada (hay datos con error). */
@@ -26,7 +29,7 @@ export default function VistaPerfil({
   alBorrador?: (d: DatosPerfil) => void;
   opciones: ReactNode;
 }) {
-  const f = useFormularioPerfil({ inicial, modo, alGuardar, alBorrador });
+  const f = useFormularioPerfil({ inicial, modo, google, alGuardar, alBorrador });
   const { valores, cambiar } = f;
   useEffect(() => alBloquear(f.hayErrores), [f.hayErrores, alBloquear]);
   useEffect(() => () => alBloquear(false), [alBloquear]);

@@ -12,6 +12,10 @@ export interface Usuario {
   apellidos: string;
   foto: string | null;
   correo?: string;
+  /** La cuenta está vinculada con Google (se creó con Google o se vinculó después). */
+  google?: boolean;
+  /** Se creó con Google: Google es su único método de acceso (no tiene contraseña), así que no se puede desvincular. */
+  creadaConGoogle?: boolean;
 }
 export interface Session {
   user: Usuario | null;

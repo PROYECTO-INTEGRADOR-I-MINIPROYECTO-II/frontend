@@ -21,7 +21,7 @@ interface Estados {
 // Estado y validación de la vista de perfil: nombres, apellidos y foto (el username se cambia en su propia vista).
 // Al completar el perfil el nombre puede quedar en blanco: se usa el username (el nombre que tiene la cuenta recién creada). Al editarlo,
 // los campos traen escritos los valores actuales y el nombre es obligatorio. Aún sin Firebase ni API (Sprint 1): `alGuardar` solo simula guardar.
-export function useFormularioPerfil({ inicial, modo, alGuardar, alBorrador }: { inicial: InicialPerfil; modo: 'completar' | 'editar'; alGuardar: (d: DatosPerfil) => void; alBorrador?: (d: DatosPerfil) => void }) {
+export function useFormularioPerfil({ inicial, modo, google = false, alGuardar, alBorrador }: { inicial: InicialPerfil; modo: 'completar' | 'editar'; google?: boolean; alGuardar: (d: DatosPerfil) => void; alBorrador?: (d: DatosPerfil) => void }) {
   const opcional = modo === 'completar';
   const [nombres, setNombres] = useState(opcional && inicial.nombres === inicial.username ? '' : inicial.nombres);
   const nombreFinal = nombres.trim() || (opcional ? inicial.username : '');
@@ -42,6 +42,8 @@ export function useFormularioPerfil({ inicial, modo, alGuardar, alBorrador }: { 
     { nombre: 'Nombre', estado: estados.nombres === 'escribiendo' ? 'ok' : estados.nombres === 'vacio' && opcional ? 'vacio' : 'error' },
     { nombre: 'Apellido', estado: estados.apellidos === 'escribiendo' ? 'ok' : estados.apellidos === 'vacio' ? 'vacio' : 'error' },
     { nombre: 'Foto', estado: estados.foto === 'ok' ? 'ok' : estados.foto === 'sin' ? 'vacio' : 'error' },
+    // Google: al editar siempre se muestra; al completar solo si la cuenta ya viene vinculada.
+    ...(modo === 'editar' || google ? [{ nombre: 'Google', estado: google ? 'vinculado' : 'sin-vincular' } as Indicador] : []),
   ];
   const hayErrores = indicadores.some((i) => i.estado === 'error');
 
