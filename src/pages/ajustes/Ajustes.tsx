@@ -43,7 +43,7 @@ export default function Ajustes() {
             aria-labelledby="pausa-titulo"
             aria-describedby="pausa-ayuda"
             onClick={() => fijarPausadas(!pausadas)}
-            className="relative h-8 w-16 shrink-0 border-2 border-texto font-monokuro text-[10px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-texto"
+            className="relative h-8 w-16 shrink-0 border-2 border-texto font-pixel text-[10px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-texto"
           >
             <span
               aria-hidden="true"

@@ -1,7 +1,5 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/geist';
-@import '@fontsource-variable/pixelify-sans';
-@import '@fontsource-variable/orbitron';
 @import '@fontsource/press-start-2p';
 
 /* Los estilos se reparten por propósito; pausa.css va al final. */

@@ -87,7 +87,7 @@ export default function CampoDestacado({ id, etiqueta, valor, onCambio, analizar
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
-        <label htmlFor={id} className="block font-monokuro text-[11px] leading-5">
+        <label htmlFor={id} className="block font-pixel text-[11px] leading-5">
           {etiqueta}
           {estado === 'verificando' && <PuntosAnimados sinVacio intervalo={350} />}
         </label>
@@ -101,7 +101,7 @@ export default function CampoDestacado({ id, etiqueta, valor, onCambio, analizar
             className="border border-texto/80 px-2 leading-5 text-texto hover:text-acento-claro aria-pressed:bg-texto aria-pressed:text-fondo aria-pressed:hover:text-fondo"
           >
             {/* Muestra la tipografía activa: Press Start 2P (relleno) o Geist (solo marco). */}
-            <span aria-hidden="true" className={clara ? 'font-sans text-sm font-medium' : 'font-monokuro text-[11px]'}>Aa</span>
+            <span aria-hidden="true" className={clara ? 'font-sans text-sm font-medium' : 'font-pixel text-[11px]'}>Aa</span>
           </button>
         )}
       </div>

@@ -7,7 +7,7 @@ import type { FasePanel } from '../loginPanelContext';
 export default function VistaElegir({ irA, opciones }: { irA: (f: FasePanel) => void; opciones: ReactNode }) {
   return (
     <div className="grid gap-4 p-4">
-      <p className="text-center font-monokuro text-[11px] leading-5">¿Cómo quieres iniciar sesión?</p>
+      <p className="text-center font-pixel text-[11px] leading-5">¿Cómo quieres iniciar sesión?</p>
       <Boton tamano="grande" data-primero onClick={() => irA('manual')}>Manual</Boton>
       <Boton tamano="grande" onClick={() => irA('google')}>
         {/* Icono pixel art de 24×24 celdas, mostrado 1:1 para que cada celda sea un píxel nítido. */}

@@ -14,7 +14,6 @@
   --color-error-suave: #2a0a0a;
   --color-foco: #f59e0b;
   --font-sans: 'Geist Variable', system-ui, sans-serif;
-  --font-display: 'Geist Variable', system-ui, sans-serif;
   --color-led: #fafafa;
   /* Color de acento (morado de la guía original, aclarado para tener contraste ≥3:1 sobre negro).
      Para otra paleta basta redefinir esta variable, p. ej. :root[data-paleta='verde'] { --color-acento: #4ade80; }
@@ -33,9 +32,8 @@
   --animate-sprites: sprites-scroll 140s linear infinite;
   --animate-flotar: flotar 2.4s steps(1) infinite;
   --animate-flecha: flecha 0.9s steps(1) infinite;
-  --font-retro: 'Orbitron Variable', system-ui, sans-serif;
-  --font-monokuro: 'Press Start 2P', ui-monospace, monospace;
-  --font-pixel: 'Pixelify Sans Variable', ui-monospace, monospace;
+  /* Solo dos tipografías (S0-C03): Geist para el texto y Press Start 2P para lo retro (títulos, etiquetas, campos y LED). */
+  --font-pixel: 'Press Start 2P', ui-monospace, monospace;
   --animate-letra: letra 1.6s steps(1) infinite;
 }
 

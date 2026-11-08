@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 type Variante = 'primario' | 'secundario' | 'peligro';
 type Tamano = 'normal' | 'grande';
 
-const BASE = 'inline-flex items-center justify-center gap-3 border-2 font-monokuro text-xs leading-5';
+const BASE = 'inline-flex items-center justify-center gap-3 border-2 font-pixel text-xs leading-5';
 const VARIANTES: Record<Variante, string> = {
   primario: 'border-texto bg-texto text-fondo hover:bg-fondo hover:text-texto focus-visible:bg-fondo focus-visible:text-texto',
   secundario: 'border-texto bg-fondo text-texto hover:bg-texto hover:text-fondo focus-visible:bg-texto focus-visible:text-fondo',

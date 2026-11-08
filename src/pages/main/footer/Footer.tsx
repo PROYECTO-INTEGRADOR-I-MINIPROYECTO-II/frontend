@@ -63,7 +63,7 @@ export default function Footer() {
   return (
     <footer ref={ref} className="fixed inset-x-0 bottom-0 z-10 bg-fondo">
       <div className="px-5 pb-4 sm:px-8">
-        <div className="relative border-t border-texto/80 pt-3 font-monokuro text-[11px] leading-5">
+        <div className="relative border-t border-texto/80 pt-3 font-pixel text-[11px] leading-5">
           {/* Ancho: enlaces repartidos en toda la fila. */}
           <nav aria-label="Pie de página" className="hidden md:block">
             <ul className="flex items-center justify-between gap-6">
