@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Boton from '../../utils/ui/Boton';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 export default function NoEncontrada() {
@@ -12,8 +12,8 @@ export default function NoEncontrada() {
         La dirección que abriste no existe o la Sala ya no está disponible. Revisa que esté bien escrita.
       </p>
       <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-        <Link to="/" className="btn-primario">Ir al inicio</Link>
-        <Link to="/dashboard" className="btn-secundario">Ir al Panel</Link>
+        <Boton to="/" variante="primario">Ir al inicio</Boton>
+        <Boton to="/dashboard">Ir al Panel</Boton>
       </div>
     </div>
   );

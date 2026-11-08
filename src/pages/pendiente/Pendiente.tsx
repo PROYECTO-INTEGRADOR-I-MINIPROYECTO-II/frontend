@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Boton from '../../utils/ui/Boton';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 interface Props {
@@ -18,7 +18,7 @@ export default function Pendiente({ titulo, descripcion, sprint }: Props) {
       <p className="mt-6 rounded-lg bg-primario-suave p-4 text-primario-hover">
         Esta pantalla estará disponible en el {sprint}.
       </p>
-      <Link to="/" className="btn-secundario mt-6">Ir al inicio</Link>
+      <Boton to="/" className="mt-6">Ir al inicio</Boton>
     </div>
   );
 }

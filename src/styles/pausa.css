@@ -1,0 +1,10 @@
+/* Debe importarse al final: anula (con !important) toda animación cuando la persona activa «Pausar animaciones» en Ajustes. */
+/* «Pausar animaciones» (Ajustes): detiene todo movimiento y deja cada elemento en su estado final. */
+:root[data-animaciones='pausadas'] *,
+:root[data-animaciones='pausadas'] *::before,
+:root[data-animaciones='pausadas'] *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+:root[data-animaciones='pausadas'] .lock-closed { opacity: 0; }
+:root[data-animaciones='pausadas'] .lock-open { opacity: 1; }

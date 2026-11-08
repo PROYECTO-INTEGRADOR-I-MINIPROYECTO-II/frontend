@@ -1,29 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Lock, LockOpen } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useLoginPanel } from '../../pages/main/footer/loginPanelContext';
 import LedMarquee from './LedMarquee';
 
 const led = 'flex items-center justify-center gap-4 font-pixel text-xl font-semibold tracking-widest text-led md:text-2xl';
 
 // Campo que funciona como botón de inicio de sesión: letrero en reposo, candado animado al apuntarlo y check al pulsarlo.
 export default function LedLoginField() {
-  const navigate = useNavigate();
+  const { abrir } = useLoginPanel();
   const [done, setDone] = useState(false);
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  function go(e: React.MouseEvent) {
-    e.preventDefault();
+  function go() {
     if (done) return;
     setDone(true);
-    timer.current = window.setTimeout(() => navigate('/login'), 900);
+    // Tras el «check», se abre el panel sobre el pie y el campo vuelve a su estado normal.
+    timer.current = window.setTimeout(() => {
+      abrir('elegir');
+      setDone(false);
+    }, 900);
   }
 
   const fade = 'absolute inset-0 transition-opacity duration-300';
   return (
-    <Link
-      to="/login"
+    <button
+      type="button"
+      aria-haspopup="dialog"
       onClick={go}
       className={`group relative block h-14 w-full overflow-hidden rounded-2xl border bg-superficie transition-shadow duration-300 md:h-16 ${
         done ? 'led-glow border-led' : 'border-led/55 led-glow-soft hover:led-glow hover:border-led focus-visible:led-glow'
@@ -56,7 +60,7 @@ export default function LedLoginField() {
         <div className="crt-scan absolute inset-0" />
       </div>
       <span className="sr-only">Inicia sesión</span>
-      <span role="status" className="sr-only">{done ? 'Abriendo inicio de sesión' : ''}</span>
-    </Link>
+      <span role="status" className="sr-only">{done ? 'Abriendo el panel de inicio de sesión' : ''}</span>
+    </button>
   );
 }

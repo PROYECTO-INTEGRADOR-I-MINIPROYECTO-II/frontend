@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import FondoSprites from './FondoSprites';
 import Footer from './footer/Footer';
 import Header from './header/Header';
+import { LoginPanelProvider } from './footer/loginPanelContext';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -20,6 +21,7 @@ export default function Layout() {
   }, [pathname]);
 
   return (
+    <LoginPanelProvider>
     <div className="relative flex min-h-screen flex-col pb-[var(--footer-h,0px)]">
       <a
         href="#contenido"
@@ -34,5 +36,6 @@ export default function Layout() {
       </main>
       <Footer />
     </div>
+    </LoginPanelProvider>
   );
 }

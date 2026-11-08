@@ -1,0 +1,91 @@
+/* Efectos de texto y movimiento «por pasos» reutilizables (estética pixel). Cada uno respeta «reducir movimiento»; «Pausar animaciones» está en pausa.css. */
+/* Animaciones «por pasos» (estética pixel): saltos marcados y de poco desplazamiento. */
+@keyframes flotar {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-3px); }
+  50% { transform: translateY(-6px); }
+  75% { transform: translateY(-3px); }
+}
+@keyframes flecha {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(4px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(4px); }
+  80% { transform: translateX(0); }
+}
+@keyframes sprites-scroll {
+  to { transform: translateX(-50%); }
+}
+@layer utilities {
+  .sprite-fade {
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+}
+
+/* Ondulación de las letras de «Iniciar sesión» (cuenta): salto corto de 2 px por pasos, en cadena. */
+@keyframes letra {
+  0% { transform: translateY(0); }
+  8% { transform: translateY(-2px); }
+  16%, 100% { transform: translateY(0); }
+}
+/* El panel de inicio de sesión sube desde el pie en 4 pasos (estética pixel). */
+@keyframes panel-subir {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Capa oscura detrás de un diálogo: aparece con un fundido corto. */
+@keyframes telon-entrar {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Texto clicable (TextoVivo): línea fija debajo. Al apuntarlo o enfocarlo (dentro de un .group) el texto pasa al morado de
+   acento (siempre, sin animación) y, si las animaciones están activas, además se eleva sobre la línea en bucle por pasos.
+   El ciclo empieza ya elevado para que la respuesta sea inmediata. Con «Pausar animaciones» o «reducir movimiento»
+   (el primero ya anula toda animación en este archivo) queda solo el cambio de color. */
+.vivo { position: relative; display: inline-block; padding-bottom: 3px; }
+.vivo::after { content: ''; position: absolute; inset-inline: 0; bottom: 0; height: 1px; background: currentColor; }
+.vivo-t { display: inline-block; }
+@keyframes vivo-elevar {
+  0%, 45% { transform: translateY(-3px); }
+  46%, 100% { transform: translateY(0); }
+}
+.group:focus-visible .vivo { color: var(--color-acento-claro); }
+.group:focus-visible .vivo-t { animation: vivo-elevar 0.9s steps(1) infinite; }
+@media (hover: hover) {
+  .group:hover .vivo { color: var(--color-acento-claro); }
+  .group:hover .vivo-t { animation: vivo-elevar 0.9s steps(1) infinite; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .group:is(:hover, :focus-visible) .vivo-t { animation: none; }
+}
+
+/* Icono de Google armándose: líneas horizontales que entran por los lados, solo en horizontal, por pasos y una sola vez. */
+.google-fila { display: block; image-rendering: pixelated; animation: g-fila 1.2s steps(8, end) both; animation-delay: var(--retraso); }
+@keyframes g-fila {
+  from { transform: translateX(var(--dx)); }
+  to { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .google-fila { animation: none; }
+}
+
+/* Error de Google: el icono rojo aparece ya inclinado 8° en sentido horario (sin animación). */
+.google-error { image-rendering: pixelated; transform: rotate(8deg); }
+
+/* Campo de username: el cursor parpadea por pasos; al comprobar la disponibilidad el texto pasa a gris una sola vez (transición lineal,
+   sin bucle) mientras la etiqueta muestra puntos; si el username es válido queda en verde con un brillo que respira. Con
+   «Pausar animaciones» (que anula animaciones y transiciones) o «reducir movimiento» el gris y el brillo quedan fijos. */
+/* Cursor del campo activo: 0,8 s encendido y 0,8 s apagado. */
+.cursor-campo { animation: led-cursor 1.6s steps(1) infinite; }
+.username-verificando { color: color-mix(in srgb, var(--color-texto) 45%, transparent); transition: color 0.5s linear; }
+@keyframes username-brillo {
+  from { text-shadow: 0 0 4px color-mix(in srgb, var(--color-exito) 45%, transparent); }
+  to { text-shadow: 0 0 12px color-mix(in srgb, var(--color-exito) 80%, transparent); }
+}
+.username-valido { color: var(--color-exito); text-shadow: 0 0 8px color-mix(in srgb, var(--color-exito) 60%, transparent); animation: username-brillo 1.6s linear infinite alternate; }
+@media (prefers-reduced-motion: reduce) {
+  .cursor-campo, .username-valido { animation: none; }
+  .username-verificando { transition: none; }
+}
