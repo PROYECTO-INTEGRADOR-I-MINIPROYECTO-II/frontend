@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { cerrarSesionDemo, guardarSesionDemo, useSession } from '../../../auth/useSession';
+import { cerrarSesion, useSession } from '../../../auth/useSession';
 import { sugerirUsername } from '../../../auth/validaciones';
 import { useAccesoGoogle } from '../../../auth/useAccesoGoogle';
 import Dialogo from '../../../utils/ui/Dialogo';
@@ -64,7 +64,6 @@ export default function LoginPanel() {
 
   // Crear la cuenta (simulado hasta el Sprint 1: Firebase y la API). La cuenta nace con el nombre igual al username; luego se personaliza.
   function crearCuenta(datos: InicialPerfil, correo?: string, google = false) {
-    guardarSesionDemo({ ...datos, correo, google, creadaConGoogle: google });
     irACreando(datos, correo);
   }
   const form = useFormularioAcceso(registro, ({ username, correo }) => crearCuenta({ username, nombres: username, apellidos: '', foto: null }, correo));
@@ -76,15 +75,14 @@ export default function LoginPanel() {
   }
   // Desvincular Google (simulado; en Firebase es unlink): la cuenta sigue con su correo y contraseña. El icono del resumen vuelve a gris.
   function desvincular() {
-    if (user) guardarSesionDemo({ ...user, google: false });
     irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo);
   }
-  // Cerrar sesión (simulado): borra la cuenta guardada y vuelve a la portada, desde donde se puede crear otra.
-  function salir() {
+  // Cerrar sesión: vuelve a la portada y cierra la sesión de Firebase, desde donde se puede crear otra cuenta.
+  async function salir() {
     borrador.current = null;
     cerrar(false);
-    navegar('/'); // primero la ruta: si no, RutaPrivada vería la sesión vacía en /perfil y mandaría a /login
-    window.setTimeout(cerrarSesionDemo, 50);
+    navegar('/'); // primero la ruta: si no, PerfilRuta vería la sesión vacía en /perfil y mandaría a /login
+    await cerrarSesion();
   }
   // Envía el formulario de la vista actual.
   const enviarForm = () => document.querySelector<HTMLFormElement>('#panel-login form')?.requestSubmit();
@@ -101,7 +99,6 @@ export default function LoginPanel() {
     if (resultadoGoogle.estado !== 'exito') return;
     if (fase === 'vincular') {
       // Vincular: la cuenta queda marcada y se vuelve a «Editar perfil», donde el icono de Google pasa a color.
-      if (user) guardarSesionDemo({ ...user, google: true });
       irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo);
       return;
     }
@@ -178,7 +175,6 @@ export default function LoginPanel() {
   // Guardar el perfil (simulado hasta el Sprint 1). Al personalizarlo por primera vez se entra al Panel (o a la ruta que se había
   // pedido) y se cierra el panel.
   function guardarPerfil(d: DatosPerfil) {
-    guardarSesionDemo({ ...d, foto: d.foto?.startsWith('blob:') ? null : d.foto, correo: perfil.correo });
     if (perfil.modo === 'completar') {
       cerrar(false);
       navegar(desde ?? '/dashboard');
@@ -224,7 +220,6 @@ export default function LoginPanel() {
             actual={perfil.inicial.username}
             intro="Cambia el nombre de usuario único con el que te identificas en Synk. Tu nombre para mostrar no cambia."
             alConfirmar={(username) => {
-              if (user) guardarSesionDemo({ ...user, username });
               irAPerfil('editar', { ...perfil.inicial, ...(borrador.current ?? {}), username }, perfil.correo);
             }}
             opciones={lista('editarUsername')}

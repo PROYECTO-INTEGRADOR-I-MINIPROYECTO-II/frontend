@@ -7,8 +7,10 @@ import { useLoginPanel } from './loginPanelContext';
 // Entrada de cuenta del pie. Con sesión, «Cuenta» abre el panel en «Editar perfil» (o en elegir username si falta) sin cambiar de ruta,
 // así se puede abrir y cerrar las veces que se quiera; sin sesión, el texto «Iniciar sesión» (con ondulación por letra) abre el panel de acceso.
 export default function CuentaEnlace({ className = '' }: { className?: string }) {
-  const { user } = useSession();
+  const { cargando, user } = useSession();
   const { abierto, alternar, cerrar, abrirPerfil, abrirUsername } = useLoginPanel();
+
+  if (cargando) return null; // aún no se sabe si hay sesión: evita mostrar «Iniciar sesión» un instante a quien sí la tiene
 
   if (user) {
     const abrirCuenta = () => {

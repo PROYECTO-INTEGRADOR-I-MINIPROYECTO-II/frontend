@@ -20,14 +20,9 @@ VITE_API_URL=https://<api-en-render> docker compose up --build   # http://localh
 
 Las animaciones de la vista inicial (`CallPreview` y `ChatPreview`) son una ilustración: **aún no están basadas en la vista real de una Sala ni de su chat**. Hay que rehacerlas o retirarlas cuando existan esas pantallas.
 
-## Probar la vista con sesión
+## Sesión y Firebase
 
-Mientras no exista Firebase Auth (Sprint 1), `src/auth/useSession.ts` es un marcador. Con `VITE_DEMO_SESION=true` el inicio muestra el campo de passphrase activo, y el chat de demostración usa el usuario `demo`. Es una variable de build:
-
-```bash
-VITE_DEMO_SESION=true npm run dev                        # desarrollo
-VITE_DEMO_SESION=true npm run build && npm run preview   # build local
-```
+La sesión es de Firebase Auth (solo en el cliente: login y token); todos los datos pasan por la API con `Authorization: Bearer <idToken>` (`src/api/base.ts`). Copia `.env.example` a `.env.local`. Para probar sin tocar el proyecto real, levanta el emulador de Auth del backend y define `VITE_FIREBASE_AUTH_EMULATOR=http://127.0.0.1:9099`.
 
 ## Estructura de `src/`
 
@@ -61,12 +56,12 @@ La cuenta se crea con el **primer «Confirmar»**: en el registro manual el form
 - **Username:** todo username válido es también un nombre válido (sin puntos o guiones bajos repetidos), para que la asignación automática nunca falle.
 - **Cursor:** parpadea en el campo activo y en los campos vacíos (al centro); un campo con texto que no está activo no lo muestra.
 - **Nombre en blanco:** al completar el perfil el nombre puede quedar vacío (círculo «E») y se usa el username; al editar, los campos traen escritos los valores actuales y el nombre es obligatorio.
-- **Cuenta:** la sesión simulada vive en `localStorage['synk:sesion-demo']`. «Editar perfil» ofrece `Cambiar username` (vista «Editar username») y `Cerrar sesión`, que la borra y permite crear otra cuenta.
+- **Cuenta:** «Editar perfil» ofrece `Cambiar username` (vista «Editar username») y `Cerrar sesión`, que cierra la sesión de Firebase y permite crear otra cuenta.
 
 - **Completar (obligatorio):** `/registro/username`. Sin username no se puede entrar a ninguna ruta privada (`RutaPrivada` en `src/auth/`): se redirige aquí y, al terminar, se vuelve a la ruta pedida (o al Panel).
 - **Editar:** «Cuenta» (o `/perfil`) abre la misma vista con el título «Editar perfil», los datos actuales, y `[1] Guardar` / `[2] Cancelar`.
 - **La cuenta se crea al final:** en el registro manual, el correo y la contraseña solo se validan y se guardan en memoria; la cuenta y el perfil se crean juntos al confirmar el perfil. Con Google la cuenta de Firebase ya existe tras el acceso, y el perfil se completa después.
-- **Sesión simulada** (Sprint 1: Firebase): `localStorage['synk:sesion-demo']` con `{username, nombres, apellidos, foto, correo}`. Con `username: null` simula una cuenta sin perfil completo. Al terminar el perfil se guarda aquí.
+- **Sesión:** `useSession` (`src/auth/useSession.ts`) escucha a Firebase y pide el perfil a `GET /api/usuarios/yo`. Mientras `cargando` ninguna ruta redirige. `refrescarSesion()` la actualiza tras un cambio; `cerrarSesion()` la cierra.
 
 Reglas (`src/auth/validaciones.ts`; el servidor debe aplicar las mismas):
 - **Username:** 3 a 20 caracteres, sin espacios; letras sin tilde, números, punto y guion bajo. Único, sin distinguir mayúsculas.
@@ -96,11 +91,12 @@ En el Sprint 1 solo cambia el interior del hook (signInWithPopup y el mapeo de e
 | Variable | Descripción |
 |---|---|
 | `VITE_API_URL` | URL base de la API (sin `/api`). Se incrusta en el build. |
-| `VITE_DEMO_SESION` | `true` simula una sesión iniciada (solo pruebas visuales). |
+| `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID` | Configuración pública de la app web de Firebase (ver `.env.example`). |
+| `VITE_FIREBASE_AUTH_EMULATOR` | Opcional: URL del emulador de Auth (p. ej. `http://127.0.0.1:9099`) para probar en local. |
 
 ## Despliegue
 
-Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` con la URL de Render. En Render, `CORS_ORIGIN` del backend debe incluir la URL de Vercel.
+Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` con la URL de Render y las `VITE_FIREBASE_*`. En Render, `CORS_ORIGIN` del backend debe incluir la URL de Vercel.
 
 ## Scripts
 
