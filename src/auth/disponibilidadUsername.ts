@@ -1,13 +1,8 @@
-import { normalizarUsername } from './validaciones';
+import { api } from '../api/base';
 
-// ¿Está libre este username? Simulado hasta el Sprint 1, cuando se reemplaza por una consulta a la API. Aun así, la unicidad
-// real solo la puede garantizar el servidor al registrar (transacción, US-01): esta consulta es una ayuda mientras se escribe.
-// Se compara en forma canónica (sin distinguir mayúsculas).
-const OCUPADOS = ['ana', 'demo', 'root'];
-const LATENCIA_MS = 400;
-
-export function comprobarDisponibilidad(username: string): Promise<boolean> {
-  return new Promise((resolver) => {
-    window.setTimeout(() => resolver(!OCUPADOS.includes(normalizarUsername(username))), LATENCIA_MS);
-  });
+// ¿Está libre este username? Consulta a la API mientras se escribe; es solo una ayuda: la unicidad real la garantiza el servidor
+// al registrar (transacción). Si la consulta falla lanza el error y el campo sigue sin bloquearse (ver useEstadoCampo).
+export async function comprobarDisponibilidad(username: string): Promise<boolean> {
+  const { disponible } = await api<{ disponible: boolean }>(`/api/usernames/${encodeURIComponent(username)}/disponible`);
+  return disponible;
 }

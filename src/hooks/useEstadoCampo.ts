@@ -5,7 +5,8 @@ import type { Analisis } from '../auth/validaciones';
 // muy corto o, si el campo tiene `verificar`, se consulta si está libre. La comprobación dura como mínimo MIN_VERIFICANDO_MS aunque
 // la API responda antes, para que se alcance a ver, y nunca se reutiliza un resultado anterior: cada edición obliga a comprobar de nuevo.
 //   vacio · escribiendo (válido; sin `verificar` se queda aquí) · invalido · corto (tras la pausa) · verificando · disponible · ocupado
-export type EstadoCampo = 'vacio' | 'escribiendo' | 'invalido' | 'corto' | 'verificando' | 'disponible' | 'ocupado';
+//   · sin-comprobar (la consulta falló, p. ej. sin red: el campo no se bloquea, la unicidad la confirma el servidor al enviar)
+export type EstadoCampo = 'vacio' | 'escribiendo' | 'invalido' | 'corto' | 'verificando' | 'disponible' | 'ocupado' | 'sin-comprobar';
 const PAUSA_MS = 700;
 const MIN_VERIFICANDO_MS = 1500;
 
@@ -16,7 +17,7 @@ interface Opciones {
   mensajeOcupado?: (valor: string) => string;
 }
 
-type Tardio = { valor: string; estado: 'corto' | 'verificando' | 'disponible' | 'ocupado' };
+type Tardio = { valor: string; estado: 'corto' | 'verificando' | 'disponible' | 'ocupado' | 'sin-comprobar' };
 const esperar = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 
 export function useEstadoCampo(valor: string, opciones: Opciones): { estado: EstadoCampo; mensaje?: string } {
@@ -35,8 +36,12 @@ export function useEstadoCampo(valor: string, opciones: Opciones): { estado: Est
     const t = window.setTimeout(async () => {
       if (tipo === 'corto') return setTardio({ valor, estado: 'corto' });
       setTardio({ valor, estado: 'verificando' });
-      const [libre] = await Promise.all([ref.current.verificar!(limpio), esperar(MIN_VERIFICANDO_MS)]);
-      if (vigente) setTardio({ valor, estado: libre ? 'disponible' : 'ocupado' });
+      try {
+        const [libre] = await Promise.all([ref.current.verificar!(limpio), esperar(MIN_VERIFICANDO_MS)]);
+        if (vigente) setTardio({ valor, estado: libre ? 'disponible' : 'ocupado' });
+      } catch {
+        if (vigente) setTardio({ valor, estado: 'sin-comprobar' }); // que un fallo de red no deje el campo en «verificando»
+      }
     }, PAUSA_MS);
     return () => {
       vigente = false;

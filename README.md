@@ -60,7 +60,7 @@ La cuenta se crea con el **primer «Confirmar»**: en el registro manual el form
 
 - **Completar (obligatorio):** `/registro/username`. Sin username no se puede entrar a ninguna ruta privada (`RutaPrivada` en `src/auth/`): se redirige aquí y, al terminar, se vuelve a la ruta pedida (o al Panel).
 - **Editar:** «Cuenta» (o `/perfil`) abre la misma vista con el título «Editar perfil», los datos actuales, y `[1] Guardar` / `[2] Cancelar`.
-- **La cuenta se crea al final:** en el registro manual, el correo y la contraseña solo se validan y se guardan en memoria; la cuenta y el perfil se crean juntos al confirmar el perfil. Con Google la cuenta de Firebase ya existe tras el acceso, y el perfil se completa después.
+- **La cuenta se crea al primer «Confirmar»:** en el registro manual la API crea la cuenta (`POST /api/auth/registro`), se inicia sesión con ella y después se personaliza el perfil (`PATCH /api/usuarios/yo`). Los errores del servidor (correo repetido, username ocupado…) salen junto a su campo. Con Google la cuenta de Firebase ya existe tras el acceso, y el perfil se completa después.
 - **Sesión:** `useSession` (`src/auth/useSession.ts`) escucha a Firebase y pide el perfil a `GET /api/usuarios/yo`. Mientras `cargando` ninguna ruta redirige. `refrescarSesion()` la actualiza tras un cambio; `cerrarSesion()` la cierra.
 
 Reglas (`src/auth/validaciones.ts`; el servidor debe aplicar las mismas):
@@ -68,9 +68,9 @@ Reglas (`src/auth/validaciones.ts`; el servidor debe aplicar las mismas):
 - **Nombre para mostrar:** letras de cualquier idioma (con tildes y ñ), números y espacios entre palabras (uno solo, nunca al inicio); además punto, guion, guion bajo y apóstrofo sin repetirse; sin emojis, símbolos decorativos ni «<» «>»; hasta 60 caracteres entre nombres y apellidos. **No** hay comprobación de unicidad. El apellido es opcional (en Google también puede faltar).
 - En ambos se bloquean los términos que simulan ser oficiales (Admin, Soporte, Google, Verificado, Synk). Lenguaje ofensivo y suplantación de personas o marcas quedan fuera de alcance.
 
-Los campos destacados (`CampoDestacado`) validan mientras se escriben y, si el texto no cabe en una línea, bajan de renglón y reducen la letra por tramos. El botón «Aa» (en los tres campos) alterna la tipografía de todos ellos entre Press Start 2P (activado) y Geist, y se recuerda en el navegador. El username comprueba su disponibilidad (`src/auth/disponibilidadUsername.ts`, simulada: 0,4 s, y como mínimo 1,5 s de verificación visible); están «ocupados» `ana`, `demo` y `root`. En el Sprint 1 se reemplaza por la API.
+Los campos destacados (`CampoDestacado`) validan mientras se escriben y, si el texto no cabe en una línea, bajan de renglón y reducen la letra por tramos. El botón «Aa» (en los tres campos) alterna la tipografía de todos ellos entre Press Start 2P (activado) y Geist, y se recuerda en el navegador. El username comprueba su disponibilidad (`src/auth/disponibilidadUsername.ts`, consulta `GET /api/usernames/:u/disponible`; la verificación se ve como mínimo 1,5 s). Si la consulta falla (sin red) el campo no se bloquea y el servidor confirma la unicidad al enviar.
 
-La foto se valida (JPG, PNG o WebP, hasta 2 MB) y se previsualiza; la subida real llega en el Sprint 1.
+La foto se valida (JPG, PNG o WebP, hasta 2 MB) y se previsualiza. Al guardar se reduce a 256 px y se envía como `data:image/webp;base64` (`fotoParaApi` en `SelectorFoto.tsx`; la API acepta hasta 100 000 caracteres).
 
 ## Probar los estados del acceso con Google
 

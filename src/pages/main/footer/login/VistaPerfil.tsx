@@ -23,7 +23,7 @@ export default function VistaPerfil({
   /** La cuenta está vinculada con Google. */
   google?: boolean;
   inicial: InicialPerfil;
-  alGuardar: (d: DatosPerfil) => void;
+  alGuardar: (d: DatosPerfil) => Promise<void>;
   /** Avisa de si la confirmación debe estar bloqueada (hay datos con error). */
   alBloquear: (bloqueada: boolean) => void;
   alBorrador?: (d: DatosPerfil) => void;
@@ -66,6 +66,7 @@ export default function VistaPerfil({
         autoComplete="family-name"
       />
       <Mensaje tipo="info" className="text-center">{f.aviso}</Mensaje>
+      <Mensaje tipo="error" className="text-center">{f.errorGeneral}</Mensaje>
 
       {/* Las acciones quedan fijas al fondo del panel si hay scroll. */}
       <div className="sticky bottom-0 -mx-4 -mb-4 grid gap-0.5 border-t border-texto/80 bg-fondo px-4 pb-2 pt-2">{opciones}</div>

@@ -42,6 +42,7 @@ const CLASE_ESTADO: Record<EstadoCampo, string> = {
   invalido: 'text-error',
   corto: 'text-error',
   ocupado: 'text-error',
+  'sin-comprobar': 'text-texto',
 };
 const ES_ERROR = (e: EstadoCampo) => e === 'invalido' || e === 'corto' || e === 'ocupado';
 

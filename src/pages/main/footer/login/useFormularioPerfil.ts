@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { ApiError } from '../../../../api/base';
 import { analizarNombre, NOMBRE_MAX_TOTAL } from '../../../../auth/validaciones';
 import type { EstadoCampo } from '../../../../hooks/useEstadoCampo';
 import type { EstadoFoto } from '../../../../utils/ui/SelectorFoto';
@@ -20,8 +21,9 @@ interface Estados {
 
 // Estado y validación de la vista de perfil: nombres, apellidos y foto (el username se cambia en su propia vista).
 // Al completar el perfil el nombre puede quedar en blanco: se usa el username (el nombre que tiene la cuenta recién creada). Al editarlo,
-// los campos traen escritos los valores actuales y el nombre es obligatorio. Aún sin Firebase ni API (Sprint 1): `alGuardar` solo simula guardar.
-export function useFormularioPerfil({ inicial, modo, google = false, alGuardar, alBorrador }: { inicial: InicialPerfil; modo: 'completar' | 'editar'; google?: boolean; alGuardar: (d: DatosPerfil) => void; alBorrador?: (d: DatosPerfil) => void }) {
+// los campos traen escritos los valores actuales y el nombre es obligatorio. `alGuardar` guarda en la API (async): el aviso de éxito
+// solo sale si salió bien y los errores se muestran junto a su campo.
+export function useFormularioPerfil({ inicial, modo, google = false, alGuardar, alBorrador }: { inicial: InicialPerfil; modo: 'completar' | 'editar'; google?: boolean; alGuardar: (d: DatosPerfil) => Promise<void>; alBorrador?: (d: DatosPerfil) => void }) {
   const opcional = modo === 'completar';
   const [nombres, setNombres] = useState(opcional && inicial.nombres === inicial.username ? '' : inicial.nombres);
   const nombreFinal = nombres.trim() || (opcional ? inicial.username : '');
@@ -30,6 +32,8 @@ export function useFormularioPerfil({ inicial, modo, google = false, alGuardar, 
   const [estados, setEstados] = useState<Estados>({ nombres: 'vacio', apellidos: 'vacio', foto: 'sin' });
   const [errorNombres, setErrorNombres] = useState<string | undefined>();
   const [aviso, setAviso] = useState('');
+  const [errorGeneral, setErrorGeneral] = useState('');
+  const guardando = useRef(false);
   const alEstado = <K extends keyof Estados>(campo: K) => (e: Estados[K]) => setEstados((s) => (s[campo] === e ? s : { ...s, [campo]: e }));
 
   // Cuánto cabe en cada campo del nombre: el total entre nombres y apellidos es NOMBRE_MAX_TOTAL.
@@ -52,8 +56,10 @@ export function useFormularioPerfil({ inicial, modo, google = false, alGuardar, 
   // Lo escrito se recuerda por si se va a «Cambiar username» y se regresa.
   useEffect(() => alBorrador?.({ username: inicial.username, nombres: nombreFinal, apellidos, foto: foto?.startsWith('blob:') ? null : foto }), [alBorrador, inicial.username, nombreFinal, apellidos, foto]);
 
-  function enviar(e: FormEvent) {
+  async function enviar(e: FormEvent) {
     e.preventDefault();
+    if (guardando.current) return;
+    setErrorGeneral('');
     const mensaje =
       !nombreFinal.trim() ? 'Escribe tu nombre.' : estados.nombres === 'invalido' || estados.apellidos === 'invalido' ? 'Revisa tu nombre y apellidos: hay algo que corregir.' : undefined;
     setErrorNombres(mensaje);
@@ -62,8 +68,22 @@ export function useFormularioPerfil({ inicial, modo, google = false, alGuardar, 
       document.getElementById('campo-nombres')?.focus();
       return;
     }
-    alGuardar({ username: inicial.username, nombres: nombreFinal.trim(), apellidos: apellidos.trim(), foto });
-    setAviso(modo === 'editar' ? 'Cambios guardados (simulado hasta el Sprint 1).' : '');
+    guardando.current = true;
+    setAviso('Guardando…');
+    try {
+      await alGuardar({ username: inicial.username, nombres: nombreFinal.trim(), apellidos: apellidos.trim(), foto });
+      setAviso(modo === 'editar' ? 'Cambios guardados.' : '');
+    } catch (err) {
+      setAviso('');
+      const e = err instanceof ApiError ? err : null;
+      const mensaje = e?.message ?? 'No pudimos guardar tus cambios. Intenta de nuevo en un momento.';
+      if (e?.campo === 'nombres' || e?.campo === 'apellidos') {
+        setErrorNombres(mensaje);
+        document.getElementById('campo-nombres')?.focus();
+      } else setErrorGeneral(mensaje);
+    } finally {
+      guardando.current = false;
+    }
   }
 
   return {
@@ -77,6 +97,7 @@ export function useFormularioPerfil({ inicial, modo, google = false, alGuardar, 
     hayErrores,
     errorNombres,
     aviso,
+    errorGeneral,
     enviar,
   };
 }

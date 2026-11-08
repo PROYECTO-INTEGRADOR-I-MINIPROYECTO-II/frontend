@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { cerrarSesion, useSession } from '../../../auth/useSession';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { api } from '../../../api/base';
+import { auth } from '../../../firebase';
+import { cerrarSesion, refrescarSesion, useSession } from '../../../auth/useSession';
 import { sugerirUsername } from '../../../auth/validaciones';
 import { useAccesoGoogle } from '../../../auth/useAccesoGoogle';
+import { fotoParaApi } from '../../../utils/ui/SelectorFoto';
 import Dialogo from '../../../utils/ui/Dialogo';
 import OpcionNumerada from '../../../utils/retro/OpcionNumerada';
 import { useLoginPanel, type FasePanel } from './loginPanelContext';
@@ -62,11 +66,19 @@ export default function LoginPanel() {
   const desde = (state as { desde?: string } | null)?.desde;
   const [perfilBloqueado, setPerfilBloqueado] = useState(false); // hay datos con error: la confirmación queda en gris
 
-  // Crear la cuenta (simulado hasta el Sprint 1: Firebase y la API). La cuenta nace con el nombre igual al username; luego se personaliza.
-  function crearCuenta(datos: InicialPerfil, correo?: string, google = false) {
+  // Crear la cuenta con correo: la API la registra, se inicia sesión con ella y se pide el perfil. La cuenta nace con el nombre igual al
+  // username; luego se personaliza. Los errores (correo repetido, username ocupado…) los muestra el formulario junto a su campo.
+  async function crearCuentaManual({ username, correo, clave }: { username: string; correo: string; clave: string }) {
+    await api('/api/auth/registro', { method: 'POST', body: { nombres: username, apellidos: '', username, correo, clave } });
+    await signInWithEmailAndPassword(auth, correo, clave);
+    await refrescarSesion();
+    irACreando({ username, nombres: username, apellidos: '', foto: null }, correo);
+  }
+  // Crear la cuenta tras Google (simulado hasta US-02).
+  function crearCuenta(datos: InicialPerfil, correo?: string) {
     irACreando(datos, correo);
   }
-  const form = useFormularioAcceso(registro, ({ username, correo }) => crearCuenta({ username, nombres: username, apellidos: '', foto: null }, correo));
+  const form = useFormularioAcceso(registro, crearCuentaManual);
   const { limpiarAvisos } = form;
   // Cerrar el panel. Si se abrió desde el enlace directo /perfil, se vuelve a la portada para que «Cuenta» pueda abrirlo de nuevo.
   function cerrarPanel(devolverFoco?: boolean) {
@@ -172,9 +184,11 @@ export default function LoginPanel() {
       </OpcionNumerada>
     ));
 
-  // Guardar el perfil (simulado hasta el Sprint 1). Al personalizarlo por primera vez se entra al Panel (o a la ruta que se había
-  // pedido) y se cierra el panel.
-  function guardarPerfil(d: DatosPerfil) {
+  // Guardar el perfil en la API (la foto elegida se reduce antes de enviarla). Al personalizarlo por primera vez se entra al Panel
+  // (o a la ruta que se había pedido) y se cierra el panel. Si falla, el error sube al formulario.
+  async function guardarPerfil(d: DatosPerfil) {
+    await api('/api/usuarios/yo', { method: 'PATCH', body: { nombres: d.nombres, apellidos: d.apellidos, foto: await fotoParaApi(d.foto) } });
+    await refrescarSesion();
     if (perfil.modo === 'completar') {
       cerrar(false);
       navegar(desde ?? '/dashboard');
@@ -209,10 +223,10 @@ export default function LoginPanel() {
         className={`${COLOCACION} overflow-y-auto font-sans text-sm leading-6 tracking-normal motion-safe:animate-panel`}
       >
         {fase === 'elegir' && <VistaElegir irA={irA} opciones={lista('elegir')} />}
-        {(fase === 'manual' || registro) && <VistaFormulario registro={registro} form={form} opciones={lista(fase)} />}
+        {(fase === 'manual' || registro) && <VistaFormulario registro={registro} form={form} opciones={lista(fase, form.enviando ? ['1'] : [])} />}
         {fase === 'google' && <VistaGoogle resultado={google.resultado} opciones={lista('google')} />}
         {fase === 'vincular' && <VistaGoogle vincular resultado={google.resultado} opciones={lista('vincular')} />}
-        {fase === 'username' && <VistaUsername key={perfil.clave} inicial={perfil.inicial.username} intro="Tu cuenta está lista. Elige tu username: es el nombre de usuario único con el que te identificas en Synk." alConfirmar={(username) => crearCuenta({ ...perfil.inicial, username, nombres: perfil.inicial.nombres || username }, perfil.correo, user?.google ?? true)} opciones={lista('username')} />}
+        {fase === 'username' && <VistaUsername key={perfil.clave} inicial={perfil.inicial.username} intro="Tu cuenta está lista. Elige tu username: es el nombre de usuario único con el que te identificas en Synk." alConfirmar={(username) => crearCuenta({ ...perfil.inicial, username, nombres: perfil.inicial.nombres || username }, perfil.correo)} opciones={lista('username')} />}
         {fase === 'editarUsername' && (
           <VistaUsername
             key={perfil.clave}

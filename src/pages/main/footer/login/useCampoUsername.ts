@@ -20,9 +20,10 @@ export function useCampoUsername(id: string, inicial = '', actual?: string) {
   /** Valida al enviar: true si se puede continuar; si no, muestra el error y lleva el foco al campo. */
   function validar(): boolean {
     let mensaje: string | undefined;
+    // «sin-comprobar»: la consulta falló; se deja continuar y el servidor confirma la unicidad al enviar.
     if (estado === 'vacio') mensaje = 'Escribe tu username.';
     else if (estado === 'verificando' || estado === 'escribiendo') mensaje = 'Espera un momento: estamos comprobando tu username.';
-    else if (estado !== 'disponible') mensaje = analizarUsername(valor.trim()).mensaje ?? 'Ese username ya está en uso. Prueba con otro.';
+    else if (estado !== 'disponible' && estado !== 'sin-comprobar') mensaje = analizarUsername(valor.trim()).mensaje ?? 'Ese username ya está en uso. Prueba con otro.';
     setError(mensaje);
     if (mensaje) document.getElementById(id)?.focus();
     return !mensaje;
@@ -30,7 +31,13 @@ export function useCampoUsername(id: string, inicial = '', actual?: string) {
 
   const verificar = (v: string) => (actual && normalizarUsername(v) === normalizarUsername(actual) ? Promise.resolve(true) : comprobarDisponibilidad(v));
 
-  return { id, valor, cambiar, estado, alEstado, error, validar, verificar };
+  /** Para errores que vienen del servidor (p. ej. username ocupado al enviar): se muestran junto al campo y con el foco. */
+  function ponerError(mensaje: string) {
+    setError(mensaje);
+    document.getElementById(id)?.focus();
+  }
+
+  return { id, valor, cambiar, estado, alEstado, error, validar, ponerError, verificar };
 }
 
 export type CampoUsernameEstado = ReturnType<typeof useCampoUsername>;
