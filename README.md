@@ -61,6 +61,7 @@ La cuenta se crea con el **primer «Confirmar»**: en el registro manual el form
 - **Completar (obligatorio):** `/registro/username`. Sin username no se puede entrar a ninguna ruta privada (`RutaPrivada` en `src/auth/`): se redirige aquí y, al terminar, se vuelve a la ruta pedida (o al Panel).
 - **Editar:** «Cuenta» (o `/perfil`) abre la misma vista con el título «Editar perfil», los datos actuales, y `[1] Guardar` / `[2] Cancelar`.
 - **La cuenta se crea al primer «Confirmar»:** en el registro manual la API crea la cuenta (`POST /api/auth/registro`), se inicia sesión con ella y después se personaliza el perfil (`PATCH /api/usuarios/yo`). Los errores del servidor (correo repetido, username ocupado…) salen junto a su campo. Con Google la cuenta de Firebase ya existe tras el acceso, y el perfil se completa después.
+- **Iniciar sesión:** correo y contraseña con `signInWithEmailAndPassword` («Ingresando…» con el envío bloqueado). Si no coinciden, el aviso es siempre «Correo o contraseña incorrectos» (no dice cuál falló). Entra a la ruta pedida (`state.desde`) o a `/dashboard`. **Cerrar sesión** cierra la de Firebase y vuelve a la portada; con «atrás», `RutaPrivada` exige sesión y lleva a `/login`.
 - **Sesión:** `useSession` (`src/auth/useSession.ts`) escucha a Firebase y pide el perfil a `GET /api/usuarios/yo`. Mientras `cargando` ninguna ruta redirige. `refrescarSesion()` la actualiza tras un cambio; `cerrarSesion()` la cierra.
 
 Reglas (`src/auth/validaciones.ts`; el servidor debe aplicar las mismas):
