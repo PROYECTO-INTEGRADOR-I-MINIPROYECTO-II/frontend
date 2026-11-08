@@ -1,21 +1,35 @@
 import { UserRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { useSession } from '../../../auth/useSession';
+import { sugerirUsername } from '../../../auth/validaciones';
 import TextoOndulante from '../../../utils/retro/TextoOndulante';
 import { useLoginPanel } from './loginPanelContext';
 
-// Entrada de cuenta del pie: icono «Cuenta» con sesión; sin sesión, el texto «Iniciar sesión» (con ondulación por letra)
-// que abre el panel de inicio de sesión sobre el pie.
+// Entrada de cuenta del pie. Con sesión, «Cuenta» abre el panel en «Editar perfil» (o en elegir username si falta) sin cambiar de ruta,
+// así se puede abrir y cerrar las veces que se quiera; sin sesión, el texto «Iniciar sesión» (con ondulación por letra) abre el panel de acceso.
 export default function CuentaEnlace({ className = '' }: { className?: string }) {
   const { user } = useSession();
-  const { abierto, alternar } = useLoginPanel();
+  const { abierto, alternar, cerrar, abrirPerfil, abrirUsername } = useLoginPanel();
 
   if (user) {
+    const abrirCuenta = () => {
+      if (abierto) return cerrar();
+      const datos = { nombres: user.nombres, apellidos: user.apellidos, foto: user.foto };
+      if (user.username) abrirPerfil('editar', { username: user.username, ...datos }, user.correo);
+      else abrirUsername({ username: sugerirUsername(user.nombres, user.apellidos), ...datos }, user.correo);
+    };
     return (
-      <Link to="/perfil" className={`inline-flex items-center gap-2 ${className}`}>
+      <button
+        type="button"
+        data-login-opener
+        aria-haspopup="dialog"
+        aria-expanded={abierto}
+        aria-controls="panel-login"
+        onClick={abrirCuenta}
+        className={`inline-flex items-center gap-2 text-left ${className}`}
+      >
         <UserRound aria-hidden="true" className="size-5" />
         Cuenta
-      </Link>
+      </button>
     );
   }
 

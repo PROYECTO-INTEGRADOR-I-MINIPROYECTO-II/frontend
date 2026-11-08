@@ -55,7 +55,7 @@ export default function LoginPanel() {
     borrador.current = d;
   }, []);
   const navegar = useNavigate();
-  const { state } = useLocation();
+  const { state, pathname } = useLocation();
   const desde = (state as { desde?: string } | null)?.desde;
   const [perfilBloqueado, setPerfilBloqueado] = useState(false); // hay datos con error: la confirmación queda en gris
 
@@ -66,6 +66,11 @@ export default function LoginPanel() {
   }
   const form = useFormularioAcceso(registro, ({ username, correo }) => crearCuenta({ username, nombres: username, apellidos: '', foto: null }, correo));
   const { limpiarAvisos } = form;
+  // Cerrar el panel. Si se abrió desde el enlace directo /perfil, se vuelve a la portada para que «Cuenta» pueda abrirlo de nuevo.
+  function cerrarPanel(devolverFoco?: boolean) {
+    cerrar(devolverFoco);
+    if (pathname === '/perfil') navegar('/', { replace: true });
+  }
   // Cerrar sesión (simulado): borra la cuenta guardada y vuelve a la portada, desde donde se puede crear otra.
   function salir() {
     borrador.current = null;
@@ -128,7 +133,7 @@ export default function LoginPanel() {
       perfil.modo === 'editar'
         ? [
             { tecla: '1', contenido: 'Guardar', enviar: true },
-            { tecla: '2', contenido: 'Cancelar', accion: () => cerrar() },
+            { tecla: '2', contenido: 'Cancelar', accion: () => cerrarPanel() },
             { tecla: '3', contenido: 'Cambiar username', accion: () => irAEditarUsername({ ...perfil.inicial, ...(borrador.current ?? {}), username: perfil.inicial.username }, perfil.correo) },
             { tecla: '4', contenido: 'Cerrar sesión', accion: salir },
           ]
@@ -172,7 +177,7 @@ export default function LoginPanel() {
         id="panel-login"
         titulo={fase === 'perfil' && perfil.modo === 'editar' ? 'Editar perfil' : TITULOS[fase]}
         modal
-        onCerrar={cerrar}
+        onCerrar={cerrarPanel}
         onTecla={alTeclear}
         reenfocar={fase === 'google' ? `${fase}-${google.resultado.estado}` : fase}
         ignorarClic="[data-login-opener]"
