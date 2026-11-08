@@ -51,7 +51,7 @@ El panel de acceso se comporta como un diálogo modal (el foco queda dentro; Esc
 La cuenta se crea con el **primer «Confirmar»**: en el registro manual el formulario pide username, correo, contraseña y confirmación; con Google, tras el acceso se elige el username (llega uno sugerido, hay que confirmarlo). La cuenta nace con el **nombre para mostrar igual al username**, una transición «Creando tu cuenta → Cuenta creada» lo indica y sigue la vista «Completa tu perfil», que solo personaliza (por eso ya no hay «Volver atrás»).
 
 - **Perfil:** de arriba abajo: resumen de 3 círculos (nombre, apellido, foto), foto grande, el nombre completo en vista previa y los campos separados por líneas. Se usa «Nombre/s» y «Apellido/s». ✓ válido, ✗ error, «E» gris opcional vacío. Con un ✗, `[1] Confirmar` queda en gris. Al nacer el nombre igual al username, se puede confirmar enseguida con apellido y foto vacíos.
-- **Editar perfil** («Cuenta» del pie, o el enlace directo `/perfil`): igual, con `[3] Vincular con Google` o, si ya está vinculada, `[3] Desvincular de Google`; después `Cambiar username` y `Cerrar sesión`. Vincular abre la vista de Google en modo «Vincular con Google» y, al salir bien, marca la cuenta y vuelve al perfil; desvincular es inmediato. Una cuenta creada con Google no ofrece desvincular (es su único método de acceso; en Firebase `unlink` no deja quitarlo).
+- **Editar perfil** («Cuenta» del pie, o el enlace directo `/perfil`): igual, con `[3] Vincular con Google` o, si ya está vinculada, `[3] Desvincular de Google`; después `Cambiar username` y `Cerrar sesión`. Vincular abre la vista de Google en modo «Vincular con Google» y, al salir bien, vuelve al perfil con el icono en color; desvincular llama a la API. Una cuenta creada con Google no ofrece desvincular (es su único método de acceso; en Firebase `unlink` no deja quitarlo).
 - **Icono de Google en el resumen:** gris si la cuenta no está vinculada, con sus colores si lo está. Al editar siempre se ve; al completar solo si la cuenta ya viene de Google (ahí no se ofrece vincular).
 - **Username:** todo username válido es también un nombre válido (sin puntos o guiones bajos repetidos), para que la asignación automática nunca falle.
 - **Cursor:** parpadea en el campo activo y en los campos vacíos (al centro); un campo con texto que no está activo no lo muestra.
@@ -72,19 +72,9 @@ Los campos destacados (`CampoDestacado`) validan mientras se escriben y, si el t
 
 La foto se valida (JPG, PNG o WebP, hasta 2 MB) y se previsualiza. Al guardar se reduce a 256 px y se envía como `data:image/webp;base64` (`fotoParaApi` en `SelectorFoto.tsx`; la API acepta hasta 100 000 caracteres).
 
-## Probar los estados del acceso con Google
+## Acceso con Google
 
-Mientras no esté Firebase (Sprint 1), `src/auth/useAccesoGoogle.ts` simula el resultado: tras ~2,6 s falla con «no disponible». Para ver cada estado basta añadir `?google=` a la URL y abrir la opción de Google del panel (por ejemplo `/registro?google=cuenta-existente`):
-
-| Valor | Resultado |
-| --- | --- |
-| `espera` | se queda esperando (el icono armado) |
-| `exito` | acceso correcto, sin foto en la cuenta (lleva a «Completa tu perfil» rellena) |
-| `exito-foto`, `exito-sin-apellido` | igual, pero la cuenta trae foto / no trae apellido |
-| `cancelado`, `bloqueado`, `cuenta-existente`, `red` | error con su explicación |
-| (sin valor) | error «no disponible» |
-
-En el Sprint 1 solo cambia el interior del hook (signInWithPopup y el mapeo de errores de Firebase); la interfaz no se toca. Este parámetro debería quitarse o limitarse a desarrollo en el repo oficial.
+`src/auth/useAccesoGoogle.ts` abre la ventana de Google (`signInWithPopup`; con «Vincular», `linkWithPopup`) y después pide el perfil a la API. La interfaz solo conoce el resultado: éxito (con el `username` si la cuenta ya lo tiene; entonces entra directo, si no se le pide elegirlo) o error con un motivo (`cancelado`, `bloqueado`, `cuenta-existente`, `red`, `no-disponible`) que se explica en palabras. Elegir o cambiar el username usa `PUT /api/usuarios/yo/username`; desvincular, `DELETE /api/usuarios/yo/proveedores/google` (si Google es el único método de acceso, la API lo rechaza y se explica en el perfil). Con el emulador de Auth la ventana de Google ofrece cuentas falsas.
 
 ## Variables de entorno
 
