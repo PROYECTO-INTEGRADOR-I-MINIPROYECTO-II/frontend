@@ -1,21 +1,13 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { useLoginPanel, type FasePanel } from '../main/footer/loginPanelContext';
+import Inicio from '../inicio/Inicio';
 
-// Marcador del Sprint 1. La creación de cuenta vive aquí y no en la portada.
-export default function Login() {
-  useDocumentTitle('Ingresar');
-
-  return (
-    <div className="mx-auto max-w-md px-5 py-16 text-center">
-      <h1 className="text-4xl font-semibold tracking-tight">Ingresar</h1>
-      <p className="mt-3 text-texto-secundario">Entra a tu cuenta para ver tus Salas.</p>
-      <p className="mt-6 rounded-xl bg-primario-suave p-4 text-texto-secundario">
-        El formulario estará disponible en el Sprint 1.
-      </p>
-      <p className="mt-8 text-texto-secundario">
-        ¿No tienes cuenta?{' '}
-        <Link to="/registro" className="text-texto underline underline-offset-4">Crear cuenta</Link>
-      </p>
-    </div>
-  );
+// /login y /registro muestran la portada con el panel de inicio de sesión abierto en la fase correspondiente
+// (el panel vive en el pie). Así «ir al login» sigue siendo una URL válida, p. ej. al abrir una ruta privada sin sesión.
+export default function Login({ fase }: { fase: FasePanel }) {
+  const { abrir } = useLoginPanel();
+  useDocumentTitle(fase === 'registro' ? 'Crear cuenta' : 'Iniciar sesión');
+  useEffect(() => abrir(fase), [abrir, fase]);
+  return <Inicio />;
 }

@@ -1,0 +1,84 @@
+/* Efecto LED / CRT: letrero, candado, campo de passphrase y brillo. */
+@keyframes led-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer utilities {
+  .led-mask {
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--color-led) 70%, transparent);
+  }
+  .led-dots {
+    background: radial-gradient(circle at center, transparent 0 0.9px, #000 1.3px) 0 0 / 3px 3px;
+    opacity: 0.55;
+  }
+}
+
+/* Campo LED de inicio de sesión: el candado alterna cerrado/abierto mientras el puntero (o el foco) está encima. */
+@keyframes lock-closed {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes lock-open {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+@layer utilities {
+  .lock-closed { animation: lock-closed 1.2s steps(1) infinite; }
+  .lock-open { animation: lock-open 1.2s steps(1) infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .lock-closed { animation: none; opacity: 0; }
+    .lock-open { animation: none; opacity: 1; }
+  }
+}
+
+/* Efecto CRT: líneas de barrido y parpadeo leve del fósforo. */
+@keyframes led-flicker {
+  0%, 100% { opacity: 1; }
+  47% { opacity: 1; }
+  50% { opacity: 0.82; }
+  53% { opacity: 1; }
+  80% { opacity: 0.92; }
+}
+@layer utilities {
+  .crt-scan {
+    background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.3) 2px 3px);
+    pointer-events: none;
+  }
+  .led-flicker { animation: led-flicker 2.4s linear infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .led-flicker { animation: none; }
+  }
+}
+
+@layer utilities {
+  .led-text { text-shadow: 0 0 8px color-mix(in srgb, var(--color-led) 70%, transparent); }
+}
+
+/* @utility (y no @layer) para que acepte variantes como hover: y focus:. */
+@utility led-glow {
+  box-shadow: 0 0 0 1px var(--color-led), 0 0 18px 2px color-mix(in srgb, var(--color-led) 55%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--color-led) 25%, transparent);
+}
+
+/* Brillo intermedio (reposo): entre el apagado y el encendido (led-glow). */
+@utility led-glow-soft {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-led) 45%, transparent),
+    0 0 10px 1px color-mix(in srgb, var(--color-led) 25%, transparent),
+    inset 0 0 8px color-mix(in srgb, var(--color-led) 12%, transparent);
+}
+
+@keyframes led-cursor {
+  50% { opacity: 0; }
+}
+@layer utilities {
+  .led-cursor {
+    animation: led-cursor 1.1s steps(1) infinite;
+    box-shadow: 0 0 10px 1px color-mix(in srgb, var(--color-led) 60%, transparent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .led-cursor { animation: none; }
+  }
+}

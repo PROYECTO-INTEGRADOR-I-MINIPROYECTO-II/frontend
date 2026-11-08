@@ -1,10 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import TextoVivo from '../../../utils/retro/TextoVivo';
 import CuentaEnlace from './CuentaEnlace';
+import LoginPanel from './LoginPanel';
+import { useLoginPanel } from './loginPanelContext';
 import univalleLogo from '../../../assets/univalle-logo.png';
 
-const tab = 'underline underline-offset-4 hover:text-texto-secundario';
 
 const ENLACES = [
   { to: '/estado', texto: 'Estado del sistema' },
@@ -32,6 +34,7 @@ export default function Footer() {
   const ref = useRef<HTMLElement>(null);
   const [abierto, setAbierto] = useState(false);
   const { pathname } = useLocation();
+  const panel = useLoginPanel();
 
   // El panel va fijo sobre el borde inferior; publica su alto para que el contenido deje ese espacio libre.
   useLayoutEffect(() => {
@@ -45,6 +48,10 @@ export default function Footer() {
   }, []);
 
   useEffect(() => setAbierto(false), [pathname]);
+  // Al abrir el panel de inicio de sesión, el menú del pie (móvil) se cierra para no encimarse.
+  useEffect(() => {
+    if (panel.abierto) setAbierto(false);
+  }, [panel.abierto]);
 
   useEffect(() => {
     if (!abierto) return;
@@ -56,14 +63,14 @@ export default function Footer() {
   return (
     <footer ref={ref} className="fixed inset-x-0 bottom-0 z-10 bg-fondo">
       <div className="px-5 pb-4 sm:px-8">
-        <div className="relative border-t border-texto/80 pt-3 font-monokuro text-[11px] leading-5">
+        <div className="relative border-t border-texto/80 pt-3 font-pixel text-[11px] leading-5">
           {/* Ancho: enlaces repartidos en toda la fila. */}
           <nav aria-label="Pie de página" className="hidden md:block">
             <ul className="flex items-center justify-between gap-6">
-              <li><CuentaEnlace className={tab} /></li>
+              <li><CuentaEnlace /></li>
 
               {ENLACES.map((e) => (
-                <li key={e.to}><Link to={e.to} className={tab}>{e.texto}</Link></li>
+                <li key={e.to}><Link to={e.to} className="group"><TextoVivo>{e.texto}</TextoVivo></Link></li>
               ))}
               
               <li><Etiqueta /></li>
@@ -94,13 +101,14 @@ export default function Footer() {
               <li className="border-b border-borde"><CuentaEnlace className="block py-3" /></li>
               {ENLACES.map((e) => (
                 <li key={e.to} className="border-b border-borde last:border-0">
-                  <Link to={e.to} className="block py-3">
-                    <span className={tab}>{e.texto}</span>
+                  <Link to={e.to} className="group block py-3">
+                    <TextoVivo>{e.texto}</TextoVivo>
                   </Link>
                 </li>
               ))}
             </ul>
           </nav>
+          <LoginPanel />
         </div>
       </div>
     </footer>

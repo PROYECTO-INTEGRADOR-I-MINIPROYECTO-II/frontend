@@ -1,37 +1,52 @@
 import { UserRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { useSession } from '../../../auth/useSession';
+import { sugerirUsername } from '../../../auth/validaciones';
+import TextoOndulante from '../../../utils/retro/TextoOndulante';
+import { useLoginPanel } from './loginPanelContext';
 
-const ETIQUETA = 'Iniciar sesión';
-
-// Entrada de cuenta del pie: icono «Cuenta» con sesión; sin sesión, el texto «Iniciar sesión»
-// con una ondulación por letra (en pasos, de poca amplitud) para que se distinga del resto.
+// Entrada de cuenta del pie. Con sesión, «Cuenta» abre el panel en «Editar perfil» (o en elegir username si falta) sin cambiar de ruta,
+// así se puede abrir y cerrar las veces que se quiera; sin sesión, el texto «Iniciar sesión» (con ondulación por letra) abre el panel de acceso.
 export default function CuentaEnlace({ className = '' }: { className?: string }) {
   const { user } = useSession();
+  const { abierto, alternar, cerrar, abrirPerfil, abrirUsername } = useLoginPanel();
 
   if (user) {
+    const abrirCuenta = () => {
+      if (abierto) return cerrar();
+      const datos = { nombres: user.nombres, apellidos: user.apellidos, foto: user.foto };
+      if (user.username) abrirPerfil('editar', { username: user.username, ...datos }, user.correo);
+      else abrirUsername({ username: sugerirUsername(user.nombres, user.apellidos), ...datos }, user.correo);
+    };
     return (
-      <Link to="/perfil" className={`inline-flex items-center gap-2 ${className}`}>
+      <button
+        type="button"
+        data-login-opener
+        aria-haspopup="dialog"
+        aria-expanded={abierto}
+        aria-controls="panel-login"
+        onClick={abrirCuenta}
+        className={`inline-flex items-center gap-2 text-left ${className}`}
+      >
         <UserRound aria-hidden="true" className="size-5" />
         Cuenta
-      </Link>
+      </button>
     );
   }
 
   return (
-    <Link to="/login" className={`group ${className}`}>
-      <span className="sr-only">{ETIQUETA}</span>
-      <span aria-hidden="true" className="relative inline-flex pb-[3px] text-[color-mix(in_srgb,var(--color-acento)_60%,white)] transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-current group-hover:text-texto-secundario group-focus-visible:text-texto-secundario">
-        {[...ETIQUETA].map((c, i) => (
-          <span
-            key={i}
-            className="inline-block whitespace-pre motion-safe:animate-letra"
-            style={{ animationDelay: `${i * 90}ms` }}
-          >
-            {c}
-          </span>
-        ))}
-      </span>
-    </Link>
+    <button
+      type="button"
+      data-login-opener
+      aria-haspopup="dialog"
+      aria-expanded={abierto}
+      aria-controls="panel-login"
+      onClick={alternar}
+      className={`group text-left ${className}`}
+    >
+      <TextoOndulante
+        texto="Iniciar sesión"
+        className="text-acento-claro transition-colors group-hover:text-texto group-focus-visible:text-texto"
+      />
+    </button>
   );
 }

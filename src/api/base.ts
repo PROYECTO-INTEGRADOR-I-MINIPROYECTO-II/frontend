@@ -26,5 +26,11 @@ export async function fetchBase(signal?: AbortSignal): Promise<BaseInfo> {
     const body = await res.json().catch(() => null);
     throw new ApiError(body?.error?.message ?? `Error ${res.status} al consultar la API.`, res.status);
   }
-  return res.json();
+  // Una respuesta 200 que no es JSON (p. ej. el index.html de la propia web cuando VITE_API_URL no apunta a la API) no debe llegar
+  // como un error de parseo: se explica en palabras y cuenta como «la API no respondió».
+  try {
+    return await res.json();
+  } catch {
+    throw new ApiError('El servidor respondió algo que no esperábamos. Intenta de nuevo en un momento.');
+  }
 }

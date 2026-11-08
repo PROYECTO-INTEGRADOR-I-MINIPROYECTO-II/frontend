@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import TextoVivo from '../../utils/retro/TextoVivo';
 import { ApiError, BaseInfo, fetchBase } from '../../api/base';
-import { BarraRetro, BotonRetro, PuntosAnimados, RetroWindow } from '../../utils/retro/RetroWindow';
+import { BarraRetro, PuntosAnimados, RetroWindow } from '../../utils/retro/RetroWindow';
+import Boton from '../../utils/ui/Boton';
+import Mensaje from '../../utils/ui/Mensaje';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 type State =
@@ -64,13 +67,13 @@ export default function Estado() {
         heading="Estado del sistema"
         title={
           <nav aria-label="Ruta de navegación">
-            <Link to="/" className="underline underline-offset-4 hover:text-texto-secundario">Inicio</Link> /{' '}
+            <Link to="/" className="group"><TextoVivo>Inicio</TextoVivo></Link> /{' '}
             <span aria-current="page">Estado del sistema</span>
           </nav>
         }
       >
         <h2 className="sr-only">Dato desde Firestore</h2>
-        <div aria-live="polite" className="text-center font-pixel text-lg">
+        <div aria-live="polite" className="text-center text-sm leading-6">
           {state.status === 'loading' && (
             <p>
               <span className="sr-only">Cargando desde Firestore</span>
@@ -91,10 +94,9 @@ export default function Estado() {
             </>
           )}
           {state.status === 'error' && (
-            <div role="alert">
-              <p className="text-error">No pudimos conectar con la base de datos</p>
-              <p className="mt-2 text-sm text-texto-secundario">{state.message} Si el problema sigue, revisa tu conexión.</p>
-            </div>
+            <Mensaje tipo="error" titulo="No pudimos conectar con la base de datos">
+              {state.message} Si el problema sigue, revisa tu conexión.
+            </Mensaje>
           )}
         </div>
 
@@ -105,7 +107,7 @@ export default function Estado() {
           />
         </div>
 
-        <ul className="mt-5 space-y-3 font-pixel text-base">
+        <ul className="mt-5 space-y-3 font-pixel text-xs leading-6">
           <Fila estado="ok" label="Aplicación web (Vercel)" />
           <Fila estado={apiOk} label="API (Render)" />
           <Fila estado={dbOk} label="Base de datos (Firestore)" />
@@ -113,7 +115,7 @@ export default function Estado() {
 
         {!cargando && (
           <div className="mt-8 flex justify-center">
-            <BotonRetro onClick={retry}>{state.status === 'error' ? 'Reintentar' : 'Recargar dato'}</BotonRetro>
+            <Boton minusculas onClick={retry}>{state.status === 'error' ? 'Reintentar' : 'Recargar dato'}</Boton>
           </div>
         )}
       </RetroWindow>

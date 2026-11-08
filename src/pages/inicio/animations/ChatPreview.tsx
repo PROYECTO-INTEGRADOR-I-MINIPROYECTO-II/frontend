@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import './chat.css';
 import { DoodleAvatar, PersonaAvatar, type Persona } from './ChatAvatar';
 import { PEOPLE } from './CallPreview';
 import { sinMovimiento } from '../../../hooks/useAnimaciones';
@@ -132,7 +133,7 @@ export default function ChatPreview() {
       aria-label="Vista previa del chat de una Sala"
       className="flex h-[23.6rem] w-full max-w-[560px] flex-col overflow-hidden border-2 border-texto bg-fondo text-left"
     >
-      <div aria-hidden="true" className="border-b-2 border-texto px-4 py-3 text-center font-monokuro text-xs leading-5">Chat de los devs</div>
+      <div aria-hidden="true" className="border-b-2 border-texto px-4 py-3 text-center font-pixel text-xs leading-5">Chat de los devs</div>
       <div ref={log} className="flex flex-1 flex-col gap-1 overflow-y-auto p-4 [scrollbar-color:#3f3f46_transparent] [scrollbar-width:thin]" role="log" aria-live="off">
         {items.map((it, idx) => {
           if (it.kind === 'sys') {
