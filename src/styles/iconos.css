@@ -1,0 +1,11 @@
+/* Fuente de iconos pixel (16 × 16, un icono por letra a-p o por U+E000 a U+E00F). Solo se usa para enmascarar contraseñas. */
+@font-face {
+  font-family: 'IconosPixel16';
+  src: url('../assets/iconos/IconosPixel16.woff2') format('woff2');
+  font-display: block;
+}
+/* Campo de contraseña enmascarado con iconos: el texto real del <input> queda invisible (los iconos se dibujan encima). */
+.clave-oculta { color: transparent; caret-color: transparent; }
+.clave-oculta::selection { background: transparent; color: transparent; }
+/* El autocompletado del navegador pinta su propio fondo y color: se neutralizan para que no se vean los puntos reales. */
+.clave-oculta:-webkit-autofill { -webkit-text-fill-color: transparent; box-shadow: inset 0 0 0 1000px var(--color-fondo); transition: background-color 9999s; }

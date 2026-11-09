@@ -3,10 +3,34 @@ import { PixelIcon } from '../retro/PixelIcon';
 
 // Foto de perfil: un círculo con las iniciales (en Geist) o la foto. Al apuntarlo o enfocarlo se tiñe del color de acento y las
 // iniciales dan paso a una cámara pixel art; al pulsarlo se elige una imagen. Sirve igual si la cuenta de Google ya trae foto o no.
-// Valida el tipo y el peso; la subida real (API) llega en el Sprint 1.
+// Valida el tipo y el peso. La vista previa es un blob:; `fotoParaApi` lo convierte en la imagen que se envía a la API.
 export type EstadoFoto = 'sin' | 'ok' | 'error';
 const TIPOS = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_MB = 2;
+
+const FOTO_MAX_PX = 256; // lado mayor de la foto enviada
+const FOTO_MAX_CHARS = 100_000; // tope de la API
+
+/** Foto lista para la API: un blob: (vista previa) se reduce a 256 px y pasa a data:image/webp;base64 (o jpeg); una URL https o null se envía tal cual. */
+export async function fotoParaApi(url: string | null): Promise<string | null> {
+  if (!url?.startsWith('blob:')) return url;
+  const imagen = await createImageBitmap(await (await fetch(url)).blob());
+  const escala = Math.min(1, FOTO_MAX_PX / Math.max(imagen.width, imagen.height));
+  const lienzo = document.createElement('canvas');
+  lienzo.width = Math.max(1, Math.round(imagen.width * escala));
+  lienzo.height = Math.max(1, Math.round(imagen.height * escala));
+  lienzo.getContext('2d')?.drawImage(imagen, 0, 0, lienzo.width, lienzo.height);
+  imagen.close();
+  // Si el navegador no sabe webp devuelve png: se usa jpeg. Si aun así pasa del tope de la API, se baja la calidad hasta que quepa.
+  let tipo = 'image/webp';
+  let datos = lienzo.toDataURL(tipo, 0.85);
+  if (!datos.startsWith('data:image/webp')) {
+    tipo = 'image/jpeg';
+    datos = lienzo.toDataURL(tipo, 0.85);
+  }
+  for (let calidad = 0.7; datos.length > FOTO_MAX_CHARS && calidad > 0.1; calidad -= 0.15) datos = lienzo.toDataURL(tipo, calidad);
+  return datos;
+}
 
 interface Props {
   iniciales: string;

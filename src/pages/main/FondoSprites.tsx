@@ -1,9 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SPRITES } from '../../utils/sprites/sprites';
 import { useLoginPanel } from './footer/loginPanelContext';
+import Destellos from './Destellos';
 
-// Cuadrícula aleatoria de sprites sobre todo el fondo. Se dibuja dos veces en canvas: una capa casi apagada
-// y otra más visible que solo se deja ver dentro de un radio alrededor del cursor (máscara radial por CSS).
+// Cuadrícula aleatoria de sprites sobre todo el fondo, con dos efectos que se pueden combinar (constante EFECTO):
+//  · 'halo': una capa en canvas que solo se deja ver dentro de un radio alrededor del cursor (máscara radial por CSS).
+//  · 'destellos': unos iconos (sprite y punto al azar, lejos de cualquier elemento de la página) suben hasta OP_LUZ de opacidad y vuelven
+//    a 0, sin parar (Destellos). No usan la cuadrícula.
+const EFECTO = 'destellos' as 'halo' | 'destellos' | 'ambos';
+const HALO = EFECTO !== 'destellos';
+const DESTELLOS_ON = EFECTO !== 'halo';
 const CELDA = 96; // px
 const RADIO = 190; // px del halo
 const OP_BASE = 0.0;
@@ -17,6 +23,7 @@ function sortear(): number[] {
 }
 
 export default function FondoSprites() {
+  const [casillas] = useState(sortear); // la misma cuadrícula para el halo y los destellos
   const base = useRef<HTMLCanvasElement>(null);
   const luz = useRef<HTMLCanvasElement>(null);
   const raiz = useRef<HTMLDivElement>(null);
@@ -34,7 +41,6 @@ export default function FondoSprites() {
     const el = raiz.current;
     if (!cl || !el) return;
 
-    const casillas = sortear();
     const imgs = SPRITES.map(({ src }) => {
       const i = new Image();
       i.src = src;
@@ -101,20 +107,23 @@ export default function FondoSprites() {
       window.removeEventListener('pointermove', mover);
       document.documentElement.removeEventListener('pointerleave', salir);
     };
-  }, []);
+  }, [casillas]);
 
   return (
-    <div ref={raiz} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden [--luz:0]">
+    <div ref={raiz} data-fondo aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden [--luz:0]">
       {OP_BASE > 0 && <canvas ref={base} className="absolute inset-0 size-full" />}
-      <canvas
-        ref={luz}
-        className="absolute inset-0 size-full transition-opacity duration-300"
-        style={{
-          opacity: 'var(--luz)',
-          maskImage: `radial-gradient(circle ${RADIO}px at var(--mx, -999px) var(--my, -999px), #000 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle ${RADIO}px at var(--mx, -999px) var(--my, -999px), #000 0%, transparent 100%)`,
-        }}
-      />
+      {HALO && (
+        <canvas
+          ref={luz}
+          className="absolute inset-0 size-full transition-opacity duration-300"
+          style={{
+            opacity: 'var(--luz)',
+            maskImage: `radial-gradient(circle ${RADIO}px at var(--mx, -999px) var(--my, -999px), #000 0%, transparent 100%)`,
+            WebkitMaskImage: `radial-gradient(circle ${RADIO}px at var(--mx, -999px) var(--my, -999px), #000 0%, transparent 100%)`,
+          }}
+        />
+      )}
+      {DESTELLOS_ON && <Destellos caja={CAJA} opacidad={OP_LUZ} />}
     </div>
   );
 }

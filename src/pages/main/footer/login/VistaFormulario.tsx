@@ -27,6 +27,7 @@ export default function VistaFormulario({ registro, form, opciones }: { registro
         <CampoTexto id={`${base}-confirmar`} etiqueta="Confirmar contraseña" etiquetaMostrar="Mostrar confirmación de contraseña" tipo="password" valor={valores.confirmar} onCambio={cambiar.confirmar} error={errores.confirmar} autoComplete="new-password" />
       )}
       <Mensaje tipo="info">{form.aviso}</Mensaje>
+      <Mensaje tipo="error">{form.errorGeneral}</Mensaje>
       <hr className="border-t border-texto/80" />
       <div className="grid gap-1">{opciones}</div>
     </form>
