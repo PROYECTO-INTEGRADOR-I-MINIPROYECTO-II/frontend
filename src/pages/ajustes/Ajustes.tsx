@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import TextoVivo from '../../utils/retro/TextoVivo';
 import { RetroWindow } from '../../utils/retro/RetroWindow';
+import { fijarFuenteCampos, useFuenteCampos } from '../../hooks/useFuenteCampos';
 import { fijarPausadas, sistemaReduce, usePausadas } from '../../hooks/useAnimaciones';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
@@ -8,6 +9,7 @@ export default function Ajustes() {
   useDocumentTitle('Ajustes');
   const pausadas = usePausadas();
   const delSistema = sistemaReduce();
+  const fuente = useFuenteCampos();
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-5 py-16">
@@ -23,6 +25,7 @@ export default function Ajustes() {
           </nav>
         }
       >
+        <div className="grid gap-8">
         <div className="flex items-start justify-between gap-6">
           <div>
             <p id="pausa-titulo" className="font-semibold">Pausar animaciones</p>
@@ -53,6 +56,30 @@ export default function Ajustes() {
               {pausadas ? 'SÍ' : 'NO'}
             </span>
           </button>
+        </div>
+
+        <div className="border-t border-borde pt-8">
+          <p id="fuente-titulo" className="font-semibold">Tipografía de los campos de texto</p>
+          <p id="fuente-ayuda" className="mt-1 text-sm text-texto-secundario">
+            La letra con la que se escribe en los campos (username, nombre, sala…). Cada campo tiene además su botón «Aa» para cambiarla solo en él.
+          </p>
+          <div role="radiogroup" aria-labelledby="fuente-titulo" aria-describedby="fuente-ayuda" className="mt-4 grid grid-cols-2 gap-3">
+            {([['pixel', 'Pixel', 'Press Start 2P', 'font-pixel text-[11px]'], ['clara', 'Clara', 'Geist', 'font-sans text-base']] as const).map(([valor, nombre, detalle, clase]) => (
+              <button
+                key={valor}
+                type="button"
+                role="radio"
+                aria-checked={fuente === valor}
+                onClick={() => fijarFuenteCampos(valor)}
+                className={`border-2 border-texto px-3 py-3 text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-texto ${fuente === valor ? 'bg-texto text-fondo' : 'bg-fondo text-texto hover:bg-primario-suave'}`}
+              >
+                <span className="block font-pixel text-[11px] leading-5">{nombre}</span>
+                <span className={`mt-2 block leading-6 ${clase}`}>Hola, Synk</span>
+                <span className="mt-1 block text-xs opacity-70">{detalle}</span>
+              </button>
+            ))}
+          </div>
+        </div>
         </div>
       </RetroWindow>
     </div>

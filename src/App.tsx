@@ -3,6 +3,7 @@ import RutaPrivada from './auth/RutaPrivada';
 import Layout from './pages/main/Layout';
 import Ajustes from './pages/ajustes/Ajustes';
 import Estado from './pages/estado/Estado';
+import Dashboard from './pages/dashboard/Dashboard';
 import Inicio from './pages/inicio/Inicio';
 import Login from './pages/login/Login';
 import NoEncontrada from './pages/no-encontrada/NoEncontrada';
@@ -18,7 +19,7 @@ export default function App() {
         <Route path="login" element={<Login fase="elegir" />} />
         <Route path="registro" element={<Login fase="registro" />} />
         <Route path="registro/username" element={<PerfilRuta modo="completar" />} />
-        <Route path="dashboard" element={<RutaPrivada><Pendiente titulo="Mis Salas" descripcion="Aquí verás las Salas que has creado y podrás unirte a otra por ID." sprint="Sprint 2" /></RutaPrivada>} />
+        <Route path="dashboard" element={<RutaPrivada><Dashboard /></RutaPrivada>} />
         <Route path="salas/:id" element={<RutaPrivada><Pendiente titulo="Sala" descripcion="Video, chat y pantalla compartida de tu Sala." sprint="Sprint 3" /></RutaPrivada>} />
         <Route path="perfil" element={<RutaPrivada><PerfilRuta modo="editar" /></RutaPrivada>} />
         <Route path="ajustes" element={<Ajustes />} />
