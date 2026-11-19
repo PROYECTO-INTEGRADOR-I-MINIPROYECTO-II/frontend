@@ -32,6 +32,10 @@ interface Props {
   /** Muestra el botón «Aa» que cambia la tipografía de los campos destacados. */
   selectorFuente?: boolean;
   autoComplete?: string;
+  /** Valores que no se comprueban: el campo queda neutro (ver `useEstadoCampo`). */
+  omitir?: (v: string) => boolean;
+  /** Al enfocar se selecciona todo el texto, así lo primero que se escribe lo reemplaza (sin borrar nada por sí solo). */
+  seleccionarTodo?: boolean;
 }
 
 const CLASE_ESTADO: Record<EstadoCampo, string> = {
@@ -46,8 +50,8 @@ const CLASE_ESTADO: Record<EstadoCampo, string> = {
 };
 const ES_ERROR = (e: EstadoCampo) => e === 'invalido' || e === 'corto' || e === 'ocupado';
 
-export default function CampoDestacado({ id, etiqueta, valor, onCambio, analizar, verificar, mensajeOcupado, textoDisponible, error, ayuda, onEstado, selectorFuente = false, autoComplete }: Props) {
-  const { estado, mensaje } = useEstadoCampo(valor, { analizar, verificar, mensajeOcupado });
+export default function CampoDestacado({ id, etiqueta, valor, onCambio, analizar, verificar, mensajeOcupado, textoDisponible, error, ayuda, onEstado, selectorFuente = false, autoComplete, omitir, seleccionarTodo = false }: Props) {
+  const { estado, mensaje } = useEstadoCampo(valor, { analizar, verificar, mensajeOcupado, omitir });
   const idMensaje = useId();
   const area = useRef<HTMLTextAreaElement>(null);
   const marca = useRef<HTMLSpanElement>(null); // marca invisible en el espejo, justo donde está el cursor
@@ -135,6 +139,11 @@ export default function CampoDestacado({ id, etiqueta, valor, onCambio, analizar
             // inicio o todo el texto seleccionado; con un clic se respeta donde se pulsó.
             const t = e.currentTarget;
             const alFinal = () => {
+              if (seleccionarTodo && document.activeElement === t && t.value) {
+                t.setSelectionRange(0, t.value.length);
+                sincronizar();
+                return;
+              }
               if (conClic.current || document.activeElement !== t || !t.value) return;
               if (t.selectionStart === 0 && (t.selectionEnd === 0 || t.selectionEnd === t.value.length)) {
                 t.setSelectionRange(t.value.length, t.value.length);

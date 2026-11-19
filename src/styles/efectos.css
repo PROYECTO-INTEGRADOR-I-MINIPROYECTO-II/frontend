@@ -52,6 +52,7 @@
   46%, 100% { transform: translateY(0); }
 }
 .group:focus-visible .vivo { color: var(--color-acento-claro); }
+.group.peligro:is(:hover, :focus-visible) .vivo { color: var(--color-error); }
 .group:focus-visible .vivo-t { animation: vivo-elevar 0.9s steps(1) infinite; }
 @media (hover: hover) {
   .group:hover .vivo { color: var(--color-acento-claro); }

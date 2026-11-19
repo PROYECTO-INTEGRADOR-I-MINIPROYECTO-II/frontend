@@ -14,6 +14,8 @@ export default function CampoUsername({ u, selectorFuente = false }: { u: CampoU
       onCambio={u.cambiar}
       analizar={analizarUsername}
       verificar={u.verificar}
+      omitir={u.omitir}
+      seleccionarTodo={u.sinCambios}
       mensajeOcupado={() => MENSAJE_OCUPADO}
       textoDisponible="Username disponible"
       error={u.error}
