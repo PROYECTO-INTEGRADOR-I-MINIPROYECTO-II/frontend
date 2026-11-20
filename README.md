@@ -85,12 +85,13 @@ La foto se valida (JPG, PNG o WebP, hasta 2 MB) y se previsualiza. Al guardar se
 | Variable | Descripción |
 |---|---|
 | `VITE_API_URL` | URL base de la API (sin `/api`). Se incrusta en el build. |
+| `VITE_REALTIME_URL` | URL del servicio de tiempo real (Socket.IO). Si falta, se usa `VITE_API_URL`. |
 | `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID` | Configuración pública de la app web de Firebase (ver `.env.example`). |
 | `VITE_FIREBASE_AUTH_EMULATOR` | Opcional: URL del emulador de Auth (p. ej. `http://127.0.0.1:9099`) para probar en local. |
 
 ## Despliegue
 
-Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` con la URL de Render y las `VITE_FIREBASE_*`. En Render, `CORS_ORIGIN` del backend debe incluir la URL de Vercel.
+Vercel: importar el repo (preset Vite) y definir `VITE_API_URL` y `VITE_REALTIME_URL` con las URLs de Render (API y tiempo real) y las `VITE_FIREBASE_*`. En Render, `CORS_ORIGIN` del backend debe incluir la URL de Vercel.
 
 ## Scripts
 
