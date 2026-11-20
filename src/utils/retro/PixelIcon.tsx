@@ -1,6 +1,82 @@
 // Iconos pixel art dibujados con rectángulos SVG a partir de un mapa de bits (# = píxel encendido).
 // Se usan dentro de un <svg>: devuelven un <g> centrado en (x, y), con cada píxel de `escala` unidades.
+// Flechas: se dibuja la de la derecha y las demás salen de ella (transpuesta = abajo, volteada = arriba).
+const FLECHA_DERECHA = [
+  '...........',
+  '......##...',
+  '.......##..',
+  '........##.',
+  '.........##',
+  '###########',
+  '.........##',
+  '........##.',
+  '.......##..',
+  '......##...',
+  '...........',
+];
+const transponer = (f: readonly string[]) => [...f[0]].map((_, c) => f.map((fila) => fila[c]).join(''));
+const FLECHA_ABAJO = transponer(FLECHA_DERECHA);
+const FLECHA_ARRIBA = [...FLECHA_ABAJO].reverse();
+const FLECHA_IZQUIERDA = FLECHA_DERECHA.map((f) => [...f].reverse().join(''));
+
 const ICONOS = {
+  info: [
+    '...#####...',
+    '.##.....##.',
+    '.#...#...#.',
+    '#....#....#',
+    '#.........#',
+    '#....#....#',
+    '#....#....#',
+    '#....#....#',
+    '.#...#...#.',
+    '.##.....##.',
+    '...#####...',
+  ],
+  // Avión de papel del envío de WhatsApp: dos alas diagonales, una muesca en cada una y el cuerpo central hasta la punta.
+  enviar: [
+    '###........',
+    '#####......',
+    '#######....',
+    '#########..',
+    '..#########',
+    '....#######',
+    '..#########',
+    '#########..',
+    '#######....',
+    '#####......',
+    '###........',
+  ],
+  ancla: [
+    '....###....',
+    '....#.#....',
+    '....###....',
+    '.....#.....',
+    '..#######..',
+    '.....#.....',
+    '.....#.....',
+    '#....#....#',
+    '##...#...##',
+    '.#########.',
+    '...#####...',
+  ],
+  contraste: [
+    '...#####...',
+    '.#####..##.',
+    '.#####...#.',
+    '######....#',
+    '######....#',
+    '######....#',
+    '######....#',
+    '######....#',
+    '.#####...#.',
+    '.#####..##.',
+    '...#####...',
+  ],
+  flechaDerecha: FLECHA_DERECHA,
+  flechaAbajo: FLECHA_ABAJO,
+  flechaArriba: FLECHA_ARRIBA,
+  flechaIzquierda: FLECHA_IZQUIERDA,
   microfono: [
     '....###....',
     '...#####...',
@@ -146,5 +222,15 @@ export function PixelIcon({ nombre, x, y, escala = 2, className }: { nombre: Nom
         )),
       )}
     </g>
+  );
+}
+
+/** Un icono pixel suelto (fuera de un <svg> propio): toma el color del texto y mide 11 píxeles × `escala`. */
+export function IconoPixel({ nombre, escala = 2, className }: { nombre: NombreIcono; escala?: number; className?: string }) {
+  const lado = ICONOS[nombre].length * escala;
+  return (
+    <svg width={lado} height={lado} viewBox={`0 0 ${lado} ${lado}`} fill="currentColor" aria-hidden="true" focusable="false" className={className}>
+      <PixelIcon nombre={nombre} x={lado / 2} y={lado / 2} escala={escala} />
+    </svg>
   );
 }

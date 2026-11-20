@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
-// Tipografía de los campos destacados (username, nombres y apellidos): Press Start 2P («pixel») o Geist («clara», más legible).
-// Se recuerda en el navegador y la comparten todos los campos, así que cambiarla en uno cambia los demás.
+// Tipografía POR DEFECTO de los campos de texto (destacados y con cuadro): Press Start 2P («pixel») o Geist («clara», más legible).
+// Se elige en Ajustes y se recuerda en el navegador. Cada campo puede cambiarla solo para sí con su botón «Aa» (no se guarda).
 export type FuenteCampos = 'pixel' | 'clara';
 const CLAVE = 'synk:campos-fuente';
 const oyentes = new Set<() => void>();
@@ -15,8 +15,9 @@ function leer(): FuenteCampos {
 }
 let actual: FuenteCampos = leer();
 
-export function alternarFuenteCampos() {
-  actual = actual === 'clara' ? 'pixel' : 'clara';
+export function fijarFuenteCampos(fuente: FuenteCampos) {
+  if (fuente === actual) return;
+  actual = fuente;
   try {
     localStorage.setItem(CLAVE, actual);
   } catch {

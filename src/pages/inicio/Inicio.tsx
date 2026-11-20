@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CallPreview from './animations/CallPreview';
 import ChatPreview from './animations/ChatPreview';
 import LedPassphraseField from '../../utils/led/LedPassphraseField';
@@ -36,6 +36,15 @@ export default function Inicio() {
           <p id="phrase-ayuda" className="mb-4 text-center text-sm text-texto-secundario">
             Escribe el código → ingresa a la sala
           </p>
+          {/* Solo con acceso al Panel (sesión y perfil completo): es el mismo caso en que «Mis salas» del pie es un enlace. */}
+          {user.username && (
+            <p className="-mt-2 mb-4 text-center text-sm text-texto-secundario">
+              o si quieres crear una, ve a{' '}
+              <Link to="/dashboard" className="text-acento-claro underline underline-offset-4 hover:text-texto focus-visible:text-texto">
+                tus salas
+              </Link>
+            </p>
+          )}
           <div className="flex items-stretch gap-3">
             <div className="min-w-0 flex-1">
               <LedPassphraseField

@@ -52,6 +52,7 @@
   46%, 100% { transform: translateY(0); }
 }
 .group:focus-visible .vivo { color: var(--color-acento-claro); }
+.group.peligro:is(:hover, :focus-visible) .vivo { color: var(--color-error); }
 .group:focus-visible .vivo-t { animation: vivo-elevar 0.9s steps(1) infinite; }
 @media (hover: hover) {
   .group:hover .vivo { color: var(--color-acento-claro); }
@@ -94,3 +95,13 @@
 @keyframes destello { 0%, 100% { opacity: 0; } 50% { opacity: var(--op, 0.25); } }
 .destello { opacity: 0; animation: destello var(--dur, 3s) ease-in-out var(--retraso, 0s) infinite; }
 @media (prefers-reduced-motion: reduce) { .destello { animation: none; } }
+
+/* Destello por letras (TextoBrillo): cada letra pasa «de golpe» a un morado muy claro (casi blanco) y vuelve al color del texto; el retraso por
+   letra lo pone el componente y --ciclo es la duración total (un tramo con el color y otro en reposo). */
+@keyframes brillo-letra {
+  0% { color: var(--color-acento-claro); }
+  8% { color: color-mix(in srgb, var(--color-acento-claro) 55%, white); }
+  16%, 100% { color: var(--color-texto); }
+}
+.brillo-letra { animation: brillo-letra var(--ciclo, 3s) steps(1) infinite; }
+@media (prefers-reduced-motion: reduce) { .brillo-letra { animation: none; } }

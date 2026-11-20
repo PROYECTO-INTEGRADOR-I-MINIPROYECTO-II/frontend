@@ -16,6 +16,8 @@ interface Opciones {
   /** Consulta si el valor está libre (true = libre). Sin esto no hay comprobación de unicidad. */
   verificar?: (valor: string) => Promise<boolean>;
   mensajeOcupado?: (valor: string) => string;
+  /** Valores que no se comprueban (p. ej. el username que ya es de la persona al editarlo): el campo queda neutro, sin «disponible». */
+  omitir?: (valor: string) => boolean;
 }
 
 type Tardio = { valor: string; estado: 'corto' | 'verificando' | 'disponible' | 'ocupado' | 'sin-comprobar' | 'invalido'; mensaje?: string };
@@ -31,7 +33,7 @@ export function useEstadoCampo(valor: string, opciones: Opciones): { estado: Est
     setTardio(null); // cualquier edición descarta lo que se sabía del texto anterior
     const limpio = valor.trim();
     const { tipo } = ref.current.analizar(limpio);
-    const comprueba = tipo === 'ok' && !!ref.current.verificar;
+    const comprueba = tipo === 'ok' && !!ref.current.verificar && !ref.current.omitir?.(limpio);
     if (tipo !== 'corto' && !comprueba) return;
     let vigente = true;
     const t = window.setTimeout(async () => {

@@ -12,6 +12,7 @@ export default function OpcionNumerada({
   tipo = 'button',
   primero = false,
   deshabilitada = false,
+  peligro = false,
   children,
 }: {
   tecla: string;
@@ -19,6 +20,8 @@ export default function OpcionNumerada({
   tipo?: 'button' | 'submit';
   primero?: boolean;
   deshabilitada?: boolean;
+  /** Acción destructiva (p. ej. eliminar la cuenta): va en rojo, el único uso del rojo además de los errores. */
+  peligro?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -28,11 +31,11 @@ export default function OpcionNumerada({
       aria-keyshortcuts={tecla}
       aria-disabled={deshabilitada || undefined}
       data-primero={primero ? '' : undefined}
-      className={`relative block w-full py-1 text-center font-pixel text-[11px] leading-5 ${deshabilitada ? 'cursor-not-allowed text-texto-secundario/60' : 'group'}`}
+      className={`relative block w-full py-1 text-center font-pixel text-[11px] leading-5 ${deshabilitada ? 'cursor-not-allowed text-texto-secundario/60' : peligro ? 'group peligro text-error' : 'group'}`}
     >
       <span
         aria-hidden="true"
-        className={`absolute left-0 top-1 ${deshabilitada ? 'text-texto-secundario/60' : 'text-acento-claro'}`}
+        className={`absolute left-0 top-1 ${deshabilitada ? 'text-texto-secundario/60' : peligro ? 'text-error' : 'text-acento-claro'}`}
       >
         [{tecla}]
       </span>
