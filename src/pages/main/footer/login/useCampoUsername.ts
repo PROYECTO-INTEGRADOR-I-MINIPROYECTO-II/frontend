@@ -14,6 +14,8 @@ export function useCampoUsername(id: string, inicial = '', actual?: string) {
   const [estado, setEstado] = useState<EstadoCampo>('vacio');
   const [error, setError] = useState<string | undefined>();
 
+  // Al editar, mientras el texto sea el username vigente el campo queda neutro (ni «disponible» ni error).
+  const sinCambios = !!actual && normalizarUsername(valor) === normalizarUsername(actual);
   const cambiar = (v: string) => {
     setValor(v);
     setError(undefined);
@@ -24,6 +26,7 @@ export function useCampoUsername(id: string, inicial = '', actual?: string) {
   function validar(): boolean {
     let mensaje: string | undefined;
     // «sin-comprobar»: la consulta falló; se deja continuar y el servidor confirma la unicidad al enviar.
+    if (sinCambios) return true; // sigue siendo el suyo: no hay nada que comprobar (quien llama decide qué hacer)
     if (estado === 'vacio') mensaje = 'Escribe tu username.';
     else if (estado === 'verificando' || estado === 'escribiendo') mensaje = 'Espera un momento: estamos comprobando tu username.';
     else if (estado !== 'disponible' && estado !== 'sin-comprobar') mensaje = analizarUsername(valor.trim()).mensaje ?? MENSAJE_OCUPADO;
@@ -32,7 +35,8 @@ export function useCampoUsername(id: string, inicial = '', actual?: string) {
     return !mensaje;
   }
 
-  const verificar = (v: string) => (actual && normalizarUsername(v) === normalizarUsername(actual) ? Promise.resolve(true) : comprobarDisponibilidad(v));
+  const omitir = (v: string) => !!actual && normalizarUsername(v) === normalizarUsername(actual);
+  const verificar = comprobarDisponibilidad;
 
   /** Para errores que vienen del servidor (p. ej. username ocupado al enviar): se muestran junto al campo y con el foco. */
   function ponerError(mensaje: string) {
@@ -46,7 +50,7 @@ export function useCampoUsername(id: string, inicial = '', actual?: string) {
     ponerError(e?.code === 'USERNAME_TAKEN' ? MENSAJE_OCUPADO : (e?.message ?? porDefecto));
   }
 
-  return { id, valor, cambiar, estado, alEstado, error, validar, ponerError, ponerErrorApi, verificar };
+  return { id, valor, sinCambios, omitir, cambiar, estado, alEstado, error, validar, ponerError, ponerErrorApi, verificar };
 }
 
 export type CampoUsernameEstado = ReturnType<typeof useCampoUsername>;
