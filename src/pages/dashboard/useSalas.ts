@@ -4,7 +4,7 @@ import { listarSalas, type Sala } from '../../api/salas';
 
 export type EstadoSalas = { fase: 'cargando' } | { fase: 'error'; mensaje: string } | { fase: 'lista'; salas: Sala[] };
 
-// Salas propias de la sesión: carga al entrar, permite reintentar si falla y añadir una recién creada sin volver a pedirlas.
+// Salas propias de la sesión: carga al entrar y permite reintentar si falla.
 export function useSalas() {
   const [estado, setEstado] = useState<EstadoSalas>({ fase: 'cargando' });
 
@@ -21,7 +21,5 @@ export function useSalas() {
 
   useEffect(() => cargar(), [cargar]);
 
-  const agregar = (sala: Sala) => setEstado((e) => (e.fase === 'lista' ? { fase: 'lista', salas: [sala, ...e.salas] } : { fase: 'lista', salas: [sala] }));
-
-  return { estado, recargar: cargar, agregar };
+  return { estado, recargar: cargar };
 }
