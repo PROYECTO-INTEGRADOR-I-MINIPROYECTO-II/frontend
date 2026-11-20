@@ -17,11 +17,66 @@ const FLECHA_DERECHA = [
 const transponer = (f: readonly string[]) => [...f[0]].map((_, c) => f.map((fila) => fila[c]).join(''));
 const FLECHA_ABAJO = transponer(FLECHA_DERECHA);
 const FLECHA_ARRIBA = [...FLECHA_ABAJO].reverse();
+const FLECHA_IZQUIERDA = FLECHA_DERECHA.map((f) => [...f].reverse().join(''));
 
 const ICONOS = {
+  info: [
+    '...#####...',
+    '.##.....##.',
+    '.#...#...#.',
+    '#....#....#',
+    '#.........#',
+    '#....#....#',
+    '#....#....#',
+    '#....#....#',
+    '.#...#...#.',
+    '.##.....##.',
+    '...#####...',
+  ],
+  // Avión de papel del envío de WhatsApp: dos alas diagonales, una muesca en cada una y el cuerpo central hasta la punta.
+  enviar: [
+    '###........',
+    '#####......',
+    '#######....',
+    '#########..',
+    '..#########',
+    '....#######',
+    '..#########',
+    '#########..',
+    '#######....',
+    '#####......',
+    '###........',
+  ],
+  ancla: [
+    '....###....',
+    '....#.#....',
+    '....###....',
+    '.....#.....',
+    '..#######..',
+    '.....#.....',
+    '.....#.....',
+    '#....#....#',
+    '##...#...##',
+    '.#########.',
+    '...#####...',
+  ],
+  contraste: [
+    '...#####...',
+    '.#####..##.',
+    '.#####...#.',
+    '######....#',
+    '######....#',
+    '######....#',
+    '######....#',
+    '######....#',
+    '.#####...#.',
+    '.#####..##.',
+    '...#####...',
+  ],
   flechaDerecha: FLECHA_DERECHA,
   flechaAbajo: FLECHA_ABAJO,
   flechaArriba: FLECHA_ARRIBA,
+  flechaIzquierda: FLECHA_IZQUIERDA,
   microfono: [
     '....###....',
     '...#####...',

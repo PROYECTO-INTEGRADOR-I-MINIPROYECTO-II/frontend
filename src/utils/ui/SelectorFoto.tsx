@@ -80,7 +80,7 @@ export default function SelectorFoto({ iniciales, fotoInicial = null, onEstado, 
         {url ? (
           <img src={url} alt="" className="size-full object-cover" />
         ) : (
-          <span aria-hidden="true" className="font-sans text-4xl font-semibold">{iniciales || '?'}</span>
+          <span aria-hidden="true" className="select-none font-sans text-4xl font-semibold">{iniciales || '?'}</span>
         )}
         {/* Al apuntar o enfocar: el círculo se tiñe de acento y aparece la cámara. */}
         <span aria-hidden="true" className="absolute inset-0 hidden place-items-center bg-acento group-hover:grid group-focus-visible:grid">
