@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import TextoVivo from '../../../utils/retro/TextoVivo';
 import CuentaEnlace from './CuentaEnlace';
 import LoginPanel from './LoginPanel';
+import MisSalasEnlace from './MisSalasEnlace';
 import { useLoginPanel } from './loginPanelContext';
 import univalleLogo from '../../../assets/univalle-logo.png';
 
@@ -68,6 +69,7 @@ export default function Footer() {
           <nav aria-label="Pie de página" className="hidden md:block">
             <ul className="flex items-center justify-between gap-6">
               <li><CuentaEnlace /></li>
+              <li><MisSalasEnlace /></li>
 
               {ENLACES.map((e) => (
                 <li key={e.to}><Link to={e.to} className="group"><TextoVivo>{e.texto}</TextoVivo></Link></li>
@@ -99,6 +101,7 @@ export default function Footer() {
           >
             <ul>
               <li className="border-b border-borde"><CuentaEnlace className="block py-3" /></li>
+              <li className="border-b border-borde"><MisSalasEnlace className="block py-3" /></li>
               {ENLACES.map((e) => (
                 <li key={e.to} className="border-b border-borde last:border-0">
                   <Link to={e.to} className="group block py-3">

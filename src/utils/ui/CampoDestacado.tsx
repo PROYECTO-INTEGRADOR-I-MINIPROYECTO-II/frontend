@@ -1,8 +1,9 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { Analisis } from '../../auth/validaciones';
-import { alternarFuenteCampos, useFuenteCampos } from '../../hooks/useFuenteCampos';
+import { useFuenteCampos, type FuenteCampos } from '../../hooks/useFuenteCampos';
 import { FUENTE_CLASE, interlineadoPara, tamanoPara } from './tamanoTexto';
 import { useEstadoCampo, type EstadoCampo } from '../../hooks/useEstadoCampo';
+import BotonFuente from './BotonFuente';
 import { PuntosAnimados } from '../retro/RetroWindow';
 
 // Campo destacado (username, nombres y apellidos): sin cuadro, texto grande y centrado en Press Start 2P y cursor propio (como el campo LED de la portada).
@@ -11,7 +12,7 @@ import { PuntosAnimados } from '../retro/RetroWindow';
 // Se valida mientras se escribe: un carácter o formato no válido pone el texto en rojo con su explicación; al hacer una pausa,
 // el texto pulsa entre gris y blanco mientras se comprueba si está libre, y si lo está queda blanco con un leve brillo.
 // El cursor parpadea en el campo activo y en los campos vacíos (al centro); un campo con texto que no está activo no lo muestra. Con `selectorFuente`, un botón a la derecha de la etiqueta alterna la tipografía de
-// todos los campos destacados entre Press Start 2P (activado) y Geist (más clara). Con `verificar` comprueba la disponibilidad (username).
+// este campo entre Press Start 2P (activado) y Geist (más clara); la de partida se elige en Ajustes. Con `verificar` comprueba la disponibilidad (username).
 interface Props {
   id: string;
   etiqueta: string;
@@ -59,7 +60,10 @@ export default function CampoDestacado({ id, etiqueta, valor, onCambio, analizar
   const conClic = useRef(false); // el foco viene de un clic: se respeta el lugar pulsado
   const [sel, setSel] = useState(0);
   const [pos, setPos] = useState({ x: 0, y: 0 });
-  const clara = useFuenteCampos() === 'clara';
+  // Tipografía: la de Ajustes, salvo que este campo la haya cambiado con su botón «Aa» (solo vale para él).
+  const porDefecto = useFuenteCampos();
+  const [propia, setPropia] = useState<FuenteCampos | null>(null);
+  const clara = (propia ?? porDefecto) === 'clara';
   const cursor = enfocado || valor === '';
   const caret = enfocado ? sel : valor.length;
   const tam = tamanoPara([...valor].length, clara);
@@ -97,17 +101,7 @@ export default function CampoDestacado({ id, etiqueta, valor, onCambio, analizar
           {estado === 'verificando' && <PuntosAnimados sinVacio intervalo={350} />}
         </label>
         {selectorFuente && (
-          <button
-            type="button"
-            onClick={alternarFuenteCampos}
-            aria-pressed={!clara}
-            aria-label="Usar tipografía pixel en el campo"
-            title={clara ? 'Cambiar a la tipografía pixel (Press Start 2P)' : 'Cambiar a la tipografía clara (Geist)'}
-            className="border border-texto/80 px-2 leading-5 text-texto hover:text-acento-claro aria-pressed:bg-texto aria-pressed:text-fondo aria-pressed:hover:text-fondo"
-          >
-            {/* Muestra la tipografía activa: Press Start 2P (relleno) o Geist (solo marco). */}
-            <span aria-hidden="true" className={clara ? 'font-sans text-sm font-medium' : 'font-pixel text-[11px]'}>Aa</span>
-          </button>
+          <BotonFuente clara={clara} onAlternar={() => setPropia(clara ? 'pixel' : 'clara')} />
         )}
       </div>
       <div className={`relative mt-2 ${invalido ? 'text-error' : estado === 'disponible' ? 'text-exito' : 'text-texto'}`}>
