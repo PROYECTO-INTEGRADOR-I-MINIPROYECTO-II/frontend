@@ -12,13 +12,12 @@ import { useSalas } from './useSalas';
 
 type Aviso = { tipo: 'exito' | 'error'; texto: string };
 
-// «Mis salas» (US-06): las salas que creó la persona, crear una nueva y copiar su ID para invitar. Entrar a una sala llega en el Sprint 3.
+// «Mis salas» (US-06): las salas que creó la persona, crear una nueva (y entrar a ella como anfitrión) y copiar su ID para invitar.
 export default function Dashboard() {
   useDocumentTitle('Mis salas');
-  const { estado, recargar, agregar } = useSalas();
+  const { estado, recargar } = useSalas();
   const [creando, setCreando] = useState(false);
   const [aviso, setAviso] = useState<Aviso | null>(null);
-  const [nuevaId, setNuevaId] = useState<string | null>(null);
   const navegar = useNavigate();
   const contenedorCrear = useRef<HTMLSpanElement>(null); // Boton no reenvía ref: se busca su <button> para devolverle el foco
 
@@ -50,11 +49,9 @@ export default function Dashboard() {
     window.setTimeout(() => contenedorCrear.current?.querySelector('button')?.focus(), 0); // el foco vuelve a quien abrió el diálogo
   }
 
+  // Crear una sala lleva directo a ella, como anfitrión (US-06): la Sala indica «Eres el anfitrión» y ahí está su ID para compartir.
   function alCrear(sala: Sala) {
-    agregar(sala);
-    setNuevaId(sala.id);
-    setAviso({ tipo: 'exito', texto: `Sala «${sala.nombre}» creada. Copia su ID para invitar a otras personas.` });
-    cerrarDialogo();
+    navegar(`/salas/${encodeURIComponent(sala.id)}`);
   }
 
   async function copiar(sala: Sala) {
@@ -110,7 +107,7 @@ export default function Dashboard() {
         {estado.fase === 'lista' && estado.salas.length > 0 && (
           <ul className="grid gap-4" aria-label="Tus salas">
             {estado.salas.map((s, i) => (
-              <TarjetaSala key={s.id} sala={s} numero={i < 9 ? i + 1 : undefined} nueva={s.id === nuevaId} alCopiar={copiar} />
+              <TarjetaSala key={s.id} sala={s} numero={i < 9 ? i + 1 : undefined} alCopiar={copiar} />
             ))}
           </ul>
         )}
