@@ -11,6 +11,7 @@ import BotonFuente from '../../utils/ui/BotonFuente';
 import Boton from '../../utils/ui/Boton';
 import Mensaje from '../../utils/ui/Mensaje';
 import DialogoCrearSala from '../dashboard/DialogoCrearSala';
+import { Anunciador, AvisoPresencia, usePresenciaReciente } from './Presencia';
 import SalaEliminada from './SalaEliminada';
 import BotonSalir from './BotonSalir';
 import SelectorVista from './SelectorVista';
@@ -21,8 +22,11 @@ import PanelIntegrantes from './PanelIntegrantes';
 import Tablero from './Tablero';
 import { useSala } from './useSala';
 import { useTablero } from './useTablero';
+import type { Novedad } from '../../realtime/tipos';
 
 type Pestana = 'chat' | 'integrantes';
+
+const SIN_NOVEDADES: Novedad[] = [];
 
 // Anchos de las columnas laterales (px): valor de partida y límites. El centro nunca baja de CENTRO_MIN.
 const IZQ = { def: 312, min: 240, max: 440 };
@@ -99,6 +103,8 @@ function CabeceraPanel({ titulo, lado, minimizado, alAlternar, cuenta, clara, co
 export default function Sala() {
   const { id = '' } = useParams();
   const { estado, enviar, actualizarSala } = useSala(id);
+  const novedades = estado.fase === 'lista' ? estado.novedades : SIN_NOVEDADES;
+  const { entraron, salieron } = usePresenciaReciente(novedades);
   const navegar = useNavigate();
   // Quien llega por «Unirse» recibe la confirmación (US-08).
   const llegaUniendose = Boolean((useLocation().state as { entraste?: boolean } | null)?.entraste);
@@ -214,9 +220,11 @@ export default function Sala() {
   }
 
   const { sala, mensajes, conectado } = estado;
+  const entradas = novedades.filter((n) => n.tipo === 'entra' && n.uid !== miUid);
+  const presencia = novedades.filter((n) => n.tipo !== 'mensaje' && n.uid !== miUid).at(-1);
   const esAnfitrion = sala.uid === miUid;
-  const panelIntegrantes = (clara: boolean) => <PanelIntegrantes integrantes={integrantes} anfitrionUid={sala.uid} miUid={miUid} tablero={tablero} clara={clara} />;
-  const panelChat = (clara: boolean) => <PanelChat mensajes={mensajes} miUid={miUid} conectado={conectado} enviar={enviar} clara={clara} />;
+  const panelIntegrantes = (clara: boolean) => <PanelIntegrantes integrantes={integrantes} anfitrionUid={sala.uid} miUid={miUid} tablero={tablero} clara={clara} entraron={entraron} salieron={salieron} />;
+  const panelChat = (clara: boolean) => <PanelChat mensajes={mensajes} entradas={entradas} miUid={miUid} conectado={conectado} enviar={enviar} clara={clara} />;
   const centrada = escritorio && !compacto;
   const pequeno = compacto || !escritorio; // botones de 32 px en teléfono
   const botonIcono = `grid ${pequeno ? 'size-8' : 'size-10'} place-items-center border-2 border-texto hover:bg-texto hover:text-fondo focus-visible:bg-texto focus-visible:text-fondo`;
@@ -250,6 +258,7 @@ export default function Sala() {
           <BotonSalir compacto={pequeno} alArmar={setSaliendo} />
         </div>
       </header>
+      <Anunciador novedades={novedades} miUid={miUid} />
       <p role="status" className={bienvenida ? 'border-b-2 border-exito px-3 py-2 text-center text-sm text-exito' : 'sr-only'}>{bienvenida ? `Entraste a «${sala.nombre}».` : ''}</p>
       <Mensaje tipo="error" className={conectado ? 'sr-only' : 'border-b-2 border-error px-3 py-2 text-center'}>
         {!conectado && 'Se perdió la conexión. Reconectando…'}
@@ -263,7 +272,10 @@ export default function Sala() {
             {!izqMin && panelIntegrantes(clara)}
           </aside>
           <div className="flex justify-center"><Divisor lado="izq" valor={izqPx} min={lim.izq.min} max={lim.izq.max} etiqueta="Cambiar el ancho de la columna de integrantes" deshabilitado={izqMin} alCambiar={(px) => ancho('izq', px)} /></div>
-          <Tablero t={tablero} anfitrionUid={sala.uid} clara={clara} compacto={compacto} />
+          <div className="relative flex min-h-0 min-w-0 flex-col">
+            <AvisoPresencia ultima={presencia} />
+            <Tablero t={tablero} anfitrionUid={sala.uid} clara={clara} compacto={compacto} />
+          </div>
           <div className="flex justify-center"><Divisor lado="der" valor={derPx} min={lim.der.min} max={lim.der.max} etiqueta="Cambiar el ancho de la columna del chat" deshabilitado={derMin} alCambiar={(px) => ancho('der', px)} /></div>
           <aside aria-label="Chat" className="flex min-h-0 min-w-0 flex-col">
             <CabeceraPanel titulo="Chat" lado="der" minimizado={derMin} alAlternar={() => setDerMin((m) => !m)} clara={clara} compacto={compacto} />
@@ -274,7 +286,10 @@ export default function Sala() {
       ) : (
         // Móvil vertical: tablero arriba; abajo, Chat o Integrantes, que se pliega con la flecha del inicio de la barra.
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex min-h-0 flex-[2] flex-col"><Tablero t={tablero} anfitrionUid={sala.uid} clara={clara} compacto={false} /></div>
+          <div className="relative flex min-h-0 flex-[2] flex-col">
+            <AvisoPresencia ultima={presencia} />
+            <Tablero t={tablero} anfitrionUid={sala.uid} clara={clara} compacto={false} />
+          </div>
           <div className={`flex min-h-0 flex-col border-t-2 border-texto ${plegado ? '' : 'flex-[3]'}`}>
             {/* Barra: flecha de plegar, pestañas y «Aa». La pestaña elegida va en morado; plegado, el morado pasa a la flecha y la pestaña queda blanca. */}
             <div className={`flex items-stretch border-b-2 border-texto ${clara ? 'font-sans text-sm font-medium' : 'font-pixel text-[11px] leading-5'}`}>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Socket } from 'socket.io-client';
 import { conectarTiempoReal } from '../../realtime/cliente';
-import type { Integrante, Mensaje, Sala } from '../../realtime/tipos';
+import type { Integrante, Mensaje, Novedad, Sala } from '../../realtime/tipos';
 
 export type EstadoSala =
   | { fase: 'conectando' }
@@ -14,13 +14,17 @@ export type EstadoSala =
       integrantes: Integrante[];
       mensajes: Mensaje[];
       conectado: boolean;
+      novedades: Novedad[];
     };
 
 type Respuesta<T> = T & { error?: { code: string; message: string } };
 const SIN_RESPUESTA = 'El servidor tardó demasiado en responder. Intenta de nuevo.';
+const MAX_NOVEDADES = 200;
 
 const unirMensajes = (...grupos: Mensaje[][]) =>
   [...new Map(grupos.flat().map((m) => [m.id, m])).values()].sort((a, b) => a.creado.localeCompare(b.creado) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+
+const nombreDe = (i: Integrante) => i.nombre || i.username;
 
 // Al reconectar se recupera el historial y se conserva el chat que ya se veía. Los eventos pueden llegar antes del ack de entrada.
 export function useSala(id: string) {
@@ -28,6 +32,7 @@ export function useSala(id: string) {
   const socket = useRef<Socket | null>(null);
   const actual = useRef(estado);
   actual.current = estado;
+  const contador = useRef(0);
 
   useEffect(() => {
     setEstado({ fase: 'conectando' });
@@ -39,6 +44,9 @@ export function useSala(id: string) {
     let eliminada = false;
     let pendientes: Mensaje[] = [];
     let salaActualizada: Sala | undefined;
+    /** Quiénes había en la última presencia recibida; null hasta la primera (los que ya estaban no «entran»). */
+    let presentes: Map<string, Integrante> | null = null;
+    const novedad = (n: Omit<Novedad, 'n'>): Novedad => ({ ...n, n: ++contador.current });
     const limpiarEntrada = () => {
       intento++;
       entrando = false;
@@ -72,7 +80,7 @@ export function useSala(id: string) {
         limpiarEntrada();
         setEstado((e) => (e.fase === 'lista'
           ? { ...e, sala, mensajes: unirMensajes(e.mensajes, mensajes), conectado: true }
-          : { fase: 'lista', sala, integrantes: [], mensajes, conectado: true }));
+          : { fase: 'lista', sala, integrantes: [], mensajes, conectado: true, novedades: [] }));
       });
     };
 
@@ -90,12 +98,25 @@ export function useSala(id: string) {
     });
     s.on('sala:presencia', (p: { salaId: string; usuarios: Integrante[] }) => {
       if (!vigente || p.salaId !== id) return;
-      setEstado((e) => (e.fase === 'lista' ? { ...e, integrantes: p.usuarios } : e));
+      const ahora = new Map(p.usuarios.map((u) => [u.uid, u]));
+      const creado = new Date().toISOString();
+      const cambios = presentes
+        ? [
+            ...p.usuarios.filter((u) => !presentes!.has(u.uid)).map((u) => novedad({ tipo: 'entra', uid: u.uid, nombre: nombreDe(u), creado })),
+            ...[...presentes.values()].filter((u) => !ahora.has(u.uid)).map((u) => novedad({ tipo: 'sale', uid: u.uid, nombre: nombreDe(u), creado })),
+          ]
+        : [];
+      presentes = ahora;
+      setEstado((e) => (e.fase === 'lista' ? { ...e, integrantes: p.usuarios, novedades: [...e.novedades, ...cambios].slice(-MAX_NOVEDADES) } : e));
     });
     s.on('mensaje:nuevo', (m: Mensaje) => {
       if (!vigente || eliminada || m.salaId !== id) return;
       if (entrando) pendientes.push(m);
-      setEstado((e) => (e.fase === 'lista' ? { ...e, mensajes: unirMensajes(e.mensajes, [m]) } : e));
+      const aviso = novedad({ tipo: 'mensaje', uid: m.uid, nombre: m.autor, texto: m.texto, creado: m.creado });
+      setEstado((e) => {
+        if (e.fase !== 'lista' || e.mensajes.some((x) => x.id === m.id)) return e;
+        return { ...e, mensajes: unirMensajes(e.mensajes, [m]), novedades: [...e.novedades, aviso].slice(-MAX_NOVEDADES) };
+      });
     });
     s.on('sala:actualizada', ({ sala }: { sala: Sala }) => {
       if (!vigente || eliminada || sala.id !== id) return;

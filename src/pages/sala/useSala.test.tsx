@@ -224,4 +224,21 @@ describe('useSala', () => {
     expect(falso.desconectado).toBe(true);
   });
 
+  it('anota quién entra y quién sale, pero no a quienes ya estaban', () => {
+    falso.respuestas.set('sala:unirse', { sala });
+    const { result } = renderHook(() => useSala('S1'));
+    disparar('connect');
+    const ana = { uid: 'u1', username: 'ana', nombre: 'Ana' };
+    const marta = { uid: 'u2', username: 'marta', nombre: 'Marta' };
+    disparar('sala:presencia', { salaId: 'S1', usuarios: [ana] });
+    disparar('sala:presencia', { salaId: 'S1', usuarios: [ana, marta] });
+    disparar('sala:presencia', { salaId: 'S1', usuarios: [ana] });
+    expect(result.current.estado).toMatchObject({
+      novedades: [
+        { tipo: 'entra', nombre: 'Marta' },
+        { tipo: 'sale', nombre: 'Marta' },
+      ],
+    });
+  });
+
 });

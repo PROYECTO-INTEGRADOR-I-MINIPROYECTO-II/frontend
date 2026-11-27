@@ -3,12 +3,11 @@ import type { Integrante } from '../../realtime/tipos';
 import { IconoPixel } from '../../utils/retro/PixelIcon';
 import type { Tablero } from './useTablero';
 
-// Inicial en un círculo: mientras no haya foto en el tiempo real (la API de presencia solo entrega uid y username).
-// No se puede seleccionar: es una imagen, no texto.
-export function Avatar({ nombre, className = '' }: { nombre: string; className?: string }) {
+// La foto de la persona o, sin ella, su inicial en un círculo. No se puede seleccionar: es una imagen, no texto.
+export function Avatar({ nombre, foto, className = '' }: { nombre: string; foto?: string | null; className?: string }) {
   return (
-    <span aria-hidden="true" className={`grid shrink-0 select-none place-items-center rounded-full border-2 border-texto font-pixel uppercase ${className}`}>
-      {[...nombre][0] ?? '?'}
+    <span aria-hidden="true" className={`grid shrink-0 select-none place-items-center overflow-hidden rounded-full border-2 border-texto font-pixel uppercase ${className}`}>
+      {foto ? <img src={foto} alt="" referrerPolicy="no-referrer" className="size-full object-cover" /> : ([...nombre][0] ?? '?')}
     </span>
   );
 }
@@ -62,7 +61,17 @@ function Menu({ opciones, alCerrar, clara }: { opciones: { texto: string; alEleg
 }
 
 // Columna de integrantes conectados, con quién es anfitrión y quién eres tú. Enter sobre una persona abre su menú para anclarla al tablero.
-export default function PanelIntegrantes({ integrantes, anfitrionUid, miUid, tablero, clara }: { integrantes: Integrante[]; anfitrionUid: string; miUid?: string; tablero: Tablero; clara: boolean }) {
+export default function PanelIntegrantes({ integrantes, anfitrionUid, miUid, tablero, clara, entraron, salieron = [] }: {
+  integrantes: Integrante[];
+  anfitrionUid: string;
+  miUid?: string;
+  tablero: Tablero;
+  clara: boolean;
+  /** Acaban de entrar: destellan. */
+  entraron?: Set<string>;
+  /** Acaban de salir: se desvanecen. */
+  salieron?: { uid: string; nombre: string }[];
+}) {
   const [abierto, setAbierto] = useState<string | null>(null);
   const disparador = useRef<HTMLButtonElement | null>(null);
   const cerrar = () => {
@@ -79,7 +88,7 @@ export default function PanelIntegrantes({ integrantes, anfitrionUid, miUid, tab
         const anclado = tablero.anclas[i.uid] === punto && punto >= 0;
         const roles = [i.uid === anfitrionUid && 'Anfitrión', i.uid === miUid && 'Tú'].filter(Boolean).join(' · ');
         return (
-          <li key={i.uid} className="relative">
+          <li key={i.uid} className={`relative ${entraron?.has(i.uid) ? 'destello-entra' : ''}`}>
             <button
               type="button"
               aria-haspopup="menu"
@@ -90,9 +99,9 @@ export default function PanelIntegrantes({ integrantes, anfitrionUid, miUid, tab
               }}
               className="flex w-full items-center gap-3 p-2 text-left hover:bg-primario-suave focus-visible:bg-primario-suave"
             >
-              <Avatar nombre={i.username} className="size-9 text-[11px]" />
+              <Avatar nombre={i.nombre || i.username} foto={i.foto} className="size-9 text-[11px]" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate">{i.username}</span>
+                <span className="block truncate">{i.nombre || i.username}</span>
                 {roles && <span className="block text-acento-claro">{roles}</span>}
               </span>
               {anclado && (
@@ -119,6 +128,12 @@ export default function PanelIntegrantes({ integrantes, anfitrionUid, miUid, tab
           </li>
         );
       })}
+      {salieron.map((s) => (
+        <li key={`sale-${s.uid}`} aria-hidden="true" className="desvanece-sale flex items-center gap-3 p-2">
+          <Avatar nombre={s.nombre} className="size-9 text-[11px]" />
+          <span className="min-w-0 truncate">{s.nombre}</span>
+        </li>
+      ))}
     </ul>
   );
 }

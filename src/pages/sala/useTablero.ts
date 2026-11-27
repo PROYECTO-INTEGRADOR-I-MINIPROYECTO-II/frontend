@@ -35,7 +35,10 @@ export function useTablero(salaId: string, integrantes: Integrante[], anfitrionU
 
   const puntos = useMemo(() => colocar(integrantes, g.anclas, anfitrionUid), [integrantes, g.anclas, anfitrionUid]);
   const indiceDe = useCallback((uid: string) => puntos.findIndex((p) => p.uid === uid), [puntos]);
-  const nombreDe = (uid: string) => integrantes.find((i) => i.uid === uid)?.username ?? 'Esa persona';
+  const nombreDe = (uid: string) => {
+    const i = integrantes.find((x) => x.uid === uid);
+    return i?.nombre || i?.username || 'Esa persona';
+  };
 
   const cambiarDiseno = (diseno: Diseno) => {
     setG((x) => ({ ...x, diseno }));
