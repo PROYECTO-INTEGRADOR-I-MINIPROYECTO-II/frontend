@@ -11,9 +11,10 @@ export type EstadoSala =
 type Respuesta<T> = T & { error?: { code: string; message: string } };
 const SIN_RESPUESTA = 'El servidor tardó demasiado en responder. Intenta de nuevo.';
 
-// Estar dentro de una sala: conecta, se une, mantiene integrantes y mensajes al día y permite escribir. Al salir de la página se sale de la
-// sala y se corta la conexión. Si la conexión se cae, el cliente reintenta solo y se vuelve a unir. La API aún no entrega el historial:
-// solo se ven los mensajes desde que se entra.
+const unirMensajes = (...grupos: Mensaje[][]) =>
+  [...new Map(grupos.flat().map((m) => [m.id, m])).values()].sort((a, b) => a.creado.localeCompare(b.creado) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+
+// Al reconectar se recupera el historial y se conserva el chat que ya se veía. Los eventos pueden llegar antes del ack de entrada.
 export function useSala(id: string) {
   const [estado, setEstado] = useState<EstadoSala>({ fase: 'conectando' });
   const socket = useRef<Socket | null>(null);
@@ -23,35 +24,75 @@ export function useSala(id: string) {
     const s = conectarTiempoReal();
     socket.current = s;
     let vigente = true;
-    const fallo = (mensaje: string) => vigente && setEstado({ fase: 'error', mensaje });
+    let intento = 0;
+    let entrando = false;
+    let eliminada = false;
+    let pendientes: Mensaje[] = [];
+    let salaActualizada: Sala | undefined;
+    const limpiarEntrada = () => {
+      intento++;
+      entrando = false;
+      pendientes = [];
+      salaActualizada = undefined;
+    };
+    const fallo = (mensaje: string) => {
+      limpiarEntrada();
+      if (vigente) setEstado({ fase: 'error', mensaje });
+    };
 
-    const unirse = () =>
-      s.timeout(8000).emit('sala:unirse', { id }, (err: Error | null, res?: Respuesta<{ sala: Sala }>) => {
-        if (!vigente) return;
+    const unirse = () => {
+      if (!vigente || eliminada) return;
+      limpiarEntrada();
+      entrando = true;
+      const actual = intento;
+      s.timeout(8000).emit('sala:unirse', { id }, (err: Error | null, res?: Respuesta<{ sala: Sala; mensajes?: Mensaje[] }>) => {
+        if (!vigente || actual !== intento) return;
         if (err) return fallo(SIN_RESPUESTA);
         if (res?.error || !res?.sala) return fallo(res?.error?.message ?? 'No pudimos entrar a la sala.');
-        const sala = res.sala;
-        // Al reconectar se conserva lo que ya se veía; la presencia llega en seguida por `sala:presencia`.
-        setEstado((e) => (e.fase === 'lista' ? { ...e, sala, conectado: true } : { fase: 'lista', sala, integrantes: [], mensajes: [], conectado: true }));
+        const sala = salaActualizada ?? res.sala;
+        const mensajes = unirMensajes(res.mensajes ?? [], pendientes);
+        limpiarEntrada();
+        setEstado((e) => (e.fase === 'lista'
+          ? { ...e, sala, mensajes: unirMensajes(e.mensajes, mensajes), conectado: true }
+          : { fase: 'lista', sala, integrantes: [], mensajes, conectado: true }));
       });
+    };
 
     s.on('connect', unirse);
-    s.on('disconnect', () => setEstado((e) => (e.fase === 'lista' ? { ...e, conectado: false } : e)));
+    s.on('disconnect', () => {
+      if (!vigente) return;
+      limpiarEntrada();
+      setEstado((e) => (e.fase === 'lista' ? { ...e, conectado: false } : e));
+    });
     s.on('connect_error', (err: Error & { data?: { message?: string } }) => {
+      if (!vigente || eliminada) return;
+      limpiarEntrada();
       // Una caída de red con la sala ya abierta se reintenta sola; solo se muestra error si aún no se había entrado.
       setEstado((e) => (e.fase === 'lista' ? { ...e, conectado: false } : { fase: 'error', mensaje: err.data?.message ?? 'No pudimos conectar con el servidor. Revisa tu conexión.' }));
     });
     s.on('sala:presencia', (p: { salaId: string; usuarios: Integrante[] }) => {
-      if (p.salaId !== id) return;
+      if (!vigente || p.salaId !== id) return;
       setEstado((e) => (e.fase === 'lista' ? { ...e, integrantes: p.usuarios } : e));
     });
     s.on('mensaje:nuevo', (m: Mensaje) => {
-      if (m.salaId !== id) return;
-      setEstado((e) => (e.fase === 'lista' && !e.mensajes.some((x) => x.id === m.id) ? { ...e, mensajes: [...e.mensajes, m] } : e));
+      if (!vigente || eliminada || m.salaId !== id) return;
+      if (entrando) pendientes.push(m);
+      setEstado((e) => (e.fase === 'lista' ? { ...e, mensajes: unirMensajes(e.mensajes, [m]) } : e));
+    });
+    s.on('sala:actualizada', ({ sala }: { sala: Sala }) => {
+      if (!vigente || eliminada || sala.id !== id) return;
+      if (entrando) salaActualizada = sala;
+      setEstado((e) => (e.fase === 'lista' ? { ...e, sala } : e));
+    });
+    s.on('sala:eliminada', ({ salaId }: { salaId: string }) => {
+      if (!vigente || salaId !== id) return;
+      eliminada = true;
+      fallo('La sala ya no existe.');
     });
 
     return () => {
       vigente = false;
+      limpiarEntrada();
       s.emit('sala:salir', { id });
       s.disconnect();
       socket.current = null;
