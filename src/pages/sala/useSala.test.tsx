@@ -160,7 +160,7 @@ describe('useSala', () => {
     expect(result.current.estado).toMatchObject({ sala: final });
   });
 
-  it.each([false, true])('la eliminación de esta sala muestra error y un ack tardío no la reabre (abierta: %s)', (abierta) => {
+  it.each([false, true])('la eliminación de esta sala la cierra y un ack tardío no la reabre (abierta: %s)', (abierta) => {
     falso.demorarEntrada = true;
     const { result } = renderHook(() => useSala('S1'));
     disparar('connect');
@@ -175,7 +175,8 @@ describe('useSala', () => {
     responderEntrada(abierta ? 1 : 0, { sala });
     disparar('sala:actualizada', { sala });
     disparar('connect');
-    expect(result.current.estado).toEqual({ fase: 'error', mensaje: 'La sala ya no existe.' });
+    // Dentro de la sala se avisa y se vuelve a «Mis salas» (US-07); entrando, es un error de entrada.
+    expect(result.current.estado).toEqual(abierta ? { fase: 'eliminada', nombre: 'Mi sala' } : { fase: 'error', mensaje: 'La sala ya no existe.' });
     expect(falso.entradas).toHaveLength(abierta ? 2 : 1);
   });
 
@@ -222,4 +223,5 @@ describe('useSala', () => {
     expect(falso.emitidos).toContainEqual(['sala:salir', { id: 'S1' }]);
     expect(falso.desconectado).toBe(true);
   });
+
 });

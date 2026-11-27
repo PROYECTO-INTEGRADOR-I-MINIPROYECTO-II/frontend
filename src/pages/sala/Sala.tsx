@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { ApiError } from '../../api/base';
+import { eliminarSala } from '../../api/salas';
 import { auth } from '../../firebase';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { useFuentePropia } from '../../hooks/useFuentePropia';
@@ -8,6 +10,8 @@ import { IconoPixel } from '../../utils/retro/PixelIcon';
 import BotonFuente from '../../utils/ui/BotonFuente';
 import Boton from '../../utils/ui/Boton';
 import Mensaje from '../../utils/ui/Mensaje';
+import DialogoCrearSala from '../dashboard/DialogoCrearSala';
+import SalaEliminada from './SalaEliminada';
 import BotonSalir from './BotonSalir';
 import SelectorVista from './SelectorVista';
 import Divisor from './Divisor';
@@ -94,10 +98,14 @@ function CabeceraPanel({ titulo, lado, minimizado, alAlternar, cuenta, clara, co
 // ajustable; móvil en vertical, con el tablero arriba y, debajo, Chat o Integrantes en pestañas. Sin encabezado ni pie del sitio.
 export default function Sala() {
   const { id = '' } = useParams();
-  const { estado, enviar } = useSala(id);
+  const { estado, enviar, actualizarSala } = useSala(id);
+  const navegar = useNavigate();
   // Quien llega por «Unirse» recibe la confirmación (US-08).
   const llegaUniendose = Boolean((useLocation().state as { entraste?: boolean } | null)?.entraste);
   const [bienvenida, setBienvenida] = useState(false);
+  const [editando, setEditando] = useState(false);
+  const [borrando, setBorrando] = useState(false);
+  const [errorBorrar, setErrorBorrar] = useState('');
   useDocumentTitle(estado.fase === 'lista' ? estado.sala.nombre : 'Sala');
   const integrantes = estado.fase === 'lista' ? estado.integrantes : [];
   const tablero = useTablero(id, integrantes, estado.fase === 'lista' ? estado.sala.uid : '');
@@ -173,6 +181,23 @@ export default function Sala() {
     setAnchos((a) => ({ ...a, [compacto ? (lado === 'izq' ? 'izqC' : 'derC') : lado]: valor }));
   };
 
+  // Quien la borra desde dentro vuelve directo a «Mis salas»; a los demás se les avisa primero.
+  async function eliminar(nombre: string) {
+    setBorrando(true);
+    setErrorBorrar('');
+    try {
+      await eliminarSala(id);
+      navegar('/dashboard', { replace: true, state: { aviso: `Sala «${nombre}» eliminada.` } });
+    } catch (err) {
+      setErrorBorrar(err instanceof ApiError ? err.message : 'No pudimos eliminar la sala. Intenta de nuevo.');
+      setBorrando(false);
+    }
+  }
+
+  if (estado.fase === 'eliminada') {
+    if (borrando) return null; // el aviso en tiempo real llegó antes que la respuesta: ya se está saliendo
+    return <SalaEliminada nombre={estado.nombre} />;
+  }
   if (estado.fase !== 'lista') {
     return (
       <main className="grid min-h-dvh place-items-center p-5 text-center">
@@ -296,9 +321,30 @@ export default function Sala() {
           sala={sala}
           esAnfitrion={esAnfitrion}
           integrantes={integrantes.length}
+          eliminando={borrando}
+          error={errorBorrar}
+          alEditar={() => {
+            setInfo(false);
+            setEditando(true);
+          }}
+          alEliminar={() => void eliminar(sala.nombre)}
           alCerrar={() => {
             setInfo(false);
             window.setTimeout(() => botonInfo.current?.focus(), 0); // el foco vuelve al botón que abrió el popup
+          }}
+        />
+      )}
+      {editando && esAnfitrion && (
+        <DialogoCrearSala
+          editar={sala}
+          alCerrar={() => {
+            setEditando(false);
+            window.setTimeout(() => botonInfo.current?.focus(), 0);
+          }}
+          alCrear={(guardada) => {
+            actualizarSala(guardada);
+            setEditando(false);
+            window.setTimeout(() => botonInfo.current?.focus(), 0);
           }}
         />
       )}
