@@ -44,6 +44,20 @@ describe('PanelChat', () => {
     expect(screen.getByLabelText('Escribe un mensaje')).toHaveValue('Hola');
   });
 
+  it('ofrece ver anteriores, y muestra la carga y el error con reintento (US-11)', async () => {
+    const cargar = vi.fn();
+    const props = { mensajes: [msg('1', 'ana', 'Hola')], miUid: 'u1', conectado: true, enviar: vi.fn(), clara: true, cargarAnteriores: cargar };
+    const { rerender } = render(<PanelChat {...props} hayMas />);
+    await userEvent.click(screen.getByRole('button', { name: 'ver anteriores' }));
+    expect(cargar).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('log')).toHaveFocus();
+    rerender(<PanelChat {...props} hayMas anteriores="cargando" />);
+    expect(screen.getByText('Cargando anteriores…')).toBeInTheDocument();
+    rerender(<PanelChat {...props} hayMas anteriores="error" />);
+    await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    expect(cargar).toHaveBeenCalledTimes(2);
+  });
+
   it('si se están leyendo mensajes de arriba, avisa de los nuevos sin mover la lista (US-10)', async () => {
     const props = { miUid: 'u1', conectado: true, enviar: vi.fn(), clara: true };
     const { rerender } = render(<PanelChat {...props} mensajes={[msg('1', 'ana', 'Hola')]} />);

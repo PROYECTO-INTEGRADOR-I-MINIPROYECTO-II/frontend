@@ -102,7 +102,7 @@ function CabeceraPanel({ titulo, lado, minimizado, alAlternar, cuenta, clara, co
 // ajustable; móvil en vertical, con el tablero arriba y, debajo, Chat o Integrantes en pestañas. Sin encabezado ni pie del sitio.
 export default function Sala() {
   const { id = '' } = useParams();
-  const { estado, enviar, actualizarSala } = useSala(id);
+  const { estado, enviar, cargarAnteriores, actualizarSala } = useSala(id);
   const novedades = estado.fase === 'lista' ? estado.novedades : SIN_NOVEDADES;
   const { entraron, salieron } = usePresenciaReciente(novedades);
   const navegar = useNavigate();
@@ -208,7 +208,7 @@ export default function Sala() {
     return (
       <main className="grid min-h-dvh place-items-center p-5 text-center">
         {estado.fase === 'conectando' ? (
-          <Mensaje tipo="info" titulo={<span className="font-pixel text-[11px] leading-5">Conectando a la Sala…</span>} />
+          <Mensaje tipo="info" titulo={<span className="font-pixel text-[11px] leading-5">Conectando a la Sala…</span>}>Cargando historial…</Mensaje>
         ) : (
           <div className="max-w-sm border-2 border-error p-6">
             <Mensaje tipo="error" titulo="No pudimos entrar a la sala">{estado.mensaje}</Mensaje>
@@ -219,12 +219,12 @@ export default function Sala() {
     );
   }
 
-  const { sala, mensajes, conectado } = estado;
+  const { sala, mensajes, conectado, hayMas, anteriores } = estado;
   const entradas = novedades.filter((n) => n.tipo === 'entra' && n.uid !== miUid);
   const presencia = novedades.filter((n) => n.tipo !== 'mensaje' && n.uid !== miUid).at(-1);
   const esAnfitrion = sala.uid === miUid;
   const panelIntegrantes = (clara: boolean) => <PanelIntegrantes integrantes={integrantes} anfitrionUid={sala.uid} miUid={miUid} tablero={tablero} clara={clara} entraron={entraron} salieron={salieron} />;
-  const panelChat = (clara: boolean) => <PanelChat mensajes={mensajes} entradas={entradas} miUid={miUid} conectado={conectado} enviar={enviar} clara={clara} />;
+  const panelChat = (clara: boolean) => <PanelChat mensajes={mensajes} entradas={entradas} miUid={miUid} conectado={conectado} enviar={enviar} clara={clara} hayMas={hayMas} anteriores={anteriores} cargarAnteriores={cargarAnteriores} />;
   const centrada = escritorio && !compacto;
   const pequeno = compacto || !escritorio; // botones de 32 px en teléfono
   const botonIcono = `grid ${pequeno ? 'size-8' : 'size-10'} place-items-center border-2 border-texto hover:bg-texto hover:text-fondo focus-visible:bg-texto focus-visible:text-fondo`;
