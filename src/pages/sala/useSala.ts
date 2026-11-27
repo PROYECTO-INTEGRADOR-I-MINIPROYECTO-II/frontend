@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Socket } from 'socket.io-client';
+import { mensajesAnteriores } from '../../api/salas';
 import { conectarTiempoReal } from '../../realtime/cliente';
 import type { Integrante, Mensaje, Novedad, Sala } from '../../realtime/tipos';
 
@@ -14,6 +15,9 @@ export type EstadoSala =
       integrantes: Integrante[];
       mensajes: Mensaje[];
       conectado: boolean;
+      /** Quedan mensajes más antiguos sin cargar (US-11). */
+      hayMas: boolean;
+      anteriores: 'cargando' | 'error' | null;
       novedades: Novedad[];
     };
 
@@ -69,7 +73,7 @@ export function useSala(id: string) {
       limpiarEntrada();
       entrando = true;
       const turno = intento;
-      s.timeout(8000).emit('sala:unirse', { id }, (err: Error | null, res?: Respuesta<{ sala: Sala; mensajes?: Mensaje[] }>) => {
+      s.timeout(8000).emit('sala:unirse', { id }, (err: Error | null, res?: Respuesta<{ sala: Sala; mensajes?: Mensaje[]; hayMas?: boolean }>) => {
         if (!vigente || turno !== intento) return;
         if (err) return fallo(SIN_RESPUESTA);
         // Al reconectar, «no existe» significa que la borraron mientras no había conexión.
@@ -77,10 +81,15 @@ export function useSala(id: string) {
         if (res?.error || !res?.sala) return fallo(res?.error?.message ?? 'No pudimos entrar a la sala.');
         const sala = salaActualizada ?? res.sala;
         const mensajes = unirMensajes(res.mensajes ?? [], pendientes);
+        const hayMas = res.hayMas ?? false;
         limpiarEntrada();
-        setEstado((e) => (e.fase === 'lista'
-          ? { ...e, sala, mensajes: unirMensajes(e.mensajes, mensajes), conectado: true }
-          : { fase: 'lista', sala, integrantes: [], mensajes, conectado: true, novedades: [] }));
+        setEstado((e) => {
+          if (e.fase !== 'lista') return { fase: 'lista', sala, integrantes: [], mensajes, conectado: true, hayMas, anteriores: null, novedades: [] };
+          // Si mientras no había conexión llegó más de una página, entre lo viejo y lo nuevo quedaría un hueco: se deja solo lo nuevo.
+          const vistos = new Set(e.mensajes.map((m) => m.id));
+          const hueco = hayMas && e.mensajes.length > 0 && !mensajes.some((m) => vistos.has(m.id));
+          return { ...e, sala, conectado: true, mensajes: hueco ? mensajes : unirMensajes(e.mensajes, mensajes), hayMas: hueco ? true : e.hayMas };
+        });
       });
     };
 
@@ -150,8 +159,22 @@ export function useSala(id: string) {
     [id],
   );
 
+  /** Trae la página anterior a lo más antiguo que se ve (US-11). */
+  const cargarAnteriores = useCallback(async () => {
+    const e = actual.current;
+    if (e.fase !== 'lista' || e.anteriores === 'cargando' || !e.hayMas || !e.mensajes[0]) return;
+    const primero = e.mensajes[0];
+    setEstado((x) => (x.fase === 'lista' ? { ...x, anteriores: 'cargando' } : x));
+    try {
+      const pagina = await mensajesAnteriores(id, primero.creado, primero.id);
+      setEstado((x) => (x.fase === 'lista' && x.sala.id === id ? { ...x, mensajes: unirMensajes(pagina.mensajes, x.mensajes), hayMas: pagina.hayMas, anteriores: null } : x));
+    } catch {
+      setEstado((x) => (x.fase === 'lista' ? { ...x, anteriores: 'error' } : x));
+    }
+  }, [id]);
+
   /** Refleja un cambio hecho desde esta pantalla sin esperar al evento de tiempo real. */
   const actualizarSala = useCallback((sala: Sala) => setEstado((e) => (e.fase === 'lista' && e.sala.id === sala.id ? { ...e, sala: { ...e.sala, ...sala } } : e)), []);
 
-  return { estado, enviar, actualizarSala };
+  return { estado, enviar, cargarAnteriores, actualizarSala };
 }

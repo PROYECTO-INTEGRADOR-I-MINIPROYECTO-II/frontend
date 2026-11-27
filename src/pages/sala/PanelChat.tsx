@@ -15,12 +15,15 @@ interface Props {
   conectado: boolean;
   enviar: (texto: string) => Promise<string | null>;
   clara: boolean;
+  hayMas?: boolean;
+  anteriores?: 'cargando' | 'error' | null;
+  cargarAnteriores?: () => void;
 }
 
 // Chat de la sala: mensajes en orden (autor, hora, texto) y el campo para escribir; Enter envía. Baja solo al llegar algo nuevo, salvo
 // que se estén leyendo mensajes anteriores: entonces aparece la barra de «mensajes nuevos». Los anuncios al lector de pantalla los hace
 // la sala (así también se oyen con el chat plegado), por eso este registro no se anuncia solo.
-export default function PanelChat({ mensajes, entradas = SIN_ENTRADAS, miUid, conectado, enviar, clara }: Props) {
+export default function PanelChat({ mensajes, entradas = SIN_ENTRADAS, miUid, conectado, enviar, clara, hayMas, anteriores, cargarAnteriores }: Props) {
   const fuente = clara ? 'font-sans text-sm' : 'font-pixel text-[11px] leading-5';
   const [texto, setTexto] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,8 +31,9 @@ export default function PanelChat({ mensajes, entradas = SIN_ENTRADAS, miUid, co
   const [nuevos, setNuevos] = useState(0);
   const lista = useRef<HTMLOListElement>(null);
   const alFinal = useRef(true);
+  const alto = useRef(0);
   const ultimaY = useRef(0);
-  const previos = useRef<{ ids: Set<string>; ultimo?: Mensaje }>({ ids: new Set() });
+  const previos = useRef<{ ids: Set<string>; primero?: string; ultimo?: Mensaje }>({ ids: new Set() });
 
   const bajar = () => {
     const el = lista.current;
@@ -42,18 +46,33 @@ export default function PanelChat({ mensajes, entradas = SIN_ENTRADAS, miUid, co
     const el = lista.current;
     const antes = previos.current;
     const ultimo = mensajes.at(-1);
-    if (el && alFinal.current) el.scrollTop = el.scrollHeight;
-    if (antes.ultimo && !alFinal.current) {
+    const seCargaronAnteriores = antes.primero !== undefined && mensajes[0]?.id !== antes.primero && ultimo?.id === antes.ultimo?.id;
+    if (el) {
+      // Al añadir arriba se mantiene a la vista lo que se estaba leyendo.
+      if (seCargaronAnteriores) el.scrollTop += el.scrollHeight - alto.current;
+      else if (alFinal.current) el.scrollTop = el.scrollHeight;
+    }
+    if (antes.ultimo && !alFinal.current && !seCargaronAnteriores) {
       const llegados = mensajes.filter((m) => !antes.ids.has(m.id) && m.creado >= antes.ultimo!.creado && m.uid !== miUid).length;
       if (llegados) setNuevos((n) => n + llegados);
     }
-    previos.current = { ids: new Set(mensajes.map((m) => m.id)), ultimo };
+    previos.current = { ids: new Set(mensajes.map((m) => m.id)), primero: mensajes[0]?.id, ultimo };
   }, [mensajes, miUid]);
 
   useEffect(() => {
     const el = lista.current;
     if (el && alFinal.current) el.scrollTop = el.scrollHeight;
   }, [entradas]);
+
+  useLayoutEffect(() => {
+    alto.current = lista.current?.scrollHeight ?? 0;
+  });
+
+  // El control que se pulsa desaparece al cargar: el foco pasa antes a la lista para no perderse.
+  const pedirAnteriores = () => {
+    lista.current?.focus({ preventScroll: true });
+    cargarAnteriores?.();
+  };
 
   // Si la lista cambia de tamaño (un aviso arriba, el teclado del celular) y se estaba al final, se sigue al final.
   useEffect(() => {
@@ -85,6 +104,7 @@ export default function PanelChat({ mensajes, entradas = SIN_ENTRADAS, miUid, co
     ...mensajes.map((m) => ({ clave: m.id, creado: m.creado, mensaje: m })),
     ...entradas.map((n) => ({ clave: `entrada-${n.n}`, creado: n.creado, entrada: n })),
   ].sort((a, b) => a.creado.localeCompare(b.creado));
+  const aviso = 'list-none text-center text-xs';
 
   return (
     <div className={`flex min-h-0 flex-1 flex-col ${fuente}`}>
@@ -107,6 +127,22 @@ export default function PanelChat({ mensajes, entradas = SIN_ENTRADAS, miUid, co
         }}
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3 [overflow-anchor:none]"
       >
+        {anteriores === 'cargando' ? (
+          <li className={`${aviso} text-texto-secundario`}><span role="status">Cargando anteriores…</span></li>
+        ) : anteriores === 'error' ? (
+          <li className={`${aviso} text-error`}>
+            <span role="alert">No pudimos cargarlos. </span>
+            <button type="button" onClick={pedirAnteriores} className="underline underline-offset-4">Reintentar</button>
+          </li>
+        ) : (
+          hayMas && (
+            <li className={aviso}>
+              <button type="button" onClick={pedirAnteriores} className="text-texto-secundario underline underline-offset-4 hover:text-acento-claro focus-visible:text-acento-claro">
+                <span aria-hidden="true">· · · </span>ver anteriores<span aria-hidden="true"> · · ·</span>
+              </button>
+            </li>
+          )
+        )}
         {lineas.length === 0 && <li className="grid flex-1 place-items-center px-4 text-center font-sans text-xs text-texto-secundario">Aún no hay mensajes. Escribe el primero.</li>}
         {lineas.map(({ clave, mensaje: m, entrada }) =>
           m ? (

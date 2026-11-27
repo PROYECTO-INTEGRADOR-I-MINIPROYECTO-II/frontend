@@ -30,6 +30,8 @@ const socket = {
   },
 };
 vi.mock('../../realtime/cliente', () => ({ conectarTiempoReal: () => socket }));
+const mensajesAnteriores = vi.fn();
+vi.mock('../../api/salas', () => ({ mensajesAnteriores: (...a: unknown[]) => mensajesAnteriores(...a) }));
 
 const sala: Sala = { id: 'S1', nombre: 'Mi sala', descripcion: '', uid: 'u1', creado: '2026-11-19T10:00:00.000Z' };
 const mensaje = (id: string, creado = '2026-11-19T18:31:00.000Z'): Mensaje => ({ id, salaId: 'S1', uid: 'u1', autor: 'ana', texto: id, creado });
@@ -241,4 +243,24 @@ describe('useSala', () => {
     });
   });
 
+  it('carga la página anterior desde el mensaje más antiguo, sin duplicados (US-11)', async () => {
+    falso.respuestas.set('sala:unirse', { sala, mensajes: [mensaje('b', '2026-11-19T18:00:00.000Z')], hayMas: true });
+    mensajesAnteriores.mockResolvedValueOnce({ mensajes: [mensaje('a', '2026-11-19T17:00:00.000Z'), mensaje('b', '2026-11-19T18:00:00.000Z')], hayMas: false });
+    const { result } = renderHook(() => useSala('S1'));
+    disparar('connect');
+    await act(() => result.current.cargarAnteriores());
+    expect(mensajesAnteriores).toHaveBeenCalledWith('S1', '2026-11-19T18:00:00.000Z', 'b');
+    const e = result.current.estado;
+    expect(e).toMatchObject({ hayMas: false, anteriores: null });
+    expect(e.fase === 'lista' && e.mensajes.map((m) => m.id)).toEqual(['a', 'b']);
+  });
+
+  it('si no puede cargar los anteriores lo marca y conserva el chat', async () => {
+    falso.respuestas.set('sala:unirse', { sala, mensajes: [mensaje('b')], hayMas: true });
+    mensajesAnteriores.mockRejectedValueOnce(new Error('sin red'));
+    const { result } = renderHook(() => useSala('S1'));
+    disparar('connect');
+    await act(() => result.current.cargarAnteriores());
+    expect(result.current.estado).toMatchObject({ anteriores: 'error', hayMas: true, mensajes: [{ id: 'b' }] });
+  });
 });
