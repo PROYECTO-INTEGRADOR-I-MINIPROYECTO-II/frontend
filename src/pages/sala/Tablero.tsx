@@ -22,12 +22,12 @@ function Punto({ i, persona, anfitrionUid, anclada, grande = false, t }: { i: nu
       onKeyDown={alTeclear}
       aria-pressed={anclada}
       aria-describedby="ayuda-puntos"
-      aria-label={`Punto ${i + 1}: ${persona.username}${persona.uid === anfitrionUid ? ', anfitrión' : ''}${anclada ? ', anclado' : ''}`}
+      aria-label={`Punto ${i + 1}: ${persona.nombre || persona.username}${persona.uid === anfitrionUid ? ', anfitrión' : ''}${anclada ? ', anclado' : ''}`}
       className="relative grid size-full min-h-16 place-items-center rounded-2xl border-2 border-texto bg-fondo hover:bg-primario-suave focus-visible:bg-primario-suave"
     >
-      <Avatar nombre={persona.username} className={grande ? 'size-20 text-xl' : 'size-12 text-sm'} />
+      <Avatar nombre={persona.nombre || persona.username} foto={persona.foto} className={grande ? 'size-20 text-xl' : 'size-12 text-sm'} />
       <span className="absolute bottom-2 left-3 right-3 flex items-center gap-2">
-        <span className="truncate">{persona.username}</span>
+        <span className="truncate">{persona.nombre || persona.username}</span>
         {persona.uid === anfitrionUid && <span className="shrink-0 text-acento-claro">Anfitrión</span>}
       </span>
       {anclada && <IconoPixel nombre="ancla" className="absolute right-2 top-2 text-acento-claro" />}
