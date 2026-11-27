@@ -7,17 +7,20 @@ import { PuntosAnimados } from '../../utils/retro/RetroWindow';
 import Boton from '../../utils/ui/Boton';
 import Mensaje from '../../utils/ui/Mensaje';
 import DialogoCrearSala from './DialogoCrearSala';
+import DialogoUnirse from './DialogoUnirse';
 import TarjetaSala from './TarjetaSala';
 import { useSalas } from './useSalas';
 
 type Aviso = { tipo: 'exito' | 'error'; texto: string };
 
-// «Mis salas» (US-06): las salas que creó la persona, crear una nueva (y entrar a ella como anfitrión) y copiar su ID para invitar.
+// «Mis salas» (US-06, 08): las salas que creó la persona, crear una (y entrar como anfitrión), unirse a otra con su ID y copiar el ID.
 export default function Dashboard() {
   useDocumentTitle('Mis salas');
   const { estado, recargar } = useSalas();
   const [creando, setCreando] = useState(false);
+  const [uniendose, setUniendose] = useState(false);
   const [aviso, setAviso] = useState<Aviso | null>(null);
+  const contenedorUnirse = useRef<HTMLSpanElement>(null);
   const navegar = useNavigate();
   const contenedorCrear = useRef<HTMLSpanElement>(null); // Boton no reenvía ref: se busca su <button> para devolverle el foco
 
@@ -31,8 +34,9 @@ export default function Dashboard() {
   // Cada tarjeta lleva un número (1–9): pulsarlo intenta entrar a esa sala. Solo actúa fuera de campos y de diálogos, y sin
   // modificadores, para no interferir al escribir ni con atajos del navegador (WCAG 2.1.4).
   const salas = estado.fase === 'lista' ? estado.salas : [];
+  const conDialogo = creando || uniendose;
   useEffect(() => {
-    if (creando) return;
+    if (conDialogo) return;
     const alTeclear = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || !/^[1-9]$/.test(e.key)) return;
       const el = e.target as Element | null;
@@ -42,7 +46,7 @@ export default function Dashboard() {
     };
     document.addEventListener('keydown', alTeclear);
     return () => document.removeEventListener('keydown', alTeclear);
-  }, [creando, salas, navegar]);
+  }, [conDialogo, salas, navegar]);
 
   function cerrarDialogo() {
     setCreando(false);
@@ -52,6 +56,11 @@ export default function Dashboard() {
   // Crear una sala lleva directo a ella, como anfitrión (US-06): la Sala indica «Eres el anfitrión» y ahí está su ID para compartir.
   function alCrear(sala: Sala) {
     navegar(`/salas/${encodeURIComponent(sala.id)}`);
+  }
+
+  function cerrarUnirse() {
+    setUniendose(false);
+    window.setTimeout(() => contenedorUnirse.current?.querySelector('button')?.focus(), 0);
   }
 
   async function copiar(sala: Sala) {
@@ -65,17 +74,22 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-col items-center gap-4 text-center">
         <div>
           <h1 className="font-pixel text-sm leading-6">Mis salas</h1>
           <p className="mt-2 text-sm text-texto-secundario">Las salas que creaste. Pulsa su número para entrar; haz clic en su ID para copiarlo y compartirlo.</p>
         </div>
-        <span ref={contenedorCrear}>
-          <Boton variante="primario" onClick={() => setCreando(true)} aria-haspopup="dialog">
-            <Plus aria-hidden="true" className="size-4" />
-            Crear sala
-          </Boton>
-        </span>
+        <div className="flex flex-wrap justify-center gap-3">
+          <span ref={contenedorUnirse}>
+            <Boton onClick={() => setUniendose(true)} aria-haspopup="dialog">Unirse</Boton>
+          </span>
+          <span ref={contenedorCrear}>
+            <Boton variante="primario" onClick={() => setCreando(true)} aria-haspopup="dialog">
+              <Plus aria-hidden="true" className="size-4" />
+              Crear sala
+            </Boton>
+          </span>
+        </div>
       </div>
 
       {/* Región viva: los avisos («Sala creada», «ID copiado») se anuncian sin mover el foco. */}
@@ -114,6 +128,7 @@ export default function Dashboard() {
       </div>
 
       {creando && <DialogoCrearSala alCerrar={cerrarDialogo} alCrear={alCrear} />}
+      {uniendose && <DialogoUnirse alCerrar={cerrarUnirse} />}
     </div>
   );
 }

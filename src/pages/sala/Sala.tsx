@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { auth } from '../../firebase';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { useFuentePropia } from '../../hooks/useFuentePropia';
@@ -95,6 +95,9 @@ function CabeceraPanel({ titulo, lado, minimizado, alAlternar, cuenta, clara, co
 export default function Sala() {
   const { id = '' } = useParams();
   const { estado, enviar } = useSala(id);
+  // Quien llega por «Unirse» recibe la confirmación (US-08).
+  const llegaUniendose = Boolean((useLocation().state as { entraste?: boolean } | null)?.entraste);
+  const [bienvenida, setBienvenida] = useState(false);
   useDocumentTitle(estado.fase === 'lista' ? estado.sala.nombre : 'Sala');
   const integrantes = estado.fase === 'lista' ? estado.integrantes : [];
   const tablero = useTablero(id, integrantes, estado.fase === 'lista' ? estado.sala.uid : '');
@@ -123,6 +126,14 @@ export default function Sala() {
   const ancho900 = useMediaQuery('(min-width: 900px)');
   const minimizada = compacto ? MINIMIZADA_COMPACTA : MINIMIZADA;
   const miUid = auth.currentUser?.uid;
+
+  const dentro = estado.fase === 'lista';
+  useEffect(() => {
+    if (!dentro || !llegaUniendose) return;
+    setBienvenida(true);
+    const t = window.setTimeout(() => setBienvenida(false), 4000);
+    return () => window.clearTimeout(t);
+  }, [dentro, llegaUniendose]);
 
   useEffect(() => guardar(CLAVE_ANCHOS, anchos), [anchos]);
   // Ancho disponible para las columnas (cambia al girar el teléfono o redimensionar la ventana).
@@ -166,7 +177,7 @@ export default function Sala() {
     return (
       <main className="grid min-h-dvh place-items-center p-5 text-center">
         {estado.fase === 'conectando' ? (
-          <Mensaje tipo="info" titulo={<span className="font-pixel text-[11px] leading-5">Entrando a la sala…</span>} />
+          <Mensaje tipo="info" titulo={<span className="font-pixel text-[11px] leading-5">Conectando a la Sala…</span>} />
         ) : (
           <div className="max-w-sm border-2 border-error p-6">
             <Mensaje tipo="error" titulo="No pudimos entrar a la sala">{estado.mensaje}</Mensaje>
@@ -214,6 +225,7 @@ export default function Sala() {
           <BotonSalir compacto={pequeno} alArmar={setSaliendo} />
         </div>
       </header>
+      <p role="status" className={bienvenida ? 'border-b-2 border-exito px-3 py-2 text-center text-sm text-exito' : 'sr-only'}>{bienvenida ? `Entraste a «${sala.nombre}».` : ''}</p>
       <Mensaje tipo="error" className={conectado ? 'sr-only' : 'border-b-2 border-error px-3 py-2 text-center'}>
         {!conectado && 'Se perdió la conexión. Reconectando…'}
       </Mensaje>
