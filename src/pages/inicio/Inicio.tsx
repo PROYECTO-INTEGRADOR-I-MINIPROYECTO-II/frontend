@@ -1,28 +1,23 @@
 import { FormEvent, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import CallPreview from './animations/CallPreview';
 import ChatPreview from './animations/ChatPreview';
 import LedPassphraseField from '../../utils/led/LedPassphraseField';
 import LedLoginField from '../../utils/led/LedLoginField';
 import { useSession } from '../../auth/useSession';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { useEntrarSala } from '../sala/useEntrarSala';
 
 export default function Inicio() {
   useDocumentTitle('Entrar a una Sala');
   const { user } = useSession();
-  const navigate = useNavigate();
-  const [phrase, setPhrase] = useState('');
-  const [error, setError] = useState('');
+  const [id, setId] = useState('');
+  const { error, limpiarError, conectando, entrar } = useEntrarSala(setId);
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    const clean = phrase.trim();
-    if (!clean) {
-      setError('Escribe la passphrase de la Sala.');
-      return;
-    }
-    navigate(`/salas/${encodeURIComponent(clean)}`);
+    void entrar(id);
   }
 
   return (
@@ -32,9 +27,9 @@ export default function Inicio() {
       <div className="w-full max-w-2xl">
       {user ? (
         <form onSubmit={submit} className="w-full" noValidate>
-          <label htmlFor="passphrase" className="sr-only">Passphrase de la Sala</label>
+          <label htmlFor="passphrase" className="sr-only">ID de la sala</label>
           <p id="phrase-ayuda" className="mb-4 text-center text-sm text-texto-secundario">
-            Escribe el código → ingresa a la sala
+            Escribe el ID → entra a la sala
           </p>
           {/* Solo con acceso al Panel (sesión y perfil completo): es el mismo caso en que «Mis salas» del pie es un enlace. */}
           {user.username && (
@@ -49,18 +44,21 @@ export default function Inicio() {
             <div className="min-w-0 flex-1">
               <LedPassphraseField
                 id="passphrase"
-                value={phrase}
+                value={id}
                 onChange={(v) => {
-                  setPhrase(v);
-                  setError('');
+                  setId(v);
+                  limpiarError();
                 }}
                 describedBy={error ? 'phrase-error phrase-ayuda' : 'phrase-ayuda'}
+                invalido={Boolean(error)}
               />
             </div>
             {/* Enter en el campo también envía el formulario. */}
             <button
               type="submit"
-              aria-label="Entrar a la Sala"
+              aria-label="Entrar a la sala"
+              disabled={conectando}
+              aria-busy={conectando || undefined}
               className="led-text led-glow-soft group relative grid size-14 shrink-0 place-items-center rounded-2xl border border-led/55 bg-superficie text-led transition-shadow duration-300 hover:led-glow hover:border-led focus-visible:led-glow focus-visible:border-led focus-visible:outline-none md:size-16"
             >
               <ArrowRight aria-hidden="true" className="size-8 motion-safe:group-hover:animate-flecha motion-safe:group-focus-visible:animate-flecha" strokeWidth={3} />
@@ -68,6 +66,7 @@ export default function Inicio() {
               <span aria-hidden="true" className="crt-scan absolute inset-0 rounded-2xl" />
             </button>
           </div>
+          <p role="status" className={conectando ? 'mt-3 text-center font-pixel text-[11px] leading-5' : 'sr-only'}>{conectando ? 'Conectando a la Sala…' : ''}</p>
           {error && (
             <p id="phrase-error" role="alert" className="mt-3 text-center text-error">
               {error}
@@ -77,7 +76,7 @@ export default function Inicio() {
       ) : (
         <div className="w-full">
           <p className="mb-4 text-center text-sm text-texto-secundario">
-            Inicia sesión para entrar a una Sala con su passphrase.
+            Inicia sesión para entrar a una sala con su ID.
           </p>
           <LedLoginField />
         </div>

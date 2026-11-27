@@ -5,13 +5,15 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   describedBy?: string;
+  invalido?: boolean;
 }
 
-const texto = 'font-pixel text-xl font-semibold uppercase tracking-widest md:text-2xl';
+// Sin mayúsculas forzadas: los ID distinguen mayúsculas de minúsculas y hay que ver lo que se escribió.
+const texto = 'font-pixel text-sm font-semibold tracking-wide md:text-lg';
 
-// Campo de passphrase con estética LED. El cursor es propio (mismo tamaño vacío o escribiendo):
+// Campo del ID de sala con estética LED. El cursor es propio (mismo tamaño vacío o escribiendo):
 // se mide el texto con dos spans ocultos para colocarlo donde está la selección del campo real.
-export default function LedPassphraseField({ id, value, onChange, describedBy }: Props) {
+export default function LedPassphraseField({ id, value, onChange, describedBy, invalido }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const full = useRef<HTMLSpanElement>(null);
   const pre = useRef<HTMLSpanElement>(null);
@@ -46,13 +48,14 @@ export default function LedPassphraseField({ id, value, onChange, describedBy }:
         }}
         onBlur={() => setFocused(false)}
         aria-describedby={describedBy}
+        aria-invalid={invalido || undefined}
         autoComplete="off"
         autoCapitalize="none"
         spellCheck={false}
         className={`led-text led-glow-soft h-14 w-full rounded-2xl border border-led/55 bg-superficie px-6 text-center text-led caret-transparent transition-shadow duration-300 focus:led-glow focus:border-led focus:outline-none md:h-16 ${texto}`}
       />
-      <span ref={full} aria-hidden="true" className={`invisible absolute whitespace-pre ${texto}`}>{value}</span>
-      <span ref={pre} aria-hidden="true" className={`invisible absolute whitespace-pre ${texto}`}>{value.slice(0, sel)}</span>
+      <span ref={full} aria-hidden="true" className={`invisible absolute left-0 top-0 whitespace-pre ${texto}`}>{value}</span>
+      <span ref={pre} aria-hidden="true" className={`invisible absolute left-0 top-0 whitespace-pre ${texto}`}>{value.slice(0, sel)}</span>
 
       {(focused || value === '') && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 grid place-items-center">
