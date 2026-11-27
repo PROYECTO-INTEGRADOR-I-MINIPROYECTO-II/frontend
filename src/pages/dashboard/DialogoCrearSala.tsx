@@ -1,17 +1,17 @@
 import { useId, useState, type FormEvent } from 'react';
 import { ApiError } from '../../api/base';
-import { crearSala, DESCRIPCION_SALA_MAX, NOMBRE_SALA_MAX, type Sala } from '../../api/salas';
+import { crearSala, DESCRIPCION_SALA_MAX, editarSala, NOMBRE_SALA_MAX, type Sala } from '../../api/salas';
 import Boton from '../../utils/ui/Boton';
 import CampoPixel from '../../utils/ui/CampoPixel';
 import Dialogo from '../../utils/ui/Dialogo';
 import Mensaje from '../../utils/ui/Mensaje';
 
-// Crear una sala (US-06): nombre obligatorio y descripción opcional. Los errores salen junto a su campo; si la API rechaza el envío
-// se conserva lo escrito. Al crearla se entrega la sala a quien lo abrió, que decide qué mostrar.
-export default function DialogoCrearSala({ alCerrar, alCrear }: { alCerrar: () => void; alCrear: (sala: Sala) => void }) {
+// Crear una sala (US-06) o, con `editar`, cambiar la propia (US-07): nombre obligatorio y descripción opcional. Los errores salen junto
+// a su campo; si la API rechaza el envío se conserva lo escrito. La sala guardada se entrega a quien lo abrió (`alCrear`).
+export default function DialogoCrearSala({ alCerrar, alCrear, editar }: { alCerrar: () => void; alCrear: (sala: Sala) => void; editar?: Sala }) {
   const idDescripcion = useId();
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+  const [nombre, setNombre] = useState(editar?.nombre ?? '');
+  const [descripcion, setDescripcion] = useState(editar?.descripcion ?? '');
   const [errores, setErrores] = useState<{ nombre?: string; descripcion?: string; general?: string }>({});
   const [creando, setCreando] = useState(false);
 
@@ -31,14 +31,14 @@ export default function DialogoCrearSala({ alCerrar, alCrear }: { alCerrar: () =
     }
     setCreando(true);
     try {
-      alCrear(await crearSala(n, d));
+      alCrear(editar ? await editarSala(editar.id, n, d) : await crearSala(n, d));
     } catch (err) {
       const api = err instanceof ApiError ? err : null;
       if (api?.campo === 'nombre' || api?.campo === 'descripcion') {
         setErrores({ [api.campo]: api.message });
         document.getElementById(api.campo === 'nombre' ? 'sala-nombre' : idDescripcion)?.focus();
       } else {
-        setErrores({ general: api?.message ?? 'No pudimos crear la sala. Intenta de nuevo en un momento.' });
+        setErrores({ general: api?.message ?? `No pudimos ${editar ? 'guardar los cambios' : 'crear la sala'}. Intenta de nuevo en un momento.` });
       }
       setCreando(false);
     }
@@ -48,13 +48,13 @@ export default function DialogoCrearSala({ alCerrar, alCrear }: { alCerrar: () =
     <>
       <div aria-hidden="true" className="fixed inset-0 z-20 bg-black/65" />
       <Dialogo
-        titulo="Crear sala"
+        titulo={editar ? 'Editar sala' : 'Crear sala'}
         onCerrar={() => !creando && alCerrar()}
         modal
         className="fixed left-1/2 top-1/2 z-30 max-h-[calc(100dvh-2rem)] w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto"
       >
         <form onSubmit={enviar} noValidate className="grid gap-5 p-4 sm:p-6">
-          <p className="text-sm text-texto-secundario">Tu sala es privada: solo entra quien tenga su ID. Podrás compartirlo desde «Mis salas».</p>
+          {!editar && <p className="text-sm text-texto-secundario">Tu sala es privada: solo entra quien tenga su ID. Podrás compartirlo desde «Mis salas».</p>}
           <CampoPixel
             id="sala-nombre"
             etiqueta="Nombre"
@@ -82,7 +82,7 @@ export default function DialogoCrearSala({ alCerrar, alCrear }: { alCerrar: () =
           <div className="flex flex-wrap justify-end gap-3">
             <Boton onClick={alCerrar} disabled={creando}>Cancelar</Boton>
             <Boton type="submit" variante="primario" disabled={creando} aria-busy={creando || undefined}>
-              {creando ? 'Creando…' : 'Crear sala'}
+              {editar ? (creando ? 'Guardando…' : errores.general ? 'Reintentar' : 'Guardar') : creando ? 'Creando…' : 'Crear sala'}
             </Boton>
           </div>
         </form>

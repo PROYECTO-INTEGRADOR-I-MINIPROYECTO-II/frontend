@@ -6,7 +6,15 @@ import type { Integrante, Mensaje, Sala } from '../../realtime/tipos';
 export type EstadoSala =
   | { fase: 'conectando' }
   | { fase: 'error'; mensaje: string }
-  | { fase: 'lista'; sala: Sala; integrantes: Integrante[]; mensajes: Mensaje[]; conectado: boolean };
+  /** El anfitrión la eliminó estando dentro (US-07). */
+  | { fase: 'eliminada'; nombre: string }
+  | {
+      fase: 'lista';
+      sala: Sala;
+      integrantes: Integrante[];
+      mensajes: Mensaje[];
+      conectado: boolean;
+    };
 
 type Respuesta<T> = T & { error?: { code: string; message: string } };
 const SIN_RESPUESTA = 'El servidor tardó demasiado en responder. Intenta de nuevo.';
@@ -18,6 +26,8 @@ const unirMensajes = (...grupos: Mensaje[][]) =>
 export function useSala(id: string) {
   const [estado, setEstado] = useState<EstadoSala>({ fase: 'conectando' });
   const socket = useRef<Socket | null>(null);
+  const actual = useRef(estado);
+  actual.current = estado;
 
   useEffect(() => {
     setEstado({ fase: 'conectando' });
@@ -39,15 +49,23 @@ export function useSala(id: string) {
       limpiarEntrada();
       if (vigente) setEstado({ fase: 'error', mensaje });
     };
+    // Si ya se estaba dentro, se avisa y se vuelve a «Mis salas»; si aún se estaba entrando, es un error de entrada.
+    const quitada = () => {
+      eliminada = true;
+      limpiarEntrada();
+      if (vigente) setEstado((e) => (e.fase === 'lista' ? { fase: 'eliminada', nombre: e.sala.nombre } : e.fase === 'eliminada' ? e : { fase: 'error', mensaje: 'La sala ya no existe.' }));
+    };
 
     const unirse = () => {
       if (!vigente || eliminada) return;
       limpiarEntrada();
       entrando = true;
-      const actual = intento;
+      const turno = intento;
       s.timeout(8000).emit('sala:unirse', { id }, (err: Error | null, res?: Respuesta<{ sala: Sala; mensajes?: Mensaje[] }>) => {
-        if (!vigente || actual !== intento) return;
+        if (!vigente || turno !== intento) return;
         if (err) return fallo(SIN_RESPUESTA);
+        // Al reconectar, «no existe» significa que la borraron mientras no había conexión.
+        if (res?.error?.code === 'NOT_FOUND' && actual.current.fase === 'lista') return quitada();
         if (res?.error || !res?.sala) return fallo(res?.error?.message ?? 'No pudimos entrar a la sala.');
         const sala = salaActualizada ?? res.sala;
         const mensajes = unirMensajes(res.mensajes ?? [], pendientes);
@@ -86,8 +104,7 @@ export function useSala(id: string) {
     });
     s.on('sala:eliminada', ({ salaId }: { salaId: string }) => {
       if (!vigente || salaId !== id) return;
-      eliminada = true;
-      fallo('La sala ya no existe.');
+      quitada();
     });
 
     return () => {
@@ -112,5 +129,8 @@ export function useSala(id: string) {
     [id],
   );
 
-  return { estado, enviar };
+  /** Refleja un cambio hecho desde esta pantalla sin esperar al evento de tiempo real. */
+  const actualizarSala = useCallback((sala: Sala) => setEstado((e) => (e.fase === 'lista' && e.sala.id === sala.id ? { ...e, sala: { ...e.sala, ...sala } } : e)), []);
+
+  return { estado, enviar, actualizarSala };
 }

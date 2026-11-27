@@ -22,6 +22,10 @@ const rutaSala = (id: string) => `/api/salas/${encodeURIComponent(id)}`;
 /** Consulta una sala por su ID, propia o ajena (US-08). Responde 404 si no existe. */
 export const obtenerSala = (id: string) => api<Sala>(rutaSala(id));
 
+/** Solo el anfitrión (US-07): cualquier otra persona recibe 403. */
+export const editarSala = (id: string, nombre: string, descripcion: string) => api<Sala>(rutaSala(id), { method: 'PATCH', body: { nombre, descripcion } });
+export const eliminarSala = (id: string) => api<void>(rutaSala(id), { method: 'DELETE' });
+
 /** Recorta y valida un ID escrito o pegado (US-08). Distingue mayúsculas de minúsculas: no se transforma. */
 export function validarIdSala(texto: string): { id: string; error?: string } {
   const id = texto.trim();

@@ -1,11 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Sala } from '../../realtime/tipos';
 import Boton from '../../utils/ui/Boton';
+import BotonDosPasos from '../../utils/ui/BotonDosPasos';
 import Dialogo from '../../utils/ui/Dialogo';
 
 // Información de la sala (el botón «i» de la cabecera): su nombre completo y su ID, que se pueden leer y copiar aunque la cabecera los corte
-// en pantallas estrechas. Lo ve cualquier integrante: ya conoce el ID (es con lo que entró). Más adelante aquí irá su configuración.
-export default function InfoSala({ sala, esAnfitrion, integrantes, alCerrar }: { sala: Sala; esAnfitrion: boolean; integrantes: number; alCerrar: () => void }) {
+// en pantallas estrechas. Lo ve cualquier integrante: ya conoce el ID (es con lo que entró). El anfitrión además puede editarla o eliminarla.
+export default function InfoSala({ sala, esAnfitrion, integrantes, alCerrar, alEditar, alEliminar, eliminando, error }: {
+  sala: Sala;
+  esAnfitrion: boolean;
+  integrantes: number;
+  alCerrar: () => void;
+  alEditar?: () => void;
+  alEliminar?: () => void;
+  eliminando?: boolean;
+  error?: string;
+}) {
   const [aviso, setAviso] = useState('');
   const reloj = useRef<number | null>(null);
   useEffect(() => () => void (reloj.current !== null && window.clearTimeout(reloj.current)), []);
@@ -46,6 +56,21 @@ export default function InfoSala({ sala, esAnfitrion, integrantes, alCerrar }: {
           <p className="text-xs text-texto-secundario">
             {esAnfitrion ? 'Eres el anfitrión.' : 'Eres participante.'} {integrantes} {integrantes === 1 ? 'persona conectada' : 'personas conectadas'}.
           </p>
+          {/* Solo el anfitrión ve las acciones sobre la sala (US-07). */}
+          {esAnfitrion && alEditar && alEliminar && (
+            <div className="flex flex-wrap items-center gap-3 border-t-2 border-borde pt-4">
+              <Boton className="!px-4 !py-2" onClick={alEditar}>Editar</Boton>
+              <BotonDosPasos
+                texto="Eliminar sala"
+                armado="Clic de nuevo para eliminar"
+                ayuda="Se borrará el chat y saldrán quienes estén dentro. Esc cancela."
+                ocupado={eliminando}
+                textoOcupado="Eliminando…"
+                alConfirmar={alEliminar}
+              />
+              {error && <p role="alert" className="w-full text-xs text-error">{error}</p>}
+            </div>
+          )}
         </div>
       </Dialogo>
     </>

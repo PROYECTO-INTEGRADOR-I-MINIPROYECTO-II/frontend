@@ -1,6 +1,8 @@
 import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Sala } from '../../api/salas';
+import Boton from '../../utils/ui/Boton';
+import BotonDosPasos from '../../utils/ui/BotonDosPasos';
 import EtiquetaTecla from '../../utils/retro/EtiquetaTecla';
 import { IconoPixel } from '../../utils/retro/PixelIcon';
 import TextoBrillo from '../../utils/retro/TextoBrillo';
@@ -12,8 +14,15 @@ const BOTON_SECUNDARIO = `${BOTON} bg-fondo text-texto hover:bg-texto hover:text
 const BOTON_PRIMARIO = `${BOTON} bg-texto text-fondo hover:bg-fondo hover:text-texto focus-visible:bg-fondo focus-visible:text-texto`;
 
 // Una sala propia. Plegada muestra lo esencial: su número de acceso rápido (la tecla que entra a ella, en morado), el nombre, su ID
-// (clicable: se copia) y dos botones, ampliar y entrar. Desplegada añade lo demás: descripción, fecha de creación y opciones.
-export default function TarjetaSala({ sala, numero, alCopiar }: { sala: Sala; numero?: number; alCopiar: (sala: Sala) => void }) {
+// (clicable: se copia) y dos botones, ampliar y entrar. Desplegada añade lo demás: descripción, fecha de creación, editar y eliminar.
+export default function TarjetaSala({ sala, numero, alCopiar, alEditar, alEliminar, eliminando }: {
+  sala: Sala;
+  numero?: number;
+  alCopiar: (sala: Sala) => void;
+  alEditar: (sala: Sala) => void;
+  alEliminar: (sala: Sala) => void;
+  eliminando?: boolean;
+}) {
   const [abierta, setAbierta] = useState(false);
   const idDetalle = useId();
   return (
@@ -61,8 +70,19 @@ export default function TarjetaSala({ sala, numero, alCopiar }: { sala: Sala; nu
           <div className="grid gap-3 border-t border-borde px-3 py-4 text-sm sm:px-4">
             {sala.descripcion && <p className="break-words text-texto-secundario">{sala.descripcion}</p>}
             <p className="text-xs text-texto-secundario">Creada el {FECHA.format(new Date(sala.creado))}</p>
-            {/* Aún sin definir (qué opciones y en qué sprint): se deja el lugar, en gris. */}
-            <p aria-disabled="true" className="cursor-not-allowed font-pixel text-[11px] leading-5 text-texto-secundario/60">Opciones de la sala (próximamente)</p>
+            {/* Solo se listan salas propias: quien ve esto es el anfitrión (US-07). */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Boton className="!px-4 !py-2" aria-label={`Editar la sala ${sala.nombre}`} onClick={() => alEditar(sala)}>Editar</Boton>
+              <BotonDosPasos
+                texto="Eliminar sala"
+                armado="Clic de nuevo para eliminar"
+                ayuda="Se borrará el chat y saldrán quienes estén dentro. Esc cancela."
+                nombre={`Eliminar la sala ${sala.nombre}`}
+                ocupado={eliminando}
+                textoOcupado="Eliminando…"
+                alConfirmar={() => alEliminar(sala)}
+              />
+            </div>
           </div>
         </div>
       </div>

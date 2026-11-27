@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconoPixel } from '../../utils/retro/PixelIcon';
 
-const TEXTO = 'Click de nuevo para salir';
+const TEXTO = 'Clic de nuevo para salir';
 const ESPERA_MS = 3500;
 
-// Salir en dos pasos, para no irse de la sala por un clic suelto: el primero cambia el botón a «Click de nuevo para salir» y abre 3,5 s
+// Salir en dos pasos, para no irse de la sala por un clic suelto: el primero cambia el botón a «Clic de nuevo para salir» y abre 3,5 s
 // para confirmar; las letras pasan de una en una del color del texto a gris y, cuando se apagan todas, el botón vuelve a ser la X. Funciona
 // igual en bajo contraste (los colores salen de los de la vista) y con «Pausar animaciones» (cambia el color sin transición).
 export default function BotonSalir({ destino = '/dashboard', compacto = false, alArmar }: { destino?: string; compacto?: boolean; alArmar?: (armado: boolean) => void }) {
