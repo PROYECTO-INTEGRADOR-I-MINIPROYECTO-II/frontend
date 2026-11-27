@@ -5,6 +5,17 @@ export type { Sala };
 export interface Integrante {
   uid: string;
   username: string;
+  nombre?: string;
+  foto?: string | null;
+}
+/** Algo que acaba de pasar en la sala mientras se está dentro: se anuncia y, si es una entrada, queda en el chat. No se guarda. */
+export interface Novedad {
+  n: number;
+  tipo: 'mensaje' | 'entra' | 'sale';
+  uid: string | null;
+  nombre: string;
+  texto?: string;
+  creado: string;
 }
 export interface Mensaje {
   id: string;

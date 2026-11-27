@@ -1,23 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import type { Sala } from '../../api/salas';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ApiError } from '../../api/base';
+import { eliminarSala, type Sala } from '../../api/salas';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { PuntosAnimados } from '../../utils/retro/RetroWindow';
 import Boton from '../../utils/ui/Boton';
 import Mensaje from '../../utils/ui/Mensaje';
 import DialogoCrearSala from './DialogoCrearSala';
+import DialogoUnirse from './DialogoUnirse';
 import TarjetaSala from './TarjetaSala';
 import { useSalas } from './useSalas';
 
 type Aviso = { tipo: 'exito' | 'error'; texto: string };
 
-// «Mis salas» (US-06): las salas que creó la persona, crear una nueva (y entrar a ella como anfitrión) y copiar su ID para invitar.
+// «Mis salas» (US-06, 07, 08): las salas que creó la persona, crear una (y entrar como anfitrión), unirse a otra con su ID, copiar el ID,
+// editarlas y eliminarlas.
 export default function Dashboard() {
   useDocumentTitle('Mis salas');
-  const { estado, recargar } = useSalas();
+  const { estado, recargar, cambiar } = useSalas();
   const [creando, setCreando] = useState(false);
-  const [aviso, setAviso] = useState<Aviso | null>(null);
+  const [uniendose, setUniendose] = useState(false);
+  const [editando, setEditando] = useState<Sala | null>(null);
+  const [eliminando, setEliminando] = useState<string | null>(null);
+  // Un aviso puede venir de la sala (p. ej. al eliminarla desde dentro).
+  const llegada = (useLocation().state as { aviso?: string } | null)?.aviso;
+  const [aviso, setAviso] = useState<Aviso | null>(llegada ? { tipo: 'exito', texto: llegada } : null);
+  const contenedorUnirse = useRef<HTMLSpanElement>(null);
   const navegar = useNavigate();
   const contenedorCrear = useRef<HTMLSpanElement>(null); // Boton no reenvía ref: se busca su <button> para devolverle el foco
 
@@ -31,8 +40,9 @@ export default function Dashboard() {
   // Cada tarjeta lleva un número (1–9): pulsarlo intenta entrar a esa sala. Solo actúa fuera de campos y de diálogos, y sin
   // modificadores, para no interferir al escribir ni con atajos del navegador (WCAG 2.1.4).
   const salas = estado.fase === 'lista' ? estado.salas : [];
+  const conDialogo = creando || uniendose || editando !== null;
   useEffect(() => {
-    if (creando) return;
+    if (conDialogo) return;
     const alTeclear = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || !/^[1-9]$/.test(e.key)) return;
       const el = e.target as Element | null;
@@ -42,7 +52,7 @@ export default function Dashboard() {
     };
     document.addEventListener('keydown', alTeclear);
     return () => document.removeEventListener('keydown', alTeclear);
-  }, [creando, salas, navegar]);
+  }, [conDialogo, salas, navegar]);
 
   function cerrarDialogo() {
     setCreando(false);
@@ -52,6 +62,30 @@ export default function Dashboard() {
   // Crear una sala lleva directo a ella, como anfitrión (US-06): la Sala indica «Eres el anfitrión» y ahí está su ID para compartir.
   function alCrear(sala: Sala) {
     navegar(`/salas/${encodeURIComponent(sala.id)}`);
+  }
+
+  function cerrarUnirse() {
+    setUniendose(false);
+    window.setTimeout(() => contenedorUnirse.current?.querySelector('button')?.focus(), 0);
+  }
+
+  function alEditada(sala: Sala) {
+    cambiar((lista) => lista.map((s) => (s.id === sala.id ? { ...s, ...sala } : s)));
+    setEditando(null);
+    setAviso({ tipo: 'exito', texto: `Cambios guardados en «${sala.nombre}».` });
+  }
+
+  async function eliminar(sala: Sala) {
+    setEliminando(sala.id);
+    try {
+      await eliminarSala(sala.id);
+      cambiar((lista) => lista.filter((s) => s.id !== sala.id));
+      setAviso({ tipo: 'exito', texto: `Sala «${sala.nombre}» eliminada.` });
+      contenedorCrear.current?.querySelector('button')?.focus(); // la tarjeta con el foco ya no existe
+    } catch (err) {
+      setAviso({ tipo: 'error', texto: err instanceof ApiError ? err.message : 'No pudimos eliminar la sala. Intenta de nuevo.' });
+    }
+    setEliminando(null);
   }
 
   async function copiar(sala: Sala) {
@@ -65,17 +99,22 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-col items-center gap-4 text-center">
         <div>
           <h1 className="font-pixel text-sm leading-6">Mis salas</h1>
           <p className="mt-2 text-sm text-texto-secundario">Las salas que creaste. Pulsa su número para entrar; haz clic en su ID para copiarlo y compartirlo.</p>
         </div>
-        <span ref={contenedorCrear}>
-          <Boton variante="primario" onClick={() => setCreando(true)} aria-haspopup="dialog">
-            <Plus aria-hidden="true" className="size-4" />
-            Crear sala
-          </Boton>
-        </span>
+        <div className="flex flex-wrap justify-center gap-3">
+          <span ref={contenedorUnirse}>
+            <Boton onClick={() => setUniendose(true)} aria-haspopup="dialog">Unirse</Boton>
+          </span>
+          <span ref={contenedorCrear}>
+            <Boton variante="primario" onClick={() => setCreando(true)} aria-haspopup="dialog">
+              <Plus aria-hidden="true" className="size-4" />
+              Crear sala
+            </Boton>
+          </span>
+        </div>
       </div>
 
       {/* Región viva: los avisos («Sala creada», «ID copiado») se anuncian sin mover el foco. */}
@@ -107,13 +146,15 @@ export default function Dashboard() {
         {estado.fase === 'lista' && estado.salas.length > 0 && (
           <ul className="grid gap-4" aria-label="Tus salas">
             {estado.salas.map((s, i) => (
-              <TarjetaSala key={s.id} sala={s} numero={i < 9 ? i + 1 : undefined} alCopiar={copiar} />
+              <TarjetaSala key={s.id} sala={s} numero={i < 9 ? i + 1 : undefined} alCopiar={copiar} alEditar={setEditando} alEliminar={eliminar} eliminando={eliminando === s.id} />
             ))}
           </ul>
         )}
       </div>
 
       {creando && <DialogoCrearSala alCerrar={cerrarDialogo} alCrear={alCrear} />}
+      {editando && <DialogoCrearSala editar={editando} alCerrar={() => setEditando(null)} alCrear={alEditada} />}
+      {uniendose && <DialogoUnirse alCerrar={cerrarUnirse} />}
     </div>
   );
 }

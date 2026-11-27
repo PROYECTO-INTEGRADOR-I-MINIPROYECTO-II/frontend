@@ -10,7 +10,7 @@ const dibujar = (numero?: number, alCopiar = vi.fn()) =>
   render(
     <MemoryRouter>
       <ul>
-        <TarjetaSala sala={sala} numero={numero} alCopiar={alCopiar} />
+        <TarjetaSala sala={sala} numero={numero} alCopiar={alCopiar} alEditar={() => {}} alEliminar={() => {}} />
       </ul>
     </MemoryRouter>,
   );

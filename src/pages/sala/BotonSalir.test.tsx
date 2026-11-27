@@ -26,7 +26,7 @@ describe('BotonSalir (salir en dos pasos)', () => {
     const alArmar = vi.fn();
     dibujar(alArmar);
     await userEvent.click(screen.getByRole('button', { name: 'Salir de la sala' }));
-    expect(screen.getByRole('button', { name: 'Pulsa de nuevo para salir de la sala' })).toHaveTextContent('Click de nuevo para salir');
+    expect(screen.getByRole('button', { name: 'Pulsa de nuevo para salir de la sala' })).toHaveTextContent('Clic de nuevo para salir');
     expect(screen.getByRole('status')).toHaveTextContent('Pulsa de nuevo para salir');
     expect(screen.queryByText('Mis salas')).not.toBeInTheDocument();
     expect(alArmar).toHaveBeenLastCalledWith(true);

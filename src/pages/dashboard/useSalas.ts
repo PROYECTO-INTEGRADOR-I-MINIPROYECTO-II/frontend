@@ -21,5 +21,8 @@ export function useSalas() {
 
   useEffect(() => cargar(), [cargar]);
 
-  return { estado, recargar: cargar };
+  // Cambios hechos aquí mismo: se reflejan al instante, sin volver a pedir la lista.
+  const cambiar = useCallback((f: (salas: Sala[]) => Sala[]) => setEstado((e) => (e.fase === 'lista' ? { ...e, salas: f(e.salas) } : e)), []);
+
+  return { estado, recargar: cargar, cambiar };
 }
